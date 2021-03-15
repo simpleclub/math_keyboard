@@ -17,7 +17,7 @@ import 'package:simpleclub_math_keyboard/src/widgets/view_insets.dart';
 class MathField extends StatefulWidget {
   /// Constructs a [MathField] widget.
   const MathField({
-    Key key,
+    Key? key,
     this.autofocus = false,
     this.focusNode,
     this.controller,
@@ -41,7 +41,7 @@ class MathField extends StatefulWidget {
   ///
   /// If you pass a controller, you need to make sure that you also take care
   /// of disposing it.
-  final MathFieldEditingController controller;
+  final MathFieldEditingController? controller;
 
   /// The keyboard type.
   ///
@@ -62,7 +62,7 @@ class MathField extends StatefulWidget {
   ///
   /// The passed [value] is the TeX representation of the expression. You can
   /// make use of the provided [TeXParser] to convert it into a math expression.
-  final void Function(String value) onChanged;
+  final void Function(String value)? onChanged;
 
   /// Whether this math field should focus itself if nothing else is already
   /// focused.
@@ -96,7 +96,7 @@ class MathField extends StatefulWidget {
   /// ```
   ///
   /// If null, this widget will create its own [FocusNode].
-  final FocusNode focusNode;
+  final FocusNode? focusNode;
 
   /// Called when the user indicates that they are done with editing the math
   /// field.
@@ -107,21 +107,21 @@ class MathField extends StatefulWidget {
   /// **before** [onSubmitted] is called.
   ///
   /// Can be `null`.
-  final ValueChanged<String> onSubmitted;
+  final ValueChanged<String>? onSubmitted;
 
   @override
   _MathFieldState createState() => _MathFieldState();
 }
 
 class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
-  OverlayEntry _overlayEntry;
+  OverlayEntry? _overlayEntry;
   // todo: initialize here
-  /*late*/ FocusNode/*!*/ _focusNode;
-  ScrollController _scrollController;
-  MathFieldEditingController _controller;
-  AnimationController _keyboardSlideController;
-  AnimationController _cursorBlinkController;
-  /*late*/ double _cursorOpacity;
+  late FocusNode _focusNode;
+  late ScrollController _scrollController;
+  late MathFieldEditingController _controller;
+  late AnimationController _keyboardSlideController;
+  late AnimationController _cursorBlinkController;
+  late double _cursorOpacity;
 
   List<String> get _variables => [
         r'\pi',
@@ -188,7 +188,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
         // Dispose the focus node created by our state instance.
         _focusNode.dispose();
         // Assign the new outside focus node.
-        _focusNode = widget.focusNode;
+        _focusNode = widget.focusNode!;
       } else if (widget.focusNode == null) {
         assert(oldWidget.focusNode != null);
         // Instantiate new local focus node.
@@ -198,7 +198,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
         );
       } else {
         // Switch the outside focus node.
-        _focusNode = widget.focusNode;
+        _focusNode = widget.focusNode!;
       }
     }
   }
@@ -250,7 +250,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     // We want to automatically scroll the math field to the right when the
     // cursor is all the way to the right.
     if (_controller.root.cursorAtTheEnd()) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 100),
@@ -271,7 +271,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   /// the math keyboard should be opened and when it should be closed.
   ///
   /// When [open] is true, the keyboard should be opened and vice versa.
-  void _handleFocusChanged(BuildContext context, {@required bool open}) {
+  void _handleFocusChanged(BuildContext context, {required bool open}) {
     assert(open != null);
 
     if (!open) {
@@ -294,10 +294,10 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       return;
     }
     _showFieldOnScreenScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((Duration _) {
+    WidgetsBinding.instance!.addPostFrameCallback((Duration _) {
       _showFieldOnScreenScheduled = false;
 
-      context.findRenderObject().showOnScreen(
+      context.findRenderObject()!.showOnScreen(
             duration: const Duration(milliseconds: 100),
             curve: Curves.fastOutSlowIn,
           );
@@ -329,7 +329,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       },
     );
 
-    Overlay.of(context).insert(_overlayEntry);
+    Overlay.of(context)!.insert(_overlayEntry!);
   }
 
   void _submit() {
@@ -376,8 +376,8 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   /// Returns `null` if not handled (indecisive) and a [KeyEventResult] if we
   /// can conclude about the complete key handling from the action taken.
   // todo: returns a bool for now until KeyEventResult lands on stable.
-  KeyEventResult _handleCharacter(
-      String character, List<KeyboardButtonConfig> configs) {
+  KeyEventResult? _handleCharacter(
+      String? character, List<KeyboardButtonConfig> configs) {
     if (character == null) return null;
     final lowerCaseCharacter = character.toLowerCase();
 
@@ -388,9 +388,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
 
       if (config.keyboardCharacters
           .any((element) => element.toLowerCase() == lowerCaseCharacter)) {
-        final basicConfig = config as BasicKeyboardButtonConfig;
+        final basicConfig = config;
         if (basicConfig.args != null) {
-          _controller.addFunction(basicConfig.value, basicConfig.args);
+          _controller.addFunction(basicConfig.value, basicConfig.args!);
         } else {
           _controller.addLeaf(basicConfig.value);
         }
@@ -430,7 +430,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   /// Returns `null` if not handled (indecisive) and a [KeyEventResult] if we
   /// can conclude about the complete key handling from the action taken.
   // todo: returns a bool for now until KeyEventResult lands on stable.
-  KeyEventResult _handleLogicalKey(
+  KeyEventResult? _handleLogicalKey(
       LogicalKeyboardKey logicalKey, List<KeyboardButtonConfig> configs) {
     // Check logical, fixed keyboard bindings (like backspace and arrow keys).
     if ((logicalKey == LogicalKeyboardKey.backspace ||
@@ -499,12 +499,12 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
 class _FieldPreview extends StatelessWidget {
   /// Constructs a [_FieldPreview].
   const _FieldPreview({
-    Key key,
-    @required this.controller,
-    @required this.cursorOpacity,
-    @required this.hasFocus,
-    @required this.decoration,
-    @required this.scrollController,
+    Key? key,
+    required this.controller,
+    required this.cursorOpacity,
+    required this.hasFocus,
+    required this.decoration,
+    required this.scrollController,
   })  : assert(controller != null),
         assert(scrollController != null),
         assert(cursorOpacity != null),
@@ -618,10 +618,10 @@ class MathFieldEditingController extends ChangeNotifier {
   bool secondPage = false;
 
   /// The root node of the expression.
-  TeXNode/*!*/ root = TeXNode(null);
+  TeXNode root = TeXNode(null);
 
   /// The block the user is currently in.
-  /*late*/ TeXNode/*!*/ currentNode;
+  late TeXNode currentNode;
 
   /// Returns the current editing value (expression), which requires temporarily
   /// removing the cursor.
@@ -677,7 +677,7 @@ class MathFieldEditingController extends ChangeNotifier {
         }
         // Otherwise, the current node must be a function argument.
         currentNode.removeCursor();
-        final parent = currentNode.parent;
+        final parent = currentNode.parent!;
         final nextArg = parent.argNodes.indexOf(currentNode) - 1;
         // If the parent function has another argument before this one,
         // we jump into that, otherwise we position the courser right
@@ -690,7 +690,7 @@ class MathFieldEditingController extends ChangeNotifier {
           }
           currentNode.setCursor();
         } else {
-          currentNode = currentNode.parent.argNodes[nextArg];
+          currentNode = currentNode.parent!.argNodes[nextArg];
           currentNode.courserPosition = currentNode.children.length;
           currentNode.setCursor();
         }
@@ -723,7 +723,7 @@ class MathFieldEditingController extends ChangeNotifier {
         }
         // Otherwise, the current node must be a function argument.
         currentNode.removeCursor();
-        final parent = currentNode.parent;
+        final parent = currentNode.parent!;
         final nextArg = parent.argNodes.indexOf(currentNode) + 1;
         // If the parent function has another argument after this one,
         // we jump into that, otherwise we position the courser right
@@ -734,7 +734,7 @@ class MathFieldEditingController extends ChangeNotifier {
               currentNode.children.indexOf(parent) + 1;
           currentNode.setCursor();
         } else {
-          currentNode = currentNode.parent.argNodes[nextArg];
+          currentNode = currentNode.parent!.argNodes[nextArg];
           currentNode.courserPosition = 0;
           currentNode.setCursor();
         }

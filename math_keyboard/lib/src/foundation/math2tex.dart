@@ -13,7 +13,7 @@ TeXNode convertMathExpressionToTeXNode(Expression mathExpression) {
   return node;
 }
 
-List<TeX> _convertToTeX(Expression/*!*/ mathExpression, TeXNode parent) {
+List<TeX> _convertToTeX(Expression mathExpression, TeXNode parent) {
   if (mathExpression is UnaryOperator) {
     return [
       if (mathExpression is UnaryMinus)
