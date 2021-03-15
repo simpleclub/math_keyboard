@@ -4,8 +4,8 @@
 [![math_keyboard Flutter web demo][demo shield]][demo]
 
 `math_keyboard` is a Flutter package that allows editing math expressions using a typeset text field
-(so-called "math field") and a custom-made fully integrated keyboard in _Flutter only_ - no plugins,
-no web views.
+(so-called "math field") and a custom-made fully integrated math keyboard in _Flutter only_ - no
+plugins, no web views.
 
 ## About math_keyboard
 
