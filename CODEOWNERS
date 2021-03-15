@@ -1,2 +1,11 @@
-math_keyboard         @edhom @creativecreatorormaybenot
+# Matches the root and math_keyboard_demo package, however, this does *not*
+# match the math_keyboard package itself. The math_keyboard directory is
+# overridden below, which is also why the single asterisk has to come first
+# (as later matches take precedence).
+# Therefore, the owners here are responsible for the repo README, GitHub
+# Actions workflows, etc.
 *                     @creativecreatorormaybenot
+
+# Matches the whole math_keyboard package, i.e. relating to all code and
+# setup of the main package.
+math_keyboard/        @edhom @creativecreatorormaybenot
