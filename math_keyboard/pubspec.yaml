@@ -1,0 +1,23 @@
+name: simpleclub_math_keyboard
+description: Package for a widget that allows editing math expressions.
+version: 0.6.0+2
+publish_to: 'none'
+
+environment:
+  sdk: '>=2.11.0 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  holding_gesture: ^1.0.0-dev
+  flutter_math_fork: ^0.3.0+1
+  math_expressions: ^2.0.2
+  petitparser: ^4.0.2
+
+  flutter_localizations:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
