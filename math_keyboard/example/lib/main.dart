@@ -9,7 +9,7 @@ void main() {
 /// Example app demonstrating how to use the `math_keyboard` package.
 class ExampleApp extends StatelessWidget {
   /// Creates an [ExampleApp] widget.
-  const ExampleApp({Key key}) : super(key: key);
+  const ExampleApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,7 @@ class ExampleApp extends StatelessWidget {
 /// Widget for a page demonstrating how to use the `math_keyboard` package.
 class DemoPage extends StatefulWidget {
   /// Creates a [DemoPage] widget.
-  const DemoPage({Key key}) : super(key: key);
+  const DemoPage({Key? key}) : super(key: key);
 
   @override
   _DemoPageState createState() => _DemoPageState();
@@ -114,7 +114,7 @@ class _DemoPageState extends State<DemoPage> {
 /// field for comparison.
 class _MathFieldTextFieldExample extends StatelessWidget {
   /// Constructs a [_MathFieldTextFieldExample] widget.
-  const _MathFieldTextFieldExample({Key key}) : super(key: key);
+  const _MathFieldTextFieldExample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +158,7 @@ class _MathFieldTextFieldExample extends StatelessWidget {
 /// outside and automatically receives focus.
 class _ClearableAutofocusExample extends StatefulWidget {
   /// Constructs a [_ClearableAutofocusExample] widget.
-  const _ClearableAutofocusExample({Key key}) : super(key: key);
+  const _ClearableAutofocusExample({Key? key}) : super(key: key);
 
   @override
   _ClearableAutofocusExampleState createState() =>
@@ -167,13 +167,7 @@ class _ClearableAutofocusExample extends StatefulWidget {
 
 class _ClearableAutofocusExampleState
     extends State<_ClearableAutofocusExample> {
-  MathFieldEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = MathFieldEditingController();
-  }
+  late final _controller = MathFieldEditingController();
 
   @override
   void dispose() {
