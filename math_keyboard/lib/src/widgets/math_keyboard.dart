@@ -39,7 +39,7 @@ class MathKeyboard extends StatelessWidget {
   /// The controller for editing the math field.
   ///
   /// Must not be `null`.
-  final MathFieldEditingController controller;
+  final MathFieldEditingController/*!*/ controller;
 
   /// The state for reporting the keyboard insets.
   ///
@@ -52,7 +52,9 @@ class MathKeyboard extends StatelessWidget {
   /// The Type of the Keyboard.
   final MathKeyboardType type;
 
-  /// Function tht is called when the enter / submit button is called.
+  /// Function that is called when the enter / submit button is tapped.
+  ///
+  /// Can be `null`.
   final VoidCallback onSubmit;
 
   @override
@@ -129,7 +131,7 @@ class _KeyboardBody extends StatefulWidget {
 
   final MathKeyboardViewInsetsState insetsState;
 
-  final Widget child;
+  final Widget/*!*/ child;
 
   @override
   _KeyboardBodyState createState() => _KeyboardBodyState();
@@ -250,7 +252,9 @@ class _Buttons extends StatelessWidget {
   /// The buttons to display.
   final List<List<KeyboardButtonConfig>> page2;
 
-  /// Function tht is called when the enter / submit button is called.
+  /// Function that is called when the enter / submit button is tapped.
+  ///
+  /// Can be `null`.
   final VoidCallback onSubmit;
 
   @override

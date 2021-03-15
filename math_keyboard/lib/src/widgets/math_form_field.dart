@@ -74,7 +74,7 @@ class MathFormField extends FormField<String> {
 }
 
 class _MathFormFieldState extends FormFieldState<String> {
-  MathFieldEditingController _controller;
+  /*late*/ MathFieldEditingController/*!*/ _controller;
 
   @override
   MathFormField get widget => super.widget as MathFormField;

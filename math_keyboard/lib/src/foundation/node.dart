@@ -7,7 +7,7 @@ class TeXNode {
   /// Constructs a [TeXNode].
   TeXNode(this.parent);
 
-  /// The nodes parent.
+  /// The parent of the node.
   TeXFunction parent;
 
   /// The courser position in this node.
@@ -116,7 +116,7 @@ class TeXFunction extends TeX {
   /// is passed empty (default), empty [TeXNode]s will be inserted for each
   /// arg.
   TeXFunction(String expression, this.parent, this.args,
-      [List<TeXNode> argNodes])
+      [List<TeXNode/*!*/> argNodes])
       : assert(args != null),
         assert(expression != null),
         assert(args.isNotEmpty, 'A function needs at least one argument.'),
@@ -141,7 +141,7 @@ class TeXFunction extends TeX {
   final List<TeXArg> args;
 
   /// The arguments to this function.
-  final List<TeXNode> argNodes;
+  final List<TeXNode/*!*/> argNodes;
 
   /// Returns the opening character for a function argument.
   String openingChar(TeXArg type) {
@@ -211,7 +211,7 @@ class Cursor extends TeX {
         super('');
 
   @override
-  String buildString({Color cursorColor}) {
+  String buildString({Color/*!*/ cursorColor}) {
     final colorString =
         '#${(cursorColor.value & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
     return '\\textcolor{$colorString}{|}';

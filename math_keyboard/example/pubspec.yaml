@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
   simpleclub_math_keyboard:
     path: ../
 

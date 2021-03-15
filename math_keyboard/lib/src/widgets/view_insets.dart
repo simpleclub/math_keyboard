@@ -73,7 +73,14 @@ class MathKeyboardViewInsets extends StatefulWidget {
 class MathKeyboardViewInsetsState extends State<MathKeyboardViewInsets> {
   /// Returns the ancestor [MathKeyboardViewInsetsState] of the given [context].
   static MathKeyboardViewInsetsState of(BuildContext context) {
-    return context.findAncestorStateOfType();
+    final result =
+        context.findAncestorStateOfType<MathKeyboardViewInsetsState>();
+    if (result != null) {
+      return result;
+    }
+    throw FlutterError(
+        'MathKeyboardViewInsetsState.of() called with a context that does not '
+        'contain a MathKeyboardViewInsetsState.');
   }
 
   final Map<ObjectKey, double> _keyboardSizes = {};
@@ -152,7 +159,14 @@ class MathKeyboardViewInsetsQuery extends InheritedWidget {
 
   /// Depends on and returns an ancestor [MathKeyboardViewInsetsQuery].
   static MathKeyboardViewInsetsQuery of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType();
+    final result = context
+        .dependOnInheritedWidgetOfExactType<MathKeyboardViewInsetsQuery>();
+    if (result != null) {
+      return result;
+    }
+    throw FlutterError(
+        'MathKeyboardViewInsetsQuery.of() called with a context that does not '
+        'contain a MathKeyboardViewInsetsQuery.');
   }
 
   /// Returns whether any math keyboard is showing in the given [context] by

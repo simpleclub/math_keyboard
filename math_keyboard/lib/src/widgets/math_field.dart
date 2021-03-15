@@ -115,12 +115,13 @@ class MathField extends StatefulWidget {
 
 class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   OverlayEntry _overlayEntry;
-  FocusNode _focusNode;
+  // todo: initialize here
+  /*late*/ FocusNode/*!*/ _focusNode;
   ScrollController _scrollController;
   MathFieldEditingController _controller;
   AnimationController _keyboardSlideController;
   AnimationController _cursorBlinkController;
-  double _cursorOpacity;
+  /*late*/ double _cursorOpacity;
 
   List<String> get _variables => [
         r'\pi',
@@ -336,15 +337,14 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     widget.onSubmitted?.call(_controller.currentEditingValue());
   }
 
-  bool /*KeyEventResult*/ _handleKey(FocusNode node, RawKeyEvent keyEvent) {
+  KeyEventResult _handleKey(FocusNode node, RawKeyEvent keyEvent) {
     if (keyEvent is! RawKeyDownEvent) {
       // We do not want to handle key up events in order to prevent double
       // detection of logical key events (pressing backspace would be triggered
       // twice - once for key down and once for key up). Characters already
       // handle this by default (keyEvent.character is null for key up) but
       // we can still cancel early :)
-      return false;
-      // return KeyEventResult.ignored;
+      return KeyEventResult.ignored;
     }
 
     final configs = <List<KeyboardButtonConfig>>[
@@ -368,8 +368,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       return logicalKeyResult;
     }
 
-    return false;
-    // return KeyEventResult.ignored;
+    return KeyEventResult.ignored;
   }
 
   /// Handles the given [RawKeyEvent.character].
@@ -377,7 +376,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   /// Returns `null` if not handled (indecisive) and a [KeyEventResult] if we
   /// can conclude about the complete key handling from the action taken.
   // todo: returns a bool for now until KeyEventResult lands on stable.
-  bool /*KeyEventResult*/ _handleCharacter(
+  KeyEventResult _handleCharacter(
       String character, List<KeyboardButtonConfig> configs) {
     if (character == null) return null;
     final lowerCaseCharacter = character.toLowerCase();
@@ -395,8 +394,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
         } else {
           _controller.addLeaf(basicConfig.value);
         }
-        // return KeyEventResult.handled;
-        return true;
+        return KeyEventResult.handled;
       }
     }
 
@@ -409,13 +407,11 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     // Handle generally specified constants.
     if (lowerCaseCharacter == 'p') {
       _controller.addLeaf(r'{\pi}');
-      // return KeyEventResult.handled;
-      return true;
+      return KeyEventResult.handled;
     }
     if (lowerCaseCharacter == 'e') {
       _controller.addLeaf('{e}');
-      // return KeyEventResult.handled;
-      return true;
+      return KeyEventResult.handled;
     }
 
     // Handle user-specified variables.
@@ -423,8 +419,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       final startingCharacter = variable.substring(0, 1).toLowerCase();
       if (startingCharacter == lowerCaseCharacter) {
         _controller.addLeaf('{$variable}');
-        // return KeyEventResult.handled;
-        return true;
+        return KeyEventResult.handled;
       }
     }
     return null;
@@ -435,36 +430,32 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   /// Returns `null` if not handled (indecisive) and a [KeyEventResult] if we
   /// can conclude about the complete key handling from the action taken.
   // todo: returns a bool for now until KeyEventResult lands on stable.
-  bool /*KeyEventResult*/ _handleLogicalKey(
+  KeyEventResult _handleLogicalKey(
       LogicalKeyboardKey logicalKey, List<KeyboardButtonConfig> configs) {
     // Check logical, fixed keyboard bindings (like backspace and arrow keys).
     if ((logicalKey == LogicalKeyboardKey.backspace ||
             logicalKey == LogicalKeyboardKey.numpadBackspace) &&
         configs.any((element) => element is DeleteButtonConfig)) {
       _controller.goBack(deleteMode: true);
-      // return KeyEventResult.handled;
-      return true;
+      return KeyEventResult.handled;
     }
     if ((logicalKey == LogicalKeyboardKey.arrowRight ||
             logicalKey == LogicalKeyboardKey.arrowDown) &&
         configs.any((element) => element is NextButtonConfig)) {
       _controller.goNext();
-      // return KeyEventResult.handled;
-      return true;
+      return KeyEventResult.handled;
     }
     if ((logicalKey == LogicalKeyboardKey.arrowLeft ||
             logicalKey == LogicalKeyboardKey.arrowUp) &&
         configs.any((element) => element is PreviousButtonConfig)) {
       _controller.goBack();
-      // return KeyEventResult.handled;
-      return true;
+      return KeyEventResult.handled;
     }
     if ((logicalKey == LogicalKeyboardKey.enter ||
             logicalKey == LogicalKeyboardKey.numpadEnter) &&
         configs.any((element) => element is SubmitButtonConfig)) {
       _submit();
-      // return KeyEventResult.handled;
-      return true;
+      return KeyEventResult.handled;
     }
 
     return null;
@@ -542,7 +533,7 @@ class _FieldPreview extends StatelessWidget {
     final tex = controller.root
         .buildTeXString(
           cursorColor: Color.lerp(
-            decoration.filled
+            (decoration.filled ?? false)
                 ? decoration.fillColor
                 : Theme.of(context).colorScheme.surface,
             Theme.of(context).textSelectionTheme.cursorColor ??
@@ -619,7 +610,6 @@ class _FieldPreview extends StatelessWidget {
 class MathFieldEditingController extends ChangeNotifier {
   /// Constructs a [MathKeyboardViewModel].
   MathFieldEditingController() {
-    root = TeXNode(null);
     currentNode = root;
     currentNode.setCursor();
   }
@@ -628,10 +618,10 @@ class MathFieldEditingController extends ChangeNotifier {
   bool secondPage = false;
 
   /// The root node of the expression.
-  TeXNode root;
+  TeXNode/*!*/ root = TeXNode(null);
 
   /// The block the user is currently in.
-  TeXNode currentNode;
+  /*late*/ TeXNode/*!*/ currentNode;
 
   /// Returns the current editing value (expression), which requires temporarily
   /// removing the cursor.

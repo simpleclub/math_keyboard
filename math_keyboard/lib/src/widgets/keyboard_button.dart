@@ -40,7 +40,8 @@ class KeyboardButton extends StatefulWidget {
 
 class _KeyboardButtonState extends State<KeyboardButton>
     with SingleTickerProviderStateMixin {
-  AnimationController _animationController;
+  // todo: initialize here
+  /*late final*/ AnimationController _animationController;
 
   @override
   void initState() {
@@ -63,7 +64,7 @@ class _KeyboardButtonState extends State<KeyboardButton>
   }
 
   void _handleTapUp([TapUpDetails details]) async {
-    _animationController.reverse(from: 1);
+    await _animationController.reverse(from: 1);
   }
 
   void _handleHold() {
