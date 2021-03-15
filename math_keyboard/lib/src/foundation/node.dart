@@ -7,8 +7,8 @@ class TeXNode {
   /// Constructs a [TeXNode].
   TeXNode(this.parent);
 
-  /// The nodes parent.
-  TeXFunction parent;
+  /// The parent of the node.
+  TeXFunction? parent;
 
   /// The courser position in this node.
   int courserPosition = 0;
@@ -95,7 +95,7 @@ class TeXNode {
   /// This includes the representation of the children of the node.
   ///
   /// Returns the TeX expression as a [String].
-  String buildTeXString({@required Color cursorColor}) {
+  String buildTeXString({required Color? cursorColor}) {
     if (children.isEmpty) {
       return '\\Box';
     }
@@ -116,10 +116,8 @@ class TeXFunction extends TeX {
   /// is passed empty (default), empty [TeXNode]s will be inserted for each
   /// arg.
   TeXFunction(String expression, this.parent, this.args,
-      [List<TeXNode> argNodes])
-      : assert(args != null),
-        assert(expression != null),
-        assert(args.isNotEmpty, 'A function needs at least one argument.'),
+      [List<TeXNode>? argNodes])
+      : assert(args.isNotEmpty, 'A function needs at least one argument.'),
         assert(argNodes == null || argNodes.length == args.length),
         argNodes = argNodes ?? List.empty(growable: true),
         super(expression) {
@@ -168,7 +166,7 @@ class TeXFunction extends TeX {
   }
 
   @override
-  String buildString({Color cursorColor}) {
+  String buildString({Color? cursorColor}) {
     final buffer = StringBuffer(expression);
     for (var i = 0; i < args.length; i++) {
       buffer.write(openingChar(args[i]));
@@ -185,7 +183,7 @@ class TeXLeaf extends TeX {
   const TeXLeaf(String expression) : super(expression);
 
   @override
-  String buildString({Color cursorColor}) {
+  String buildString({Color? cursorColor}) {
     return expression;
   }
 }
@@ -199,7 +197,7 @@ abstract class TeX {
   final String expression;
 
   /// Builds the string representation of this TeX expression.
-  String buildString({@required Color cursorColor});
+  String buildString({required Color? cursorColor});
 }
 
 /// Class describing the cursor as a TeX expression.
@@ -211,7 +209,10 @@ class Cursor extends TeX {
         super('');
 
   @override
-  String buildString({Color cursorColor}) {
+  String buildString({required Color? cursorColor}) {
+    if (cursorColor == null) {
+      throw FlutterError('Cursor.buildString() called without a cursorColor.');
+    }
     final colorString =
         '#${(cursorColor.value & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
     return '\\textcolor{$colorString}{|}';

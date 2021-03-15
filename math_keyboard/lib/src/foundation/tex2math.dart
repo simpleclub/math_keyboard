@@ -372,7 +372,7 @@ class TeXParser {
       var a = t.toInt();
       var y = 1;
       while (a > 0) {
-        y *= a;
+        y = y * a ~/ 1;
         a--;
       }
       result.add(Number(y));

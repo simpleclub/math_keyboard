@@ -17,7 +17,7 @@ import 'package:simpleclub_math_keyboard/src/widgets/view_insets.dart';
 class MathField extends StatefulWidget {
   /// Constructs a [MathField] widget.
   const MathField({
-    Key key,
+    Key? key,
     this.autofocus = false,
     this.focusNode,
     this.controller,
@@ -26,11 +26,7 @@ class MathField extends StatefulWidget {
     this.decoration = const InputDecoration(),
     this.onChanged,
     this.onSubmitted,
-  })  : assert(autofocus != null),
-        assert(variables != null),
-        assert(decoration != null),
-        assert(keyboardType != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// The controller for the math field.
   ///
@@ -41,7 +37,7 @@ class MathField extends StatefulWidget {
   ///
   /// If you pass a controller, you need to make sure that you also take care
   /// of disposing it.
-  final MathFieldEditingController controller;
+  final MathFieldEditingController? controller;
 
   /// The keyboard type.
   ///
@@ -62,7 +58,7 @@ class MathField extends StatefulWidget {
   ///
   /// The passed [value] is the TeX representation of the expression. You can
   /// make use of the provided [TeXParser] to convert it into a math expression.
-  final void Function(String value) onChanged;
+  final void Function(String value)? onChanged;
 
   /// Whether this math field should focus itself if nothing else is already
   /// focused.
@@ -96,7 +92,7 @@ class MathField extends StatefulWidget {
   /// ```
   ///
   /// If null, this widget will create its own [FocusNode].
-  final FocusNode focusNode;
+  final FocusNode? focusNode;
 
   /// Called when the user indicates that they are done with editing the math
   /// field.
@@ -107,20 +103,35 @@ class MathField extends StatefulWidget {
   /// **before** [onSubmitted] is called.
   ///
   /// Can be `null`.
-  final ValueChanged<String> onSubmitted;
+  final ValueChanged<String>? onSubmitted;
 
   @override
   _MathFieldState createState() => _MathFieldState();
 }
 
 class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
-  OverlayEntry _overlayEntry;
-  FocusNode _focusNode;
-  ScrollController _scrollController;
-  MathFieldEditingController _controller;
-  AnimationController _keyboardSlideController;
-  AnimationController _cursorBlinkController;
-  double _cursorOpacity;
+  late final _scrollController = ScrollController();
+  late final _keyboardSlideController = AnimationController(
+    duration: const Duration(milliseconds: 250),
+    vsync: this,
+  );
+  late final _cursorBlinkController = AnimationController(
+    duration: const Duration(seconds: 1),
+    vsync: this,
+    // We start the controller at 1/2 so that immediately when the controller
+    // is forwarded the cursor appears. The cursor is visible when the value
+    // is greater than 1/2.
+    value: 1 / 2,
+  );
+  late var _cursorOpacity = 0.0;
+
+  OverlayEntry? _overlayEntry;
+  late var _focusNode = widget.focusNode ??
+      FocusNode(
+        debugLabel: 'math_keyboard_$hashCode',
+        descendantsAreFocusable: false,
+      );
+  late var _controller = widget.controller ?? MathFieldEditingController();
 
   List<String> get _variables => [
         r'\pi',
@@ -132,35 +143,15 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    _focusNode = widget.focusNode ??
-        FocusNode(
-          debugLabel: 'math_keyboard_$hashCode',
-          descendantsAreFocusable: false,
-        );
-    _scrollController = ScrollController();
-
-    _keyboardSlideController = AnimationController(
-      duration: const Duration(milliseconds: 250),
-      vsync: this,
-    )..addStatusListener((status) {
-        if (status == AnimationStatus.dismissed) {
-          _overlayEntry?.remove();
-          _overlayEntry = null;
-        } else if (status == AnimationStatus.completed) {
-          _showFieldOnScreen();
-        }
-      });
-    _cursorBlinkController = AnimationController(
-      duration: const Duration(seconds: 1),
-      vsync: this,
-      // We start the controller at 1/2 so that immediately when the controller
-      // is forwarded the cursor appears. The cursor is visible when the value
-      // is greater than 1/2.
-      value: 1 / 2,
-    )..addListener(_handleBlinkUpdate);
-    _cursorOpacity = 0;
-
-    _controller = widget.controller ?? MathFieldEditingController();
+    _keyboardSlideController.addStatusListener((status) {
+      if (status == AnimationStatus.dismissed) {
+        _overlayEntry?.remove();
+        _overlayEntry = null;
+      } else if (status == AnimationStatus.completed) {
+        _showFieldOnScreen();
+      }
+    });
+    _cursorBlinkController.addListener(_handleBlinkUpdate);
     _controller.addListener(_handleControllerUpdate);
   }
 
@@ -187,7 +178,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
         // Dispose the focus node created by our state instance.
         _focusNode.dispose();
         // Assign the new outside focus node.
-        _focusNode = widget.focusNode;
+        _focusNode = widget.focusNode!;
       } else if (widget.focusNode == null) {
         assert(oldWidget.focusNode != null);
         // Instantiate new local focus node.
@@ -197,7 +188,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
         );
       } else {
         // Switch the outside focus node.
-        _focusNode = widget.focusNode;
+        _focusNode = widget.focusNode!;
       }
     }
   }
@@ -249,7 +240,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     // We want to automatically scroll the math field to the right when the
     // cursor is all the way to the right.
     if (_controller.root.cursorAtTheEnd()) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 100),
@@ -270,9 +261,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   /// the math keyboard should be opened and when it should be closed.
   ///
   /// When [open] is true, the keyboard should be opened and vice versa.
-  void _handleFocusChanged(BuildContext context, {@required bool open}) {
-    assert(open != null);
-
+  void _handleFocusChanged(BuildContext context, {required bool open}) {
     if (!open) {
       _keyboardSlideController.reverse();
       _cursorBlinkController.value = 1 / 2;
@@ -293,10 +282,10 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       return;
     }
     _showFieldOnScreenScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((Duration _) {
+    WidgetsBinding.instance!.addPostFrameCallback((Duration _) {
       _showFieldOnScreenScheduled = false;
 
-      context.findRenderObject().showOnScreen(
+      context.findRenderObject()!.showOnScreen(
             duration: const Duration(milliseconds: 100),
             curve: Curves.fastOutSlowIn,
           );
@@ -328,7 +317,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       },
     );
 
-    Overlay.of(context).insert(_overlayEntry);
+    Overlay.of(context)!.insert(_overlayEntry!);
   }
 
   void _submit() {
@@ -336,15 +325,14 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     widget.onSubmitted?.call(_controller.currentEditingValue());
   }
 
-  bool /*KeyEventResult*/ _handleKey(FocusNode node, RawKeyEvent keyEvent) {
+  KeyEventResult _handleKey(FocusNode node, RawKeyEvent keyEvent) {
     if (keyEvent is! RawKeyDownEvent) {
       // We do not want to handle key up events in order to prevent double
       // detection of logical key events (pressing backspace would be triggered
       // twice - once for key down and once for key up). Characters already
       // handle this by default (keyEvent.character is null for key up) but
       // we can still cancel early :)
-      return false;
-      // return KeyEventResult.ignored;
+      return KeyEventResult.ignored;
     }
 
     final configs = <List<KeyboardButtonConfig>>[
@@ -368,17 +356,15 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       return logicalKeyResult;
     }
 
-    return false;
-    // return KeyEventResult.ignored;
+    return KeyEventResult.ignored;
   }
 
   /// Handles the given [RawKeyEvent.character].
   ///
   /// Returns `null` if not handled (indecisive) and a [KeyEventResult] if we
   /// can conclude about the complete key handling from the action taken.
-  // todo: returns a bool for now until KeyEventResult lands on stable.
-  bool /*KeyEventResult*/ _handleCharacter(
-      String character, List<KeyboardButtonConfig> configs) {
+  KeyEventResult? _handleCharacter(
+      String? character, List<KeyboardButtonConfig> configs) {
     if (character == null) return null;
     final lowerCaseCharacter = character.toLowerCase();
 
@@ -389,14 +375,13 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
 
       if (config.keyboardCharacters
           .any((element) => element.toLowerCase() == lowerCaseCharacter)) {
-        final basicConfig = config as BasicKeyboardButtonConfig;
+        final basicConfig = config;
         if (basicConfig.args != null) {
-          _controller.addFunction(basicConfig.value, basicConfig.args);
+          _controller.addFunction(basicConfig.value, basicConfig.args!);
         } else {
           _controller.addLeaf(basicConfig.value);
         }
-        // return KeyEventResult.handled;
-        return true;
+        return KeyEventResult.handled;
       }
     }
 
@@ -409,13 +394,11 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     // Handle generally specified constants.
     if (lowerCaseCharacter == 'p') {
       _controller.addLeaf(r'{\pi}');
-      // return KeyEventResult.handled;
-      return true;
+      return KeyEventResult.handled;
     }
     if (lowerCaseCharacter == 'e') {
       _controller.addLeaf('{e}');
-      // return KeyEventResult.handled;
-      return true;
+      return KeyEventResult.handled;
     }
 
     // Handle user-specified variables.
@@ -423,8 +406,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       final startingCharacter = variable.substring(0, 1).toLowerCase();
       if (startingCharacter == lowerCaseCharacter) {
         _controller.addLeaf('{$variable}');
-        // return KeyEventResult.handled;
-        return true;
+        return KeyEventResult.handled;
       }
     }
     return null;
@@ -434,37 +416,32 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   ///
   /// Returns `null` if not handled (indecisive) and a [KeyEventResult] if we
   /// can conclude about the complete key handling from the action taken.
-  // todo: returns a bool for now until KeyEventResult lands on stable.
-  bool /*KeyEventResult*/ _handleLogicalKey(
+  KeyEventResult? _handleLogicalKey(
       LogicalKeyboardKey logicalKey, List<KeyboardButtonConfig> configs) {
     // Check logical, fixed keyboard bindings (like backspace and arrow keys).
     if ((logicalKey == LogicalKeyboardKey.backspace ||
             logicalKey == LogicalKeyboardKey.numpadBackspace) &&
         configs.any((element) => element is DeleteButtonConfig)) {
       _controller.goBack(deleteMode: true);
-      // return KeyEventResult.handled;
-      return true;
+      return KeyEventResult.handled;
     }
     if ((logicalKey == LogicalKeyboardKey.arrowRight ||
             logicalKey == LogicalKeyboardKey.arrowDown) &&
         configs.any((element) => element is NextButtonConfig)) {
       _controller.goNext();
-      // return KeyEventResult.handled;
-      return true;
+      return KeyEventResult.handled;
     }
     if ((logicalKey == LogicalKeyboardKey.arrowLeft ||
             logicalKey == LogicalKeyboardKey.arrowUp) &&
         configs.any((element) => element is PreviousButtonConfig)) {
       _controller.goBack();
-      // return KeyEventResult.handled;
-      return true;
+      return KeyEventResult.handled;
     }
     if ((logicalKey == LogicalKeyboardKey.enter ||
             logicalKey == LogicalKeyboardKey.numpadEnter) &&
         configs.any((element) => element is SubmitButtonConfig)) {
       _submit();
-      // return KeyEventResult.handled;
-      return true;
+      return KeyEventResult.handled;
     }
 
     return null;
@@ -508,18 +485,13 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
 class _FieldPreview extends StatelessWidget {
   /// Constructs a [_FieldPreview].
   const _FieldPreview({
-    Key key,
-    @required this.controller,
-    @required this.cursorOpacity,
-    @required this.hasFocus,
-    @required this.decoration,
-    @required this.scrollController,
-  })  : assert(controller != null),
-        assert(scrollController != null),
-        assert(cursorOpacity != null),
-        assert(hasFocus != null),
-        assert(decoration != null),
-        super(key: key);
+    Key? key,
+    required this.controller,
+    required this.cursorOpacity,
+    required this.hasFocus,
+    required this.decoration,
+    required this.scrollController,
+  }) : super(key: key);
 
   /// The controller for the math field.
   final MathFieldEditingController controller;
@@ -542,7 +514,7 @@ class _FieldPreview extends StatelessWidget {
     final tex = controller.root
         .buildTeXString(
           cursorColor: Color.lerp(
-            decoration.filled
+            (decoration.filled ?? false)
                 ? decoration.fillColor
                 : Theme.of(context).colorScheme.surface,
             Theme.of(context).textSelectionTheme.cursorColor ??
@@ -619,7 +591,6 @@ class _FieldPreview extends StatelessWidget {
 class MathFieldEditingController extends ChangeNotifier {
   /// Constructs a [MathKeyboardViewModel].
   MathFieldEditingController() {
-    root = TeXNode(null);
     currentNode = root;
     currentNode.setCursor();
   }
@@ -628,10 +599,10 @@ class MathFieldEditingController extends ChangeNotifier {
   bool secondPage = false;
 
   /// The root node of the expression.
-  TeXNode root;
+  TeXNode root = TeXNode(null);
 
   /// The block the user is currently in.
-  TeXNode currentNode;
+  late TeXNode currentNode;
 
   /// Returns the current editing value (expression), which requires temporarily
   /// removing the cursor.
@@ -687,7 +658,7 @@ class MathFieldEditingController extends ChangeNotifier {
         }
         // Otherwise, the current node must be a function argument.
         currentNode.removeCursor();
-        final parent = currentNode.parent;
+        final parent = currentNode.parent!;
         final nextArg = parent.argNodes.indexOf(currentNode) - 1;
         // If the parent function has another argument before this one,
         // we jump into that, otherwise we position the courser right
@@ -700,7 +671,7 @@ class MathFieldEditingController extends ChangeNotifier {
           }
           currentNode.setCursor();
         } else {
-          currentNode = currentNode.parent.argNodes[nextArg];
+          currentNode = currentNode.parent!.argNodes[nextArg];
           currentNode.courserPosition = currentNode.children.length;
           currentNode.setCursor();
         }
@@ -733,7 +704,7 @@ class MathFieldEditingController extends ChangeNotifier {
         }
         // Otherwise, the current node must be a function argument.
         currentNode.removeCursor();
-        final parent = currentNode.parent;
+        final parent = currentNode.parent!;
         final nextArg = parent.argNodes.indexOf(currentNode) + 1;
         // If the parent function has another argument after this one,
         // we jump into that, otherwise we position the courser right
@@ -744,7 +715,7 @@ class MathFieldEditingController extends ChangeNotifier {
               currentNode.children.indexOf(parent) + 1;
           currentNode.setCursor();
         } else {
-          currentNode = currentNode.parent.argNodes[nextArg];
+          currentNode = currentNode.parent!.argNodes[nextArg];
           currentNode.courserPosition = 0;
           currentNode.setCursor();
         }
@@ -785,13 +756,14 @@ class MathFieldEditingController extends ChangeNotifier {
   /// of the pow function directly.
   void addPow(TeXFunction pow) {
     final posBefore = currentNode.courserPosition - 1;
+
     /// We don't allow having to pow's next to each other (x^2^2), since this
     /// is not supported by TeX.
     if (currentNode.children.isEmpty ||
         currentNode.courserPosition == 0 ||
         currentNode.children[posBefore].expression == '^' ||
         currentNode.courserPosition < currentNode.children.length &&
-        currentNode.children[posBefore + 1].expression == '^') {
+            currentNode.children[posBefore + 1].expression == '^') {
       return;
     }
     if (pow.expression.endsWith('2')) {

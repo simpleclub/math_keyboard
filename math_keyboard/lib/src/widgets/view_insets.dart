@@ -49,10 +49,9 @@ import 'package:simpleclub_math_keyboard/math_keyboard.dart';
 class MathKeyboardViewInsets extends StatefulWidget {
   /// Creates a [MathKeyboardViewInsets] widget around the [child] widget.
   const MathKeyboardViewInsets({
-    Key key,
-    @required this.child,
-  })  : assert(child != null),
-        super(key: key);
+    Key? key,
+    required this.child,
+  }) : super(key: key);
 
   /// The child widget that the math keyboard scaffold should report its
   /// view insets to.
@@ -73,7 +72,14 @@ class MathKeyboardViewInsets extends StatefulWidget {
 class MathKeyboardViewInsetsState extends State<MathKeyboardViewInsets> {
   /// Returns the ancestor [MathKeyboardViewInsetsState] of the given [context].
   static MathKeyboardViewInsetsState of(BuildContext context) {
-    return context.findAncestorStateOfType();
+    final result =
+        context.findAncestorStateOfType<MathKeyboardViewInsetsState>();
+    if (result != null) {
+      return result;
+    }
+    throw FlutterError(
+        'MathKeyboardViewInsetsState.of() called with a context that does not '
+        'contain a MathKeyboardViewInsetsState.');
   }
 
   final Map<ObjectKey, double> _keyboardSizes = {};
@@ -82,9 +88,7 @@ class MathKeyboardViewInsetsState extends State<MathKeyboardViewInsets> {
   ///
   /// Pass `null` for [size] to report that a keyboard has been removed from
   /// the scaffold. This is important for preventing memory leaks.
-  void operator []=(ObjectKey key, double size) {
-    assert(key != null);
-
+  void operator []=(ObjectKey key, double? size) {
     if (!mounted) return;
     if (_keyboardSizes[key] == size) return;
 
@@ -144,15 +148,21 @@ class MathKeyboardViewInsetsQuery extends InheritedWidget {
   /// Creates a [MathKeyboardViewInsetsQuery] that provides the [bottomInset] to
   /// the [child] tree.
   const MathKeyboardViewInsetsQuery({
-    Key key,
-    @required this.bottomInset,
-    @required Widget child,
-  })  : assert(bottomInset != null),
-        super(key: key, child: child);
+    Key? key,
+    required this.bottomInset,
+    required Widget child,
+  }) : super(key: key, child: child);
 
   /// Depends on and returns an ancestor [MathKeyboardViewInsetsQuery].
   static MathKeyboardViewInsetsQuery of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType();
+    final result = context
+        .dependOnInheritedWidgetOfExactType<MathKeyboardViewInsetsQuery>();
+    if (result != null) {
+      return result;
+    }
+    throw FlutterError(
+        'MathKeyboardViewInsetsQuery.of() called with a context that does not '
+        'contain a MathKeyboardViewInsetsQuery.');
   }
 
   /// Returns whether any math keyboard is showing in the given [context] by
@@ -210,11 +220,11 @@ class MathKeyboardViewInsetsQuery extends InheritedWidget {
   static bool keyboardShowingIn(BuildContext context) {
     final maxInset = max(
       of(context).bottomInset,
-      WidgetsBinding.instance.window.viewInsets.bottom /
+      WidgetsBinding.instance!.window.viewInsets.bottom /
           // Note that we obviously do not care about the pixel ratio for our
           // > 0 comparison, however, I do want to prevent any future mistake,
           // where someone forgets the pixel ratio on the window.
-          WidgetsBinding.instance.window.devicePixelRatio,
+          WidgetsBinding.instance!.window.devicePixelRatio,
     );
 
     return maxInset > 0;

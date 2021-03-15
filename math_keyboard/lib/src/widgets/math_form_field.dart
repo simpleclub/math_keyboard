@@ -22,20 +22,18 @@ import 'package:simpleclub_math_keyboard/src/widgets/math_keyboard.dart';
 class MathFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [MathField].
   MathFormField({
-    Key key,
+    Key? key,
     this.controller,
-    FocusNode focusNode,
+    FocusNode? focusNode,
     InputDecoration decoration = const InputDecoration(),
     MathKeyboardType keyboardType = MathKeyboardType.standard,
     List<String> variables = const [],
     bool autofocus = false,
-    ValueChanged<String> onChanged,
-    ValueChanged<String> onFieldSubmitted,
+    ValueChanged<String>? onChanged,
+    ValueChanged<String>? onFieldSubmitted,
     AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
-    FormFieldValidator<String> validator,
-  })  : assert(autofocus != null),
-        assert(decoration != null),
-        super(
+    FormFieldValidator<String>? validator,
+  }) : super(
           key: key,
           initialValue:
               controller != null ? controller.currentEditingValue() : '',
@@ -67,14 +65,14 @@ class MathFormField extends FormField<String> {
   /// Controls the math input being edited.
   ///
   /// If null, this widget will create its own [MathFieldEditingController].
-  final MathFieldEditingController controller;
+  final MathFieldEditingController? controller;
 
   @override
   _MathFormFieldState createState() => _MathFormFieldState();
 }
 
 class _MathFormFieldState extends FormFieldState<String> {
-  MathFieldEditingController _controller;
+  late MathFieldEditingController _controller;
 
   @override
   MathFormField get widget => super.widget as MathFormField;
@@ -86,7 +84,7 @@ class _MathFormFieldState extends FormFieldState<String> {
     if (widget.controller == null) {
       _controller = MathFieldEditingController();
     } else {
-      _controller = widget.controller;
+      _controller = widget.controller!;
       _controller.addListener(_handleControllerChanged);
     }
   }
@@ -96,15 +94,15 @@ class _MathFormFieldState extends FormFieldState<String> {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
       if (oldWidget.controller == null) {
-        widget.controller.addListener(_handleControllerChanged);
-        _controller = widget.controller;
+        widget.controller!.addListener(_handleControllerChanged);
+        _controller = widget.controller!;
       } else if (widget.controller == null) {
-        oldWidget.controller.removeListener(_handleControllerChanged);
+        oldWidget.controller!.removeListener(_handleControllerChanged);
         _controller = MathFieldEditingController();
       } else {
-        oldWidget.controller.removeListener(_handleControllerChanged);
-        widget.controller.addListener(_handleControllerChanged);
-        _controller = widget.controller;
+        oldWidget.controller!.removeListener(_handleControllerChanged);
+        widget.controller!.addListener(_handleControllerChanged);
+        _controller = widget.controller!;
       }
       setValue(_controller.currentEditingValue());
     }
@@ -117,7 +115,7 @@ class _MathFormFieldState extends FormFieldState<String> {
   }
 
   @override
-  void didChange(String value) {
+  void didChange(String? value) {
     super.didChange(value);
 
     // todo: allow changing the value from outside of the controller.

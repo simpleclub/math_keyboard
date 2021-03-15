@@ -26,15 +26,13 @@ enum MathKeyboardType {
 class MathKeyboard extends StatelessWidget {
   /// Constructs a [MathKeyboard].
   const MathKeyboard({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
     this.insetsState,
     this.variables = const [],
     this.type = MathKeyboardType.standard,
     this.onSubmit,
-  })  : assert(variables != null),
-        assert(type != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// The controller for editing the math field.
   ///
@@ -44,7 +42,7 @@ class MathKeyboard extends StatelessWidget {
   /// The state for reporting the keyboard insets.
   ///
   /// If `null`, the math keyboard will not report about its bottom inset.
-  final MathKeyboardViewInsetsState insetsState;
+  final MathKeyboardViewInsetsState? insetsState;
 
   /// The Variables a user can use.
   final List<String> variables;
@@ -52,8 +50,10 @@ class MathKeyboard extends StatelessWidget {
   /// The Type of the Keyboard.
   final MathKeyboardType type;
 
-  /// Function tht is called when the enter / submit button is called.
-  final VoidCallback onSubmit;
+  /// Function that is called when the enter / submit button is tapped.
+  ///
+  /// Can be `null`.
+  final VoidCallback? onSubmit;
 
   @override
   Widget build(BuildContext context) {
@@ -122,12 +122,12 @@ class MathKeyboard extends StatelessWidget {
 /// Widget that reports about the math keyboard body's bottom inset.
 class _KeyboardBody extends StatefulWidget {
   const _KeyboardBody({
-    Key key,
+    Key? key,
     this.insetsState,
-    this.child,
+    required this.child,
   }) : super(key: key);
 
-  final MathKeyboardViewInsetsState insetsState;
+  final MathKeyboardViewInsetsState? insetsState;
 
   final Widget child;
 
@@ -152,16 +152,16 @@ class _KeyboardBodyState extends State<_KeyboardBody> {
     super.dispose();
   }
 
-  void _removeInsets(MathKeyboardViewInsetsState insetsState) {
+  void _removeInsets(MathKeyboardViewInsetsState? insetsState) {
     if (insetsState == null) return;
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      widget.insetsState[ObjectKey(this)] = null;
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
+      widget.insetsState![ObjectKey(this)] = null;
     });
   }
 
-  void _reportInsets(MathKeyboardViewInsetsState insetsState) {
+  void _reportInsets(MathKeyboardViewInsetsState? insetsState) {
     if (insetsState == null) return;
-    SchedulerBinding.instance.addPostFrameCallback((_) {
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
       final renderBox = context.findRenderObject() as RenderBox;
       insetsState[ObjectKey(this)] = renderBox.size.height;
     });
@@ -178,12 +178,10 @@ class _KeyboardBodyState extends State<_KeyboardBody> {
 class _Variables extends StatelessWidget {
   /// Constructs a [_Variables] Widget.
   const _Variables({
-    Key key,
-    @required this.controller,
-    @required this.variables,
-  })  : assert(controller != null),
-        assert(variables != null),
-        super(key: key);
+    Key? key,
+    required this.controller,
+    required this.variables,
+  }) : super(key: key);
 
   /// The editing controller for the math field that the variables are connected
   /// to.
@@ -232,26 +230,27 @@ class _Variables extends StatelessWidget {
 class _Buttons extends StatelessWidget {
   /// Constructs a [_Buttons] Widget.
   const _Buttons({
-    Key key,
-    @required this.controller,
+    Key? key,
+    required this.controller,
     this.page1,
     this.page2,
     this.onSubmit,
-  })  : assert(controller != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// The editing controller for the math field that the variables are connected
   /// to.
   final MathFieldEditingController controller;
 
   /// The buttons to display.
-  final List<List<KeyboardButtonConfig>> page1;
+  final List<List<KeyboardButtonConfig>>? page1;
 
   /// The buttons to display.
-  final List<List<KeyboardButtonConfig>> page2;
+  final List<List<KeyboardButtonConfig>>? page2;
 
-  /// Function tht is called when the enter / submit button is called.
-  final VoidCallback onSubmit;
+  /// Function that is called when the enter / submit button is tapped.
+  ///
+  /// Can be `null`.
+  final VoidCallback? onSubmit;
 
   @override
   Widget build(BuildContext context) {
@@ -261,7 +260,7 @@ class _Buttons extends StatelessWidget {
         animation: controller,
         builder: (context, child) {
           final layout =
-              controller.secondPage ? page2 : page1 ?? numberKeyboard;
+              controller.secondPage ? page2! : page1 ?? numberKeyboard;
           return Column(
             children: [
               for (final row in layout)
@@ -277,7 +276,7 @@ class _Buttons extends StatelessWidget {
                             onTap: config.args != null
                                 ? () => controller.addFunction(
                                       config.value,
-                                      config.args,
+                                      config.args!,
                                     )
                                 : () => controller.addLeaf(config.value),
                             asTex: config.asTex,
@@ -331,8 +330,8 @@ class _Buttons extends StatelessWidget {
 class _BasicButton extends StatelessWidget {
   /// Constructs a [_BasicButton].
   const _BasicButton({
-    Key key,
-    @required this.flex,
+    Key? key,
+    required this.flex,
     this.label,
     this.icon,
     this.onTap,
@@ -342,16 +341,16 @@ class _BasicButton extends StatelessWidget {
         super(key: key);
 
   /// The flexible flex value.
-  final int flex;
+  final int? flex;
 
   /// The label for this button.
-  final String label;
+  final String? label;
 
   /// Icon for this button.
-  final IconData icon;
+  final IconData? icon;
 
   /// Function to be called on tap.
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   /// Show label as tex.
   final bool asTex;
@@ -369,7 +368,7 @@ class _BasicButton extends StatelessWidget {
       );
     } else if (asTex) {
       result = Math.tex(
-        label,
+        label!,
         options: MathOptions(
           fontSize: 22,
           color: Colors.white,
@@ -384,7 +383,7 @@ class _BasicButton extends StatelessWidget {
       }
 
       result = Text(
-        symbol,
+        symbol!,
         style: const TextStyle(
           fontSize: 22,
           color: Colors.white,
@@ -413,24 +412,24 @@ class _BasicButton extends StatelessWidget {
 class _NavigationButton extends StatelessWidget {
   /// Constructs a [_NavigationButton].
   const _NavigationButton({
-    Key key,
-    @required this.flex,
+    Key? key,
+    required this.flex,
     this.icon,
     this.iconSize = 36,
     this.onTap,
   }) : super(key: key);
 
   /// The flexible flex value.
-  final int flex;
+  final int? flex;
 
   /// Icon to be shown.
-  final IconData icon;
+  final IconData? icon;
 
   /// The size for the icon.
   final double iconSize;
 
   /// Function used when user holds the button down.
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -454,17 +453,16 @@ class _NavigationButton extends StatelessWidget {
 class _VariableButton extends StatelessWidget {
   /// Constructs a [_VariableButton] widget.
   const _VariableButton({
-    Key key,
-    @required this.name,
+    Key? key,
+    required this.name,
     this.onTap,
-  })  : assert(name != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// The variable name.
   final String name;
 
   /// Called when the button is tapped.
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
