@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:simpleclub_math_keyboard/math_keyboard.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:simpleclub_math_keyboard/math_keyboard.dart';
 
 void main() {
   runApp(const ExampleApp());
@@ -185,11 +185,19 @@ class _ClearableAutofocusExampleState
             child: MathField(
               autofocus: true,
               controller: _controller,
+              decoration: InputDecoration(
+                suffix: MouseRegion(
+                  cursor: MaterialStateMouseCursor.clickable,
+                  child: GestureDetector(
+                    onTap: _controller.clear,
+                    child: const Icon(
+                      Icons.highlight_remove_rounded,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
-          TextButton(
-            onPressed: _controller.clear,
-            child: const Text('Clear all'),
           ),
           const Padding(
             padding: EdgeInsets.all(16),

@@ -272,6 +272,10 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
 
       _showFieldOnScreen();
     }
+
+    setState(() {
+      // Mark as dirty in order to respond to the focus node update.
+    });
   }
 
   bool _showFieldOnScreenScheduled = false;
@@ -542,45 +546,25 @@ class _FieldPreview extends StatelessWidget {
         isEmpty: false,
         isFocused: hasFocus,
         decoration: decoration,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                controller: scrollController,
-                scrollDirection: Axis.horizontal,
-                // TODO: Let InputDecorator care about hint.
-                child: (hasFocus || !controller.isEmpty)
-                    ? Opacity(
-                        opacity: (hasFocus || !controller.isEmpty) ? 1 : 0,
-                        child: Math.tex(
-                          tex,
-                          options: MathOptions(
-                            fontSize: MathOptions.defaultFontSize,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                      )
-                    : Text(
-                        decoration.hintText ?? '',
-                        style: decoration.hintStyle,
-                      ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: MouseRegion(
-                cursor: MaterialStateMouseCursor.clickable,
-                child: GestureDetector(
-                  onTap: controller.clear,
-                  child: const Icon(
-                    Icons.highlight_remove_rounded,
-                    color: Colors.grey,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          scrollDirection: Axis.horizontal,
+          // TODO: Let InputDecorator care about hint.
+          child: (hasFocus || !controller.isEmpty)
+              ? Opacity(
+                  opacity: (hasFocus || !controller.isEmpty) ? 1 : 0,
+                  child: Math.tex(
+                    tex,
+                    options: MathOptions(
+                      fontSize: MathOptions.defaultFontSize,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
+                )
+              : Text(
+                  decoration.hintText ?? '',
+                  style: decoration.hintStyle,
                 ),
-              ),
-            ),
-          ],
         ),
       ),
     );
