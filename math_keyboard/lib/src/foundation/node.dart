@@ -117,9 +117,7 @@ class TeXFunction extends TeX {
   /// arg.
   TeXFunction(String expression, this.parent, this.args,
       [List<TeXNode>? argNodes])
-      : assert(args != null),
-        assert(expression != null),
-        assert(args.isNotEmpty, 'A function needs at least one argument.'),
+      : assert(args.isNotEmpty, 'A function needs at least one argument.'),
         assert(argNodes == null || argNodes.length == args.length),
         argNodes = argNodes ?? List.empty(growable: true),
         super(expression) {
@@ -211,7 +209,10 @@ class Cursor extends TeX {
         super('');
 
   @override
-  String buildString({required Color cursorColor}) {
+  String buildString({required Color? cursorColor}) {
+    if (cursorColor == null) {
+      throw FlutterError('Cursor.buildString() called without a cursorColor.');
+    }
     final colorString =
         '#${(cursorColor.value & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
     return '\\textcolor{$colorString}{|}';

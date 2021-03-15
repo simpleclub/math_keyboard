@@ -51,8 +51,7 @@ class MathKeyboardViewInsets extends StatefulWidget {
   const MathKeyboardViewInsets({
     Key? key,
     required this.child,
-  })  : assert(child != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// The child widget that the math keyboard scaffold should report its
   /// view insets to.
@@ -90,8 +89,6 @@ class MathKeyboardViewInsetsState extends State<MathKeyboardViewInsets> {
   /// Pass `null` for [size] to report that a keyboard has been removed from
   /// the scaffold. This is important for preventing memory leaks.
   void operator []=(ObjectKey key, double? size) {
-    assert(key != null);
-
     if (!mounted) return;
     if (_keyboardSizes[key] == size) return;
 
@@ -154,8 +151,7 @@ class MathKeyboardViewInsetsQuery extends InheritedWidget {
     Key? key,
     required this.bottomInset,
     required Widget child,
-  })  : assert(bottomInset != null),
-        super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// Depends on and returns an ancestor [MathKeyboardViewInsetsQuery].
   static MathKeyboardViewInsetsQuery of(BuildContext context) {

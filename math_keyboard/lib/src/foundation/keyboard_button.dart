@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:simpleclub_math_keyboard/src/foundation/node.dart';
 
@@ -8,7 +7,7 @@ abstract class KeyboardButtonConfig {
   const KeyboardButtonConfig({
     this.flex,
     this.keyboardCharacters = const [],
-  }) : assert(keyboardCharacters != null);
+  });
 
   /// Optional flex.
   final int? flex;
@@ -36,9 +35,7 @@ class BasicKeyboardButtonConfig extends KeyboardButtonConfig {
     this.highlighted = false,
     List<String> keyboardCharacters = const [],
     int? flex,
-  })  : assert(label != null),
-        assert(value != null),
-        super(
+  }) : super(
           flex: flex,
           keyboardCharacters: keyboardCharacters,
         );

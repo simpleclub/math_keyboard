@@ -26,11 +26,7 @@ class MathField extends StatefulWidget {
     this.decoration = const InputDecoration(),
     this.onChanged,
     this.onSubmitted,
-  })  : assert(autofocus != null),
-        assert(variables != null),
-        assert(decoration != null),
-        assert(keyboardType != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// The controller for the math field.
   ///
@@ -114,14 +110,28 @@ class MathField extends StatefulWidget {
 }
 
 class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
+  late final _scrollController = ScrollController();
+  late final _keyboardSlideController = AnimationController(
+    duration: const Duration(milliseconds: 250),
+    vsync: this,
+  );
+  late final _cursorBlinkController = AnimationController(
+    duration: const Duration(seconds: 1),
+    vsync: this,
+    // We start the controller at 1/2 so that immediately when the controller
+    // is forwarded the cursor appears. The cursor is visible when the value
+    // is greater than 1/2.
+    value: 1 / 2,
+  );
+  late var _cursorOpacity = 0.0;
+
   OverlayEntry? _overlayEntry;
-  // todo: initialize here
-  late FocusNode _focusNode;
-  late ScrollController _scrollController;
-  late MathFieldEditingController _controller;
-  late AnimationController _keyboardSlideController;
-  late AnimationController _cursorBlinkController;
-  late double _cursorOpacity;
+  late var _focusNode = widget.focusNode ??
+      FocusNode(
+        debugLabel: 'math_keyboard_$hashCode',
+        descendantsAreFocusable: false,
+      );
+  late var _controller = widget.controller ?? MathFieldEditingController();
 
   List<String> get _variables => [
         r'\pi',
@@ -133,35 +143,15 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    _focusNode = widget.focusNode ??
-        FocusNode(
-          debugLabel: 'math_keyboard_$hashCode',
-          descendantsAreFocusable: false,
-        );
-    _scrollController = ScrollController();
-
-    _keyboardSlideController = AnimationController(
-      duration: const Duration(milliseconds: 250),
-      vsync: this,
-    )..addStatusListener((status) {
-        if (status == AnimationStatus.dismissed) {
-          _overlayEntry?.remove();
-          _overlayEntry = null;
-        } else if (status == AnimationStatus.completed) {
-          _showFieldOnScreen();
-        }
-      });
-    _cursorBlinkController = AnimationController(
-      duration: const Duration(seconds: 1),
-      vsync: this,
-      // We start the controller at 1/2 so that immediately when the controller
-      // is forwarded the cursor appears. The cursor is visible when the value
-      // is greater than 1/2.
-      value: 1 / 2,
-    )..addListener(_handleBlinkUpdate);
-    _cursorOpacity = 0;
-
-    _controller = widget.controller ?? MathFieldEditingController();
+    _keyboardSlideController.addStatusListener((status) {
+      if (status == AnimationStatus.dismissed) {
+        _overlayEntry?.remove();
+        _overlayEntry = null;
+      } else if (status == AnimationStatus.completed) {
+        _showFieldOnScreen();
+      }
+    });
+    _cursorBlinkController.addListener(_handleBlinkUpdate);
     _controller.addListener(_handleControllerUpdate);
   }
 
@@ -272,8 +262,6 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   ///
   /// When [open] is true, the keyboard should be opened and vice versa.
   void _handleFocusChanged(BuildContext context, {required bool open}) {
-    assert(open != null);
-
     if (!open) {
       _keyboardSlideController.reverse();
       _cursorBlinkController.value = 1 / 2;
@@ -375,7 +363,6 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   ///
   /// Returns `null` if not handled (indecisive) and a [KeyEventResult] if we
   /// can conclude about the complete key handling from the action taken.
-  // todo: returns a bool for now until KeyEventResult lands on stable.
   KeyEventResult? _handleCharacter(
       String? character, List<KeyboardButtonConfig> configs) {
     if (character == null) return null;
@@ -429,7 +416,6 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   ///
   /// Returns `null` if not handled (indecisive) and a [KeyEventResult] if we
   /// can conclude about the complete key handling from the action taken.
-  // todo: returns a bool for now until KeyEventResult lands on stable.
   KeyEventResult? _handleLogicalKey(
       LogicalKeyboardKey logicalKey, List<KeyboardButtonConfig> configs) {
     // Check logical, fixed keyboard bindings (like backspace and arrow keys).
@@ -505,12 +491,7 @@ class _FieldPreview extends StatelessWidget {
     required this.hasFocus,
     required this.decoration,
     required this.scrollController,
-  })  : assert(controller != null),
-        assert(scrollController != null),
-        assert(cursorOpacity != null),
-        assert(hasFocus != null),
-        assert(decoration != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// The controller for the math field.
   final MathFieldEditingController controller;
@@ -775,13 +756,14 @@ class MathFieldEditingController extends ChangeNotifier {
   /// of the pow function directly.
   void addPow(TeXFunction pow) {
     final posBefore = currentNode.courserPosition - 1;
+
     /// We don't allow having to pow's next to each other (x^2^2), since this
     /// is not supported by TeX.
     if (currentNode.children.isEmpty ||
         currentNode.courserPosition == 0 ||
         currentNode.children[posBefore].expression == '^' ||
         currentNode.courserPosition < currentNode.children.length &&
-        currentNode.children[posBefore + 1].expression == '^') {
+            currentNode.children[posBefore + 1].expression == '^') {
       return;
     }
     if (pow.expression.endsWith('2')) {

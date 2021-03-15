@@ -19,8 +19,7 @@ class KeyboardButton extends StatefulWidget {
     this.onHold,
     this.color,
     required this.child,
-  })  : assert(child != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// Called when the keyboard button is tapped.
   final VoidCallback? onTap;
@@ -40,18 +39,11 @@ class KeyboardButton extends StatefulWidget {
 
 class _KeyboardButtonState extends State<KeyboardButton>
     with SingleTickerProviderStateMixin {
-  // todo: initialize here
-  late final AnimationController _animationController;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 50),
-      reverseDuration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-  }
+  late final _animationController = AnimationController(
+    duration: const Duration(milliseconds: 50),
+    reverseDuration: const Duration(milliseconds: 200),
+    vsync: this,
+  );
 
   @override
   void dispose() {

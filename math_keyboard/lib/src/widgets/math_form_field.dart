@@ -33,9 +33,7 @@ class MathFormField extends FormField<String> {
     ValueChanged<String>? onFieldSubmitted,
     AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
     FormFieldValidator<String>? validator,
-  })  : assert(autofocus != null),
-        assert(decoration != null),
-        super(
+  }) : super(
           key: key,
           initialValue:
               controller != null ? controller.currentEditingValue() : '',

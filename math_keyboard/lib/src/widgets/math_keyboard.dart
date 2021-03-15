@@ -32,9 +32,7 @@ class MathKeyboard extends StatelessWidget {
     this.variables = const [],
     this.type = MathKeyboardType.standard,
     this.onSubmit,
-  })  : assert(variables != null),
-        assert(type != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// The controller for editing the math field.
   ///
@@ -183,9 +181,7 @@ class _Variables extends StatelessWidget {
     Key? key,
     required this.controller,
     required this.variables,
-  })  : assert(controller != null),
-        assert(variables != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// The editing controller for the math field that the variables are connected
   /// to.
@@ -239,8 +235,7 @@ class _Buttons extends StatelessWidget {
     this.page1,
     this.page2,
     this.onSubmit,
-  })  : assert(controller != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// The editing controller for the math field that the variables are connected
   /// to.
@@ -461,8 +456,7 @@ class _VariableButton extends StatelessWidget {
     Key? key,
     required this.name,
     this.onTap,
-  })  : assert(name != null),
-        super(key: key);
+  }) : super(key: key);
 
   /// The variable name.
   final String name;
