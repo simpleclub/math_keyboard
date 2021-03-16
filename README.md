@@ -15,6 +15,8 @@ _on-screen software keyboard_ as well as **physical keyboard input** support. On
 math field typesetting uses TeX and the package supports converting to math expressions (that e.g.
 can be used for calculation).
 
+todo(creativecreatorormaybenot): insert screenshots
+
 `math_keyboard` is an open source project with the aim of providing a way to edit math expression
 providing the best user experience in terms of input and UI as well as allowing accurate evaluation
 of the mathematical expressions entered by the user. This is used by the
@@ -24,6 +26,30 @@ of the mathematical expressions entered by the user. This is used by the
 ## Usage
 
 See the [package README][package readme] for usage information.
+
+## Math expressions
+
+Notice how the `math_keyboard` package includes a major feature that allows working with the input
+expressions in a mathematical matter, i.e. by converting them into "math expressions" (this is how
+we refer to the format in the context of this project).
+
+We achieve this by essentially working with two formats:
+
+* The typeset display format, powered by TeX (see below).
+* A data format, i.e. math expressions.
+
+This "data format" depends on the [`math_expressions` package][math_expressions]. Handling the
+expressions in this format allows you to e.g. evaluate the expressions.
+
+## TeX typesetting
+
+Both the math field content, i.e. the expressions typed by the user, as well as some symbols on the
+keyboard itself are typeset using TeX. For TeX typesetting in Flutter, we created our own proof of
+concept renderer in early 2020, called [CaTeX][catex]. This project is on-hold for now and in the
+meantime, we collaborated on the [flutter_math] package that aims to achieve something similar.  
+Due to lack of maintenance on that repo, we are currently using our forked version,
+[flutter_math_fork]. Note that our ultimate goal is fully integrating the `math_keyboard` package
+with the `catex` package, which would give us maximum control over the rendering of the typeset math.
 
 ## Missing features
 
@@ -47,6 +73,14 @@ community. Any contributions are more than welcome!
 
 See our [contributing guide][contributing] for more information.
 
+## Num++ inspiration
+
+During the research phase of this project, we came across the [Num++ app][numpp], which served as
+an inspiration for the math expression parsing part of the package.  
+The main difference between that app and this package (apart from one being a calculator app and the
+other being a generalized usable package) is the fact that Num++ uses a web view and MathQuill for
+editing the expression while we built the input field and editing ourselves.
+
 [logo]: https://i.imgur.com/bWCrGG8.png
 [simpleclub]: https://github.com/simpleclub
 [demo]: https://simpleclub.github.io/math_keyboard
@@ -58,3 +92,8 @@ See our [contributing guide][contributing] for more information.
 [issues]: https://github.com/simpleclub/math_keyboard/issues
 [license]: https://github.com/simpleclub/math_keyboard/blob/main/LICENSE
 [package readme]: https://github.com/simpleclub/math_keyboard/tree/main/math_keyboard
+[catex]: https://github.com/simpleclub/CaTeX
+[flutter_math]: https://github.com/znjameswu/flutter_math
+[flutter_math_fork]: https://github.com/simpleclub-extended/flutter_math_fork
+[math_expressions]: https://pub.dev/packages/math_expressions
+[numpp]: https://github.com/DylanXie123/Num-Plus-Plus

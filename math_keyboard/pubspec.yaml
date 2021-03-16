@@ -1,7 +1,9 @@
-name: simpleclub_math_keyboard
-description: Package for a widget that allows editing math expressions.
-version: 0.1.0
-publish_to: 'none'
+name: math_keyboard
+description: >-2
+  Math expression editing using an on-screen software keyboard or physical keyboard input in a
+  typeset input field in Flutter.
+# todo(creativecreatorormaybenot): bump to 0.1.0 once all files are finalized.
+version: 0.0.1
 
 environment:
   sdk: '>=2.12.0 <3.0.0'

@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:simpleclub_math_keyboard/math_keyboard.dart';
+import 'package:math_keyboard/math_keyboard.dart';
 
 /// Widget for math keyboards ensuring the content is pushed up by the
 /// keyboards, connected with [MathField]s.

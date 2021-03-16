@@ -1,10 +1,17 @@
+// Copyright (c) 2019 DXie123
+// Copyright 2021 simpleclub GmbH. All rights reserved.
+// Use of this source code is governed by an MIT-style license that can be
+// found at https://github.com/DylanXie123/Num-Plus-Plus/blob/71a959ff6c43cc0515348f6eafbe6ea529888833/LICENSE
+// and by a BSD-style license that can be found in the LICENSE file.
+
 import 'dart:math' as math;
 
 import 'package:math_expressions/math_expressions.dart';
 import 'package:petitparser/petitparser.dart';
 
+/// Parser for converting TeX input strings to math expressions.
+///
 /// Most of this code is taken from https://github.com/DylanXie123/Num-Plus-Plus.
-/// Class that parses TeX Strings to
 class TeXParser {
   /// Constructs a [TeXParser].
   TeXParser(this.inputString);
