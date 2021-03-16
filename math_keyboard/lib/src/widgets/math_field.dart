@@ -3,12 +3,12 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:math_expressions/math_expressions.dart';
-import 'package:simpleclub_math_keyboard/math_keyboard.dart';
-import 'package:simpleclub_math_keyboard/src/foundation/keyboard_button.dart';
-import 'package:simpleclub_math_keyboard/src/foundation/node.dart';
-import 'package:simpleclub_math_keyboard/src/widgets/decimal_separator.dart';
-import 'package:simpleclub_math_keyboard/src/widgets/math_keyboard.dart';
-import 'package:simpleclub_math_keyboard/src/widgets/view_insets.dart';
+import 'package:math_keyboard/math_keyboard.dart';
+import 'package:math_keyboard/src/foundation/keyboard_button.dart';
+import 'package:math_keyboard/src/foundation/node.dart';
+import 'package:math_keyboard/src/widgets/decimal_separator.dart';
+import 'package:math_keyboard/src/widgets/math_keyboard.dart';
+import 'package:math_keyboard/src/widgets/view_insets.dart';
 
 /// Widget that is like a [TextField] for math expressions.
 ///
@@ -272,6 +272,10 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
 
       _showFieldOnScreen();
     }
+
+    setState(() {
+      // Mark as dirty in order to respond to the focus node update.
+    });
   }
 
   bool _showFieldOnScreenScheduled = false;
@@ -542,45 +546,25 @@ class _FieldPreview extends StatelessWidget {
         isEmpty: false,
         isFocused: hasFocus,
         decoration: decoration,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                controller: scrollController,
-                scrollDirection: Axis.horizontal,
-                // TODO: Let InputDecorator care about hint.
-                child: (hasFocus || !controller.isEmpty)
-                    ? Opacity(
-                        opacity: (hasFocus || !controller.isEmpty) ? 1 : 0,
-                        child: Math.tex(
-                          tex,
-                          options: MathOptions(
-                            fontSize: MathOptions.defaultFontSize,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                      )
-                    : Text(
-                        decoration.hintText ?? '',
-                        style: decoration.hintStyle,
-                      ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: MouseRegion(
-                cursor: MaterialStateMouseCursor.clickable,
-                child: GestureDetector(
-                  onTap: controller.clear,
-                  child: const Icon(
-                    Icons.highlight_remove_rounded,
-                    color: Colors.grey,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          scrollDirection: Axis.horizontal,
+          // TODO: Let InputDecorator care about hint.
+          child: (hasFocus || !controller.isEmpty)
+              ? Opacity(
+                  opacity: (hasFocus || !controller.isEmpty) ? 1 : 0,
+                  child: Math.tex(
+                    tex,
+                    options: MathOptions(
+                      fontSize: MathOptions.defaultFontSize,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
+                )
+              : Text(
+                  decoration.hintText ?? '',
+                  style: decoration.hintStyle,
                 ),
-              ),
-            ),
-          ],
         ),
       ),
     );

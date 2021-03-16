@@ -1,0 +1,43 @@
+name: web demo
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/deploy.yml'
+      - 'math_keyboard_demo/lib/**'
+      - 'math_keyboard_demo/web/**'
+      - 'math_keyboard_demo/pubspec.yaml'
+
+jobs:
+  demo-deploy:
+    timeout-minutes: 6
+    runs-on: ubuntu-latest
+    name: deployment of math_keyboard_demo
+
+    steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@v1.4.0
+        with:
+          channel: 'stable'
+
+      - name: Build demo web app
+        run: |
+          cd math_keyboard_demo
+          flutter pub get
+          flutter build web
+          cd build/web
+          touch ".nojekyll"
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: math_keyboard_demo/build/web
+          GIT_CONFIG_NAME: creativecreatorormaybenot
+          GIT_CONFIG_EMAIL: creativecreatorormaybenot@gmail.com
+          COMMIT_MESSAGE: Deploy math_keyboard_demo web page

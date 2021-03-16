@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:math_expressions/math_expressions.dart';
-import 'package:simpleclub_math_keyboard/math_keyboard.dart';
+import 'package:math_keyboard/math_keyboard.dart';
 
 // todo: these tests are only useful to a limited degree because we neither
 // todo| directly test nodes nor properly compare the math expressions.

@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:simpleclub_math_keyboard/src/foundation/node.dart';
+import 'package:math_keyboard/src/foundation/node.dart';
 
 /// Class representing a button configuration.
 abstract class KeyboardButtonConfig {

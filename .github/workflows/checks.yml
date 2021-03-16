@@ -1,0 +1,74 @@
+name: checks
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/checks.yml'
+      - '**/lib/**'
+      - '**/android/**'
+      - '**/ios/**'
+      - '**/web/**'
+      - '**/macos/**'
+      - '**/windows/**'
+      - '**/pubspec.yaml'
+      - '**/test/**'
+      - '**/test_driver/**'
+      - '**/assets/**'
+      - '**/integration_test/**'
+
+jobs:
+  analyze:
+    timeout-minutes: 11
+    runs-on: ubuntu-latest
+    name: ${{ matrix.package }} analysis on ${{ matrix.channel }}
+    strategy:
+      matrix:
+        channel:
+          - 'stable'
+          - 'beta'
+          - 'dev'
+        package:
+          - 'math_keyboard'
+          - 'math_keyboard_demo'
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v2.3.3
+      - uses: subosito/flutter-action@v1.4.0
+        with:
+          channel: ${{ matrix.channel }}
+      - name: pub get
+        run: flutter pub get
+        working-directory: ${{ matrix.package }}
+      - name: dart format
+        working-directory: ${{ matrix.package }}
+        run: dart format . --fix --set-exit-if-changed
+      - run: flutter analyze
+        working-directory: ${{ matrix.package }}
+
+  test:
+    timeout-minutes: 16
+    runs-on: macos-latest
+    name: ${{ matrix.package }} testing on ${{ matrix.channel }}
+    strategy:
+      matrix:
+        channel:
+          - 'stable'
+          - 'beta'
+          - 'dev'
+        package:
+          - 'math_keyboard'
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v2.3.3
+      - uses: subosito/flutter-action@v1.4.0
+        with:
+          channel: ${{ matrix.channel }}
+      - run: flutter pub get
+        working-directory: ${{ matrix.package }}
+      - name: Run unit tests
+        run: flutter test
+        working-directory: ${{ matrix.package }}

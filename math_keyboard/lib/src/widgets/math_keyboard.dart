@@ -3,11 +3,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
-import 'package:simpleclub_math_keyboard/src/foundation/keyboard_button.dart';
-import 'package:simpleclub_math_keyboard/src/widgets/decimal_separator.dart';
-import 'package:simpleclub_math_keyboard/src/widgets/keyboard_button.dart';
-import 'package:simpleclub_math_keyboard/src/widgets/math_field.dart';
-import 'package:simpleclub_math_keyboard/src/widgets/view_insets.dart';
+import 'package:math_keyboard/src/foundation/keyboard_button.dart';
+import 'package:math_keyboard/src/widgets/decimal_separator.dart';
+import 'package:math_keyboard/src/widgets/keyboard_button.dart';
+import 'package:math_keyboard/src/widgets/math_field.dart';
+import 'package:math_keyboard/src/widgets/view_insets.dart';
 
 /// Enumeration for the types of keyboard that a math keyboard can adopt.
 ///

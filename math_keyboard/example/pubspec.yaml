@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  simpleclub_math_keyboard:
+  math_keyboard:
     path: ../
 
 flutter:
