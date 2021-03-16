@@ -34,7 +34,7 @@ import 'package:math_keyboard/math_keyboard.dart';
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return MathKeyboardScaffold(
+///   return MathKeyboardViewInsets(
 ///     child: Scaffold(
 ///       // ...
 ///     ),
@@ -53,8 +53,7 @@ class MathKeyboardViewInsets extends StatefulWidget {
     required this.child,
   }) : super(key: key);
 
-  /// The child widget that the math keyboard scaffold should report its
-  /// view insets to.
+  /// The child widget tree that the math keyboard view insets should report to.
   ///
   /// Usually a `Scaffold`. Do note, however, that the `Scaffold`, `SafeArea`,
   /// etc. can be as deep in the tree below the [MathKeyboardViewInsets] as you

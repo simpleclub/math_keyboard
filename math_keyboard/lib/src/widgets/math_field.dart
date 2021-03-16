@@ -21,7 +21,7 @@ class MathField extends StatefulWidget {
     this.autofocus = false,
     this.focusNode,
     this.controller,
-    this.keyboardType = MathKeyboardType.standard,
+    this.keyboardType = MathKeyboardType.expression,
     this.variables = const [],
     this.decoration = const InputDecoration(),
     this.onChanged,
@@ -341,7 +341,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
 
     final configs = <List<KeyboardButtonConfig>>[
       if (widget.keyboardType ==
-          MathKeyboardType.standard) ...<List<KeyboardButtonConfig>>[
+          MathKeyboardType.expression) ...<List<KeyboardButtonConfig>>[
         ...standardKeyboard,
         ...functionKeyboard,
       ] else if (widget.keyboardType == MathKeyboardType.numberOnly) ...[

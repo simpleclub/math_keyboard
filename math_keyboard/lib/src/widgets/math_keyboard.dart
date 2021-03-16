@@ -14,9 +14,11 @@ import 'package:math_keyboard/src/widgets/view_insets.dart';
 /// This way we allow different button configurations. The user may only need to
 /// input a number.
 enum MathKeyboardType {
-  /// Standard keyboard showing numbers and operators and a toggle button to
-  /// switch to extended functions page.
-  standard,
+  /// Keyboard for entering complete math expressions.
+  ///
+  /// This shows numbers + operators and a toggle button to switch to another
+  /// page with extended functions.
+  expression,
 
   /// Keyboard for number input only.
   numberOnly,
@@ -30,7 +32,7 @@ class MathKeyboard extends StatelessWidget {
     required this.controller,
     this.insetsState,
     this.variables = const [],
-    this.type = MathKeyboardType.standard,
+    this.type = MathKeyboardType.expression,
     this.onSubmit,
   }) : super(key: key);
 
