@@ -17,6 +17,8 @@ can be used for calculation).
 
 todo(creativecreatorormaybenot): insert screenshots
 
+todo(creativecreatorormaybenot): link to video & tweet.
+
 `math_keyboard` is an open source project with the aim of providing a way to edit math expression
 providing the best user experience in terms of input and UI as well as allowing accurate evaluation
 of the mathematical expressions entered by the user. This is used by the

@@ -10,6 +10,8 @@ no plugins, no web views.
 
 ## Features
 
+todo(creativecreatorormaybenot): insert screenshots.
+
 * Editing math expressions using a custom on-screen software keyboard
 * Editing via physical keyboard input (with shortcuts for functions and constants)
 * Support for both number and expression mode
@@ -19,6 +21,8 @@ no plugins, no web views.
 * Autofocus support
 * Form field support
 * Decimal separator based on locale
+
+todo(creativecreatorormaybenot): link to video & tweet.
 
 ## Usage
 
