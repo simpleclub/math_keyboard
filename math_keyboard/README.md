@@ -21,6 +21,7 @@ todo(creativecreatorormaybenot): insert screenshots.
 * Autofocus support
 * Form field support
 * Decimal separator based on locale
+* Converting TeX from and to math expressions
 
 todo(creativecreatorormaybenot): link to video & tweet.
 
@@ -178,6 +179,28 @@ Otherwise, a dot `.` is used. You can override the locale using the
 
 Note that physical keyboard input always accepts both `.` and `,`.
 
+### Math expressions
+
+To convert the TeX strings returned by the math keyboard into math expressions, you can make use
+of the provided [`TeXParser`][TeXParser]:
+
+```dart
+final mathExpression = TeXParser(texString).parse();
+```
+
+For the opposite operation, i.e. converting a math `Expression` to TeX, you can make use
+of the provided [`convertMathExpressionToTeXNode`][convertMathExpressionToTeXNode]:
+
+```dart
+final texNode = convertMathExpressionToTeXNode(expression);
+```
+
+Note that this returns an internal `TeXNode` format, which you can convert to a TeX string:
+
+```dart
+final texString = texNode.buildTexString();
+```
+
 [logo]: https://i.imgur.com/gCdWyka.png
 [repo]: https://github.com/simpleclub/math_keyboard
 [repo shield]: https://img.shields.io/github/stars/simpleclub/math_keyboard?style=social
@@ -200,3 +223,5 @@ Note that physical keyboard input always accepts both `.` and `,`.
 [decimal separators]: https://en.wikipedia.org/wiki/Decimal_separator#Countries_using_decimal_comma
 [localeOf]: https://api.flutter.dev/flutter/widgets/Localizations/localeOf.html
 [Localizations override]: https://api.flutter.dev/flutter/widgets/Localizations/Localizations.override.html
+[TeXParser]: https://pub.dev/documentation/math_keyboard/latest/math_keyboard/TeXParser-class.html
+[convertMathExpressionToTeXNode]: https://pub.dev/documentation/math_keyboard/latest/math_keyboard/convertMathExpressionToTeXNode.html
