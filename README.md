@@ -3,9 +3,9 @@
 [![math_keyboard on Pub][pub shield]][pub]
 [![math_keyboard Flutter web demo][demo shield]][demo]
 
-`math_keyboard` is a Flutter package that allows editing math expressions using a typeset text field
-(so-called "math field") and a custom-made fully integrated math keyboard in _Flutter only_ - no
-plugins, no web views.
+`math_keyboard` is a Flutter package that allows editing math expressions using a typeset input
+field (so-called "math field") and a custom-made fully integrated math keyboard in _Flutter only_ -
+no plugins, no web views.
 
 ## About math_keyboard
 
@@ -20,14 +20,25 @@ todo(creativecreatorormaybenot): insert screenshots
 `math_keyboard` is an open source project with the aim of providing a way to edit math expression
 providing the best user experience in terms of input and UI as well as allowing accurate evaluation
 of the mathematical expressions entered by the user. This is used by the
-[simpleclub app][simpleclub], hence, the association. It is also maintained by [simpleclub][]
+[simpleclub app][simpleclub], hence, the association. It is also maintained by [simpleclub]
 (see the [`LICENSE`][license] file).
 
-## Usage
+## Features & usage
 
-See the [package README][package readme] for usage information.
+See the [package README][package readme] for features and usage information.
 
-## Math expressions
+Or view the package on Pub → [![math_keyboard on Pub][pub shield]][pub]  
+It is worth a read :)
+
+## Implementation
+
+In the following, some high-level information regarding the implementation of the package is
+described. This is useful in case you are curious or intend to contribute.
+
+For information on *implementing `math_keyboard` into your own app*, please see the
+[package README][pub].
+
+### Math expressions
 
 Notice how the `math_keyboard` package includes a major feature that allows working with the input
 expressions in a mathematical matter, i.e. by converting them into "math expressions" (this is how
@@ -41,7 +52,7 @@ We achieve this by essentially working with two formats:
 This "data format" depends on the [`math_expressions` package][math_expressions]. Handling the
 expressions in this format allows you to e.g. evaluate the expressions.
 
-## TeX typesetting
+### TeX typesetting
 
 Both the math field content, i.e. the expressions typed by the user, as well as some symbols on the
 keyboard itself are typeset using TeX. For TeX typesetting in Flutter, we created our own proof of
@@ -50,17 +61,6 @@ meantime, we collaborated on the [flutter_math] package that aims to achieve som
 Due to lack of maintenance on that repo, we are currently using our forked version,
 [flutter_math_fork]. Note that our ultimate goal is fully integrating the `math_keyboard` package
 with the `catex` package, which would give us maximum control over the rendering of the typeset math.
-
-## Missing features
-
-You might notice that some features that you would expect from the `math_keyboard` package are
-missing or something is not working as expected. In that case, please [file an issue][issues].
-
-In general, we can of course never fully solve every use case, however, especially in this case we
-are aware of a few shortcomings. For example the customization options of the keyboard are currently
-limited because this has simply not yet been a requirement in our internal usage. In that case,
-please consider **contributing** pull requests to this repo in order to allow as many use cases
-to be covered as possible :) See the next section for information on that.
 
 ## Contributing
 
@@ -73,6 +73,26 @@ community. Any contributions are more than welcome!
 
 See our [contributing guide][contributing] for more information.
 
+### Missing features
+
+You might notice that some features that you would expect from the `math_keyboard` package are
+missing or something is not working as expected. In that case, please [file an issue][issues].
+
+In general, we can of course never fully solve every use case, however, especially in this case we
+are aware of a few shortcomings. For example the customization options of the keyboard are currently
+limited because this has simply not yet been a requirement in our internal usage. In that case,
+please consider **contributing** pull requests to this repo in order to allow as many use cases
+to be covered as possible :) Please refer to the [contributing guide][contributing] for that.
+
+### Repo structure
+
+The `math_keyboard` repository is divided into multiple packages. These packages are the following:
+
+| Package                                                                                           | Content                     |
+| --------------------------------------------------------------------------------------------------| --------------------------- |
+| [`math_keyboard`](https://github.com/simpleclub/math_keyboard/tree/main/math_keyboard)            | Main package implementation |
+| [`math_keyboard_demo`](https://github.com/simpleclub/math_keyboard/tree/main/math_keyboard_demo)  | Demo app                    |
+
 ## Num++ inspiration
 
 During the research phase of this project, we came across the [Num++ app][numpp], which served as
@@ -81,7 +101,7 @@ The main difference between that app and this package (apart from one being a ca
 other being a generalized usable package) is the fact that Num++ uses a web view and MathQuill for
 editing the expression while we built the input field and editing ourselves.
 
-[logo]: https://i.imgur.com/bWCrGG8.png
+[logo]: https://i.imgur.com/gCdWyka.png
 [simpleclub]: https://github.com/simpleclub
 [demo]: https://simpleclub.github.io/math_keyboard
 [demo shield]: https://img.shields.io/badge/math_keyboard-demo-FFC107
