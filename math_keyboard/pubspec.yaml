@@ -4,6 +4,7 @@ description: >-2
   typeset input field in Flutter.
 # todo(creativecreatorormaybenot): bump to 0.1.0 once all files are finalized.
 version: 0.0.1
+homepage: https://github.com/simpleclub/math_keyboard/tree/main/math_keyboard
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -12,14 +13,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  holding_gesture: ^1.0.0-dev
-  flutter_math_fork: ^0.3.0+1
-  math_expressions: ^2.1.0-nullsafety.0
-  petitparser: ^4.0.2
-
   flutter_localizations:
     sdk: flutter
+
+  flutter_math_fork: ^0.3.0+1
+  holding_gesture: ^1.0.0-dev
+  intl: ^0.17.0
+  math_expressions: ^2.1.0-nullsafety.0
+  petitparser: ^4.0.2
 
 dev_dependencies:
   flutter_test:
