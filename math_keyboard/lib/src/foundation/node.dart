@@ -95,7 +95,7 @@ class TeXNode {
   /// This includes the representation of the children of the node.
   ///
   /// Returns the TeX expression as a [String].
-  String buildTeXString({required Color? cursorColor}) {
+  String buildTeXString({Color? cursorColor}) {
     if (children.isEmpty) {
       return '\\Box';
     }
