@@ -1,7 +1,7 @@
 # [![math_keyboard logo][logo]][demo]
 
-[![math_keyboard on Pub][pub shield]][pub]
 [![math_keyboard Flutter web demo][demo shield]][demo]
+[![math_keyboard on Pub][pub shield]][pub]
 
 `math_keyboard` is a Flutter package that allows editing math expressions using a typeset input
 field (so-called "math field") and a custom-made fully integrated math keyboard in _Flutter only_ -
@@ -29,8 +29,9 @@ of the mathematical expressions entered by the user. This is used by the
 
 See the [package README][package readme] for features and usage information.
 
-Or view the package on Pub → [![math_keyboard on Pub][pub shield]][pub]  
-It is worth a read :)
+You can also try the **demo app** or view the package on Pub →
+[![math_keyboard Flutter web demo][demo shield]][demo]
+[![math_keyboard on Pub][pub shield]][pub]
 
 ## Implementation
 
