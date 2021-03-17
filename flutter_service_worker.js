@@ -30,9 +30,9 @@ const RESOURCES = {
 "assets/packages/flutter_math_fork/lib/katex_fonts/fonts/KaTeX_Size4-Regular.ttf": "85554307b465da7eb785fd3ce52ad282",
 "assets/packages/flutter_math_fork/lib/katex_fonts/fonts/KaTeX_AMS-Regular.ttf": "657a5353a553777e270827bd1630e467",
 "assets/FontManifest.json": "5e79a7154a9c0743680ad7fe9f7d50c5",
-"index.html": "c59afb50ebec6d6bf09a45c4c3ee8186",
-"/": "c59afb50ebec6d6bf09a45c4c3ee8186",
-"main.dart.js": "84bb2891ec721cf8188df2de4c58bf1b",
+"index.html": "dd49e9d2e585e8db2a9ee73dd75ed36c",
+"/": "dd49e9d2e585e8db2a9ee73dd75ed36c",
+"main.dart.js": "9f179b9adc1b4ae06ae5a73004863a60",
 "version.json": "85ee2b56930f9682c881157818a639b0",
 "favicon.png": "e89862aadfed7152acdb2ccd31ee4a53"
 };
