@@ -66953,7 +66953,7 @@ cI:function(a){return this.f!==a.f}}
 S.w_.prototype={
 ap:function(){return new S.MT(C.p)}}
 S.MT.prototype={
-K:function(a,b){return new S.xq(new M.Fv(new S.a9B(this),null),"CaTeX - Fast TeX renderer for Flutter",X.aim(C.al4,this.d?C.an:C.aC,C.al7),null)}}
+K:function(a,b){return new S.xq(new M.Fv(new S.a9B(this),null),"math_keyboard - Fully integrated math expression editing in Flutter",X.aim(C.al4,this.d?C.an:C.aC,C.al7),null)}}
 S.a9B.prototype={
 $0:function(){var s=this.a
 s.aw(new S.a9A(s))},
@@ -67238,7 +67238,7 @@ $S:0}
 M.Fv.prototype={
 K:function(a,b){var s,r=null,q=K.aB(b).O.cx===C.an,p=U.Z_("https://raster.shields.io/pub/v/math_keyboard.png",r),o=t.p,n=H.b([U.Z_("https://i.imgur.com/dxmmhk4.png",r)],o)
 if(!q)n.push(U.Z_("https://i.imgur.com/B9jYEyK.png",r))
-s=H.b([new E.nW("Pub","https://pub.dev/packages/catex",p,r),new E.nW("GitHub",u.m,T.jf(C.bY,n,C.ck),r),C.aed],t.ZE)
+s=H.b([new E.nW("Pub","https://pub.dev/packages/math_keyboard",p,r),new E.nW("GitHub",u.m,T.jf(C.bY,n,C.ck),r),C.aed],t.ZE)
 p=B.axn(L.aht(q?C.adD:C.adC,r,r),this.c,20,"Toggle brightness")
 n=K.aB(b).ad.e
 p=T.el(H.b([T.qE(T.ea(H.b([p,new T.az(C.ach,T.h9(D.hK(r,L.bD("math_keyboard",r,r,r,n==null?r:n.a5W(C.c6),C.a9,r),C.at,!1,r,r,r,r,r,r,r,r,r,r,r,r,new M.Ve(),r,r,r,r,r,r),C.dY,r,r,!0),r)],o),C.F,C.bQ,C.W,r),1),C.AA],o),C.F,C.ab,C.W)
