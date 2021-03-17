@@ -513,14 +513,42 @@ class _FieldPreview extends StatelessWidget {
   /// The decoration to show around the text field.
   final InputDecoration decoration;
 
+  // Adapted from InputDecorator._getFillColor.
+  Color _getDisabledCursorColor(ThemeData themeData) {
+    if (!(decoration.filled ?? false)) {
+      return themeData.colorScheme.surface;
+    }
+
+    if (decoration.fillColor != null) {
+      return Color.alphaBlend(
+          decoration.fillColor!, themeData.colorScheme.surface);
+    }
+
+    // dark theme: 10% white (enabled), 5% white (disabled)
+    // light theme: 4% black (enabled), 2% black (disabled)
+    const darkEnabled = Color(0x1AFFFFFF);
+    const darkDisabled = Color(0x0DFFFFFF);
+    const lightEnabled = Color(0x0A000000);
+    const lightDisabled = Color(0x05000000);
+
+    final Color foregroundColor;
+    switch (themeData.brightness) {
+      case Brightness.dark:
+        foregroundColor = decoration.enabled ? darkEnabled : darkDisabled;
+        break;
+      case Brightness.light:
+        foregroundColor = decoration.enabled ? lightEnabled : lightDisabled;
+        break;
+    }
+    return Color.alphaBlend(foregroundColor, themeData.colorScheme.surface);
+  }
+
   @override
   Widget build(BuildContext context) {
     final tex = controller.root
         .buildTeXString(
           cursorColor: Color.lerp(
-            (decoration.filled ?? false)
-                ? decoration.fillColor
-                : Theme.of(context).colorScheme.surface,
+            _getDisabledCursorColor(Theme.of(context)),
             Theme.of(context).textSelectionTheme.cursorColor ??
                 Theme.of(context).accentColor,
             cursorOpacity,

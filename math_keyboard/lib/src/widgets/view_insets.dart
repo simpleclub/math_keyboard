@@ -70,15 +70,8 @@ class MathKeyboardViewInsets extends StatefulWidget {
 /// keyboards. It provides them by inserting a modified [MediaQuery].
 class MathKeyboardViewInsetsState extends State<MathKeyboardViewInsets> {
   /// Returns the ancestor [MathKeyboardViewInsetsState] of the given [context].
-  static MathKeyboardViewInsetsState of(BuildContext context) {
-    final result =
-        context.findAncestorStateOfType<MathKeyboardViewInsetsState>();
-    if (result != null) {
-      return result;
-    }
-    throw FlutterError(
-        'MathKeyboardViewInsetsState.of() called with a context that does not '
-        'contain a MathKeyboardViewInsetsState.');
+  static MathKeyboardViewInsetsState? of(BuildContext context) {
+    return context.findAncestorStateOfType<MathKeyboardViewInsetsState>();
   }
 
   final Map<ObjectKey, double> _keyboardSizes = {};
