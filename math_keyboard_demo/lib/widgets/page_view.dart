@@ -65,6 +65,7 @@ class _DemoPageViewState extends State<DemoPageView> {
       const _Page(child: _FocusTreePage()),
       const _Page(child: _DecimalSeparatorPage()),
       const _Page(child: _MathExpressionsPage()),
+      const _Page(child: _FormFieldPage()),
     ];
 
     return Column(
@@ -1005,6 +1006,88 @@ class _MathExpressionsPageState extends State<_MathExpressionsPage> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _FormFieldPage extends StatelessWidget {
+  const _FormFieldPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      child: Builder(
+        builder: (context) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                  bottom: 16,
+                ),
+                child: Text(
+                  'Last but not least: form fields!',
+                  style: Theme.of(context).textTheme.headline5!.copyWith(
+                        fontStyle: FontStyle.italic,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(32),
+                child: SizedBox(
+                  width: 5e2,
+                  child: Text(
+                    'The math_keyboard package has built-in support for Flutter '
+                    'forms and offers a MathFormField widget 🎉',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 420,
+                child: MathFormField(
+                  validator: (value) {
+                    if (value == null || value.isEmpty || value == r'\Box') {
+                      return 'Missing expression (:';
+                    }
+
+                    try {
+                      TeXParser(value)
+                          .parse()
+                          .evaluate(EvaluationType.REAL, ContextModel());
+                      return null;
+                    } catch (_) {
+                      return 'Invalid expression (:';
+                    }
+                  },
+                  variables: [],
+                  decoration: InputDecoration(
+                    hintText: 'Enter a valid expression',
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: TextButton(
+                  onPressed: () {
+                    final result = Form.of(context)!.validate();
+
+                    if (result == true) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [Text('Form is valid :)')],
+                        ),
+                      ));
+                    }
+                  },
+                  child: Text('Submit form'),
+                ),
+              )
+            ],
+          );
+        },
+      ),
     );
   }
 }
