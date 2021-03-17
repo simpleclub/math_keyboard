@@ -26,37 +26,32 @@ class LinkButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     void onPressed() => launch(url);
-
-    Widget result = Text(
-      label,
-      style: const TextStyle(
+    final style = OutlinedButton.styleFrom(
+      padding: const EdgeInsets.all(16),
+      textStyle: TextStyle(
         fontSize: 20,
+        decoration: TextDecoration.underline,
       ),
     );
 
     if (child == null) {
-      result = OutlinedButton(
+      return OutlinedButton(
         onPressed: onPressed,
-        child: result,
-      );
-    } else {
-      result = OutlinedButton.icon(
-        onPressed: onPressed,
-        label: result,
-        icon: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 6,
-          ),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxHeight: 32,
-            ),
-            child: child,
-          ),
-        ),
+        style: style,
+        child: Text(label),
       );
     }
 
-    return result;
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      style: style,
+      label: Text(label),
+      icon: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxHeight: 32,
+        ),
+        child: child,
+      ),
+    );
   }
 }

@@ -300,23 +300,15 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     _overlayEntry?.remove();
     _overlayEntry = OverlayEntry(
       builder: (context) {
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, 1),
-            end: const Offset(0, 0),
-          ).animate(CurvedAnimation(
-            parent: _keyboardSlideController,
-            curve: Curves.ease,
-          )),
-          child: MathKeyboard(
-            controller: _controller,
-            // Note that we need to pass the insets state like this because the
-            // overlay context does not have the ancestor state.
-            insetsState: MathKeyboardViewInsetsState.of(this.context),
-            type: widget.keyboardType,
-            variables: _variables,
-            onSubmit: _submit,
-          ),
+        return MathKeyboard(
+          controller: _controller,
+          type: widget.keyboardType,
+          variables: _variables,
+          onSubmit: _submit,
+          // Note that we need to pass the insets state like this because the
+          // overlay context does not have the ancestor state.
+          insetsState: MathKeyboardViewInsetsState.of(this.context),
+          slideAnimation: _keyboardSlideController,
         );
       },
     );

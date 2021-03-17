@@ -30,10 +30,11 @@ class MathKeyboard extends StatelessWidget {
   const MathKeyboard({
     Key? key,
     required this.controller,
-    this.insetsState,
-    this.variables = const [],
     this.type = MathKeyboardType.expression,
+    this.variables = const [],
     this.onSubmit,
+    this.insetsState,
+    this.slideAnimation,
   }) : super(key: key);
 
   /// The controller for editing the math field.
@@ -45,6 +46,11 @@ class MathKeyboard extends StatelessWidget {
   ///
   /// If `null`, the math keyboard will not report about its bottom inset.
   final MathKeyboardViewInsetsState? insetsState;
+
+  /// Animation that indicates the current slide progress of the keyboard.
+  ///
+  /// If `null`, the keyboard is always fully slided out.
+  final Animation<double>? slideAnimation;
 
   /// The Variables a user can use.
   final List<String> variables;
@@ -59,54 +65,67 @@ class MathKeyboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: Material(
-            type: MaterialType.transparency,
-            child: ColoredBox(
-              color: Colors.black,
-              child: SafeArea(
-                top: false,
-                child: _KeyboardBody(
-                  insetsState: insetsState,
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: 4,
-                      left: 4,
-                      right: 4,
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          maxWidth: 5e2,
-                        ),
-                        child: Column(
-                          children: [
-                            if (type != MathKeyboardType.numberOnly)
-                              _Variables(
-                                controller: controller,
-                                variables: variables,
+    final curvedSlideAnimation = CurvedAnimation(
+      parent: slideAnimation ?? AlwaysStoppedAnimation(1),
+      curve: Curves.ease,
+    );
+
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(0, 1),
+        end: const Offset(0, 0),
+      ).animate(curvedSlideAnimation),
+      child: Stack(
+        children: [
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Material(
+              type: MaterialType.transparency,
+              child: ColoredBox(
+                color: Colors.black,
+                child: SafeArea(
+                  top: false,
+                  child: _KeyboardBody(
+                    insetsState: insetsState,
+                    slideAnimation:
+                        slideAnimation == null ? null : curvedSlideAnimation,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        bottom: 4,
+                        left: 4,
+                        right: 4,
+                      ),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            maxWidth: 5e2,
+                          ),
+                          child: Column(
+                            children: [
+                              if (type != MathKeyboardType.numberOnly)
+                                _Variables(
+                                  controller: controller,
+                                  variables: variables,
+                                ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 4,
+                                ),
+                                child: _Buttons(
+                                  controller: controller,
+                                  page1: type == MathKeyboardType.numberOnly
+                                      ? numberKeyboard
+                                      : standardKeyboard,
+                                  page2: type == MathKeyboardType.numberOnly
+                                      ? null
+                                      : functionKeyboard,
+                                  onSubmit: onSubmit,
+                                ),
                               ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                top: 4,
-                              ),
-                              child: _Buttons(
-                                controller: controller,
-                                page1: type == MathKeyboardType.numberOnly
-                                    ? numberKeyboard
-                                    : standardKeyboard,
-                                page2: type == MathKeyboardType.numberOnly
-                                    ? null
-                                    : functionKeyboard,
-                                onSubmit: onSubmit,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -115,8 +134,8 @@ class MathKeyboard extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -126,10 +145,17 @@ class _KeyboardBody extends StatefulWidget {
   const _KeyboardBody({
     Key? key,
     this.insetsState,
+    this.slideAnimation,
     required this.child,
   }) : super(key: key);
 
   final MathKeyboardViewInsetsState? insetsState;
+
+  /// The animation for sliding the keyboard.
+  ///
+  /// This is used in the body for reporting fractional sliding progress, i.e.
+  /// reporting a smaller size while sliding.
+  final Animation<double>? slideAnimation;
 
   final Widget child;
 
@@ -139,6 +165,13 @@ class _KeyboardBody extends StatefulWidget {
 
 class _KeyboardBodyState extends State<_KeyboardBody> {
   @override
+  void initState() {
+    super.initState();
+
+    widget.slideAnimation?.addListener(_handleAnimation);
+  }
+
+  @override
   void didUpdateWidget(_KeyboardBody oldWidget) {
     super.didUpdateWidget(oldWidget);
 
@@ -146,12 +179,23 @@ class _KeyboardBodyState extends State<_KeyboardBody> {
       _removeInsets(oldWidget.insetsState);
       _reportInsets(widget.insetsState);
     }
+
+    if (oldWidget.slideAnimation != widget.slideAnimation) {
+      oldWidget.slideAnimation?.removeListener(_handleAnimation);
+      widget.slideAnimation?.addListener(_handleAnimation);
+    }
   }
 
   @override
   void dispose() {
     _removeInsets(widget.insetsState);
+    widget.slideAnimation?.removeListener(_handleAnimation);
+
     super.dispose();
+  }
+
+  void _handleAnimation() {
+    _reportInsets(widget.insetsState);
   }
 
   void _removeInsets(MathKeyboardViewInsetsState? insetsState) {
@@ -164,8 +208,11 @@ class _KeyboardBodyState extends State<_KeyboardBody> {
   void _reportInsets(MathKeyboardViewInsetsState? insetsState) {
     if (insetsState == null) return;
     SchedulerBinding.instance!.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       final renderBox = context.findRenderObject() as RenderBox;
-      insetsState[ObjectKey(this)] = renderBox.size.height;
+      insetsState[ObjectKey(this)] =
+          renderBox.size.height * (widget.slideAnimation?.value ?? 1);
     });
   }
 

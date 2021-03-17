@@ -51,12 +51,13 @@ class DemoScaffold extends StatelessWidget {
                       onPressed: onToggleBrightness,
                       splashRadius: 20,
                       icon: Icon(darkMode
-                          ? Icons.brightness_high_outlined
-                          : Icons.brightness_low_outlined),
+                          ? Icons.brightness_6_outlined
+                          : Icons.brightness_2_outlined),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(
-                        bottom: 2,
+                        left: 3,
+                        bottom: 3,
                       ),
                       child: MouseRegion(
                         cursor: MaterialStateMouseCursor.clickable,
@@ -151,7 +152,7 @@ class DemoScaffold extends StatelessWidget {
                               ),
                             const Padding(
                               padding: EdgeInsets.only(
-                                top: 64,
+                                top: 32,
                               ),
                               child: DemoPageView(),
                             ),
