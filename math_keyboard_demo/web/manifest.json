@@ -5,7 +5,7 @@
   "display": "standalone",
   "background_color": "#FFC107",
   "theme_color": "#FFD740",
-  "description": "Demo app for the math_keyboard package.",
+  "description": "Fully integrated math expression editing in Flutter - math_keyboard demo app.",
   "orientation": "portrait-primary",
   "prefer_related_applications": false,
   "icons": [

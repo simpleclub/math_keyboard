@@ -2,7 +2,7 @@
 const pubLabel = 'Pub';
 
 /// Pub URL of the math_keyboard package.
-const pubUrl = 'https://pub.dev/packages/catex';
+const pubUrl = 'https://pub.dev/packages/math_keyboard';
 
 /// Pub shields badge for math_keyboard.
 const pubBadgeUrl = 'https://raster.shields.io/pub/v/math_keyboard.png';
@@ -26,7 +26,8 @@ const docsLabel = 'API reference';
 const docsUrl = 'https://pub.dev/documentation/math_keyboard/latest';
 
 /// Title for the demo app.
-const appTitle = 'CaTeX - Fast TeX renderer for Flutter';
+const appTitle =
+    'math_keyboard - Fully integrated math expression editing in Flutter';
 
 /// The header of the demo app.
 const header = 'math_keyboard';
