@@ -15,9 +15,7 @@ _on-screen software keyboard_ as well as **physical keyboard input** support. On
 math field typesetting uses TeX and the package supports converting to math expressions (that e.g.
 can be used for calculation).
 
-todo(creativecreatorormaybenot): insert screenshots
-
-todo(creativecreatorormaybenot): link to video & tweet.
+[![](https://i.imgur.com/FYl1TqF.png)][demo]
 
 `math_keyboard` is an open source project with the aim of providing a way to edit math expression
 providing the best user experience in terms of input and UI as well as allowing accurate evaluation

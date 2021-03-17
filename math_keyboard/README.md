@@ -10,7 +10,7 @@ no plugins, no web views.
 
 ## Features
 
-todo(creativecreatorormaybenot): insert screenshots.
+[![](https://i.imgur.com/FYl1TqF.png)][demo]
 
 * Editing math expressions using a custom on-screen software keyboard
 * Editing via physical keyboard input (with shortcuts for functions and constants)
@@ -24,8 +24,6 @@ todo(creativecreatorormaybenot): insert screenshots.
 * Converting TeX from and to math expressions
 
 You can view all features **in action** in the [demo app][demo].
-
-todo(creativecreatorormaybenot): link to video & tweet.
 
 ## Usage
 
