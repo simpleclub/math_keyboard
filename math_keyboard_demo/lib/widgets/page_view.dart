@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:math_keyboard/math_keyboard.dart';
 import 'package:math_expressions/math_expressions.dart';
+import 'package:math_keyboard/math_keyboard.dart';
 
 /// Page view for presenting the features that math_keyboard has to offer.
 class DemoPageView extends StatefulWidget {
@@ -62,6 +62,9 @@ class _DemoPageViewState extends State<DemoPageView> {
           autofocus: _page == 3,
         ),
       ),
+      const _Page(child: _FocusTreePage()),
+      const _Page(child: _DecimalSeparatorPage()),
+      const _Page(child: _MathExpressionsPage()),
     ];
 
     return Column(
@@ -591,7 +594,7 @@ class _AutofocusPage extends StatelessWidget {
             width: 5e2,
             child: Text(
               'The math field on this page will automatically receive focus '
-              'whenever you navigate to this page 👌',
+              'when you navigate to this page 👌',
               textAlign: TextAlign.center,
             ),
           ),
@@ -605,6 +608,400 @@ class _AutofocusPage extends StatelessWidget {
               filled: true,
               border: OutlineInputBorder(),
             ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FocusTreePage extends StatefulWidget {
+  const _FocusTreePage({Key? key}) : super(key: key);
+
+  @override
+  _FocusTreePageState createState() => _FocusTreePageState();
+}
+
+class _FocusTreePageState extends State<_FocusTreePage> {
+  final _focusNodeOne = FocusNode(debugLabel: 'one');
+  final _focusNodeTwo = FocusNode(debugLabel: 'two');
+  final _focusNodeThree = FocusNode(debugLabel: 'three');
+  final _focusNodeFour = FocusNode(debugLabel: 'four');
+
+  @override
+  void dispose() {
+    _focusNodeOne.dispose();
+    _focusNodeTwo.dispose();
+    _focusNodeThree.dispose();
+    _focusNodeFour.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+            bottom: 16,
+          ),
+          child: Text(
+            'And focus tree integration!',
+            style: Theme.of(context).textTheme.headline5!.copyWith(
+                  fontStyle: FontStyle.italic,
+                ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(32),
+          child: SizedBox(
+            width: 5e2,
+            child: Text(
+              "Math fields integrate completely with Flutter's tree 💪\n"
+              'On desktop, you can try using *tab* on this page after clicking'
+              'on a math field :)',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 420,
+              child: FocusScope(
+                child: Column(
+                  children: [
+                    MathField(
+                      focusNode: _focusNodeOne,
+                      variables: ['o', 'n', 'e'],
+                      decoration: InputDecoration(
+                        labelText: 'One',
+                        filled: true,
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 8,
+                      ),
+                      child: MathField(
+                        focusNode: _focusNodeTwo,
+                        variables: ['t', 'w', 'o'],
+                        decoration: InputDecoration(
+                          labelText: 'Two',
+                          filled: true,
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 8,
+                      ),
+                      child: MathField(
+                        focusNode: _focusNodeThree,
+                        variables: ['t', 'h', 'r', 'e'],
+                        decoration: InputDecoration(
+                          labelText: 'Three',
+                          filled: true,
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 8,
+                      ),
+                      child: MathField(
+                        focusNode: _focusNodeFour,
+                        variables: ['f', 'o', 'u', 'r'],
+                        decoration: InputDecoration(
+                          labelText: 'Four',
+                          filled: true,
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: FloatingActionButton(
+                onPressed: () {
+                  if (_focusNodeOne.hasFocus) {
+                    _focusNodeTwo.requestFocus();
+                    return;
+                  }
+                  if (_focusNodeTwo.hasFocus) {
+                    _focusNodeThree.requestFocus();
+                    return;
+                  }
+                  if (_focusNodeThree.hasFocus) {
+                    _focusNodeFour.requestFocus();
+                    return;
+                  }
+                  if (_focusNodeFour.hasFocus) {
+                    _focusNodeFour.unfocus();
+                    return;
+                  }
+
+                  _focusNodeOne.requestFocus();
+                },
+                tooltip: 'Rotate focus',
+                child: const Icon(Icons.rotate_90_degrees_ccw_outlined),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _DecimalSeparatorPage extends StatefulWidget {
+  const _DecimalSeparatorPage({Key? key}) : super(key: key);
+
+  @override
+  _DecimalSeparatorPageState createState() => _DecimalSeparatorPageState();
+}
+
+class _DecimalSeparatorPageState extends State<_DecimalSeparatorPage> {
+  late final _controller = MathFieldEditingController()
+    ..updateValue(Parser().parse('4.2'));
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+            bottom: 16,
+          ),
+          child: Text(
+            'Adaptive decimal separators!',
+            style: Theme.of(context).textTheme.headline5!.copyWith(
+                  fontStyle: FontStyle.italic,
+                ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(32),
+          child: SizedBox(
+            width: 5e2,
+            child: Text(
+              'The decimal separator on the math keyboard and the ones '
+              'displayed in the math field change based on the current '
+              'locale!',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 420,
+          child: Localizations.override(
+            context: context,
+            locale: Locale('en', 'US'),
+            child: MathField(
+              controller: _controller,
+              keyboardType: MathKeyboardType.numberOnly,
+              decoration: InputDecoration(
+                labelText: 'English locale',
+                filled: true,
+                border: OutlineInputBorder(),
+                suffixText: '🇺🇸',
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(
+            top: 32,
+          ),
+          child: SizedBox(
+            width: 420,
+            child: Localizations.override(
+              context: context,
+              locale: Locale('de', 'DE'),
+              child: MathField(
+                controller: _controller,
+                keyboardType: MathKeyboardType.numberOnly,
+                decoration: InputDecoration(
+                  labelText: 'German locale',
+                  filled: true,
+                  border: OutlineInputBorder(),
+                  suffixText: '🇩🇪',
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MathExpressionsPage extends StatefulWidget {
+  const _MathExpressionsPage({Key? key}) : super(key: key);
+
+  @override
+  _MathExpressionsPageState createState() => _MathExpressionsPageState();
+}
+
+class _MathExpressionsPageState extends State<_MathExpressionsPage> {
+  String? _tex;
+  late Expression _expression = Parser().parse('(x^2)/2 + 1');
+  double _value = 4;
+  double? _result;
+
+  late final _expressionController = MathFieldEditingController()
+    ..updateValue(_expression);
+  late final _valueController = MathFieldEditingController()
+    ..updateValue(Parser().parse('$_value'));
+
+  @override
+  void initState() {
+    _calculateResult();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _expressionController.dispose();
+    _valueController.dispose();
+    super.dispose();
+  }
+
+  void _calculateResult() {
+    try {
+      setState(() {
+        _result = _expression.evaluate(EvaluationType.REAL,
+            ContextModel()..bindVariableName('x', Number(_value)));
+      });
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+            bottom: 16,
+          ),
+          child: Text(
+            'Math expression support!',
+            style: Theme.of(context).textTheme.headline5!.copyWith(
+                  fontStyle: FontStyle.italic,
+                ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(32),
+          child: SizedBox(
+            width: 5e2,
+            child: Text(
+              'The math_keyboard package is built to work with math '
+              'expressions while it displays everything as TeX.',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 420,
+          child: Localizations.override(
+            context: context,
+            locale: Locale('en', 'US'),
+            child: MathField(
+              controller: _expressionController,
+              onChanged: (tex) {
+                try {
+                  _expression = TeXParser(tex).parse();
+                  _calculateResult();
+                } catch (_) {}
+
+                setState(() {
+                  _tex = tex;
+                });
+              },
+              variables: ['x'],
+              decoration: InputDecoration(
+                labelText: 'Expression field',
+                filled: true,
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(
+            top: 32,
+            left: 32,
+            right: 32,
+          ),
+          child: Text(
+            'TeX: ${_tex ?? 'waiting for input'}',
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(
+            top: 16,
+            left: 32,
+            right: 32,
+          ),
+          child: Text(
+            'Math expression: $_expression',
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(
+            top: 32,
+            left: 32,
+            right: 32,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 125,
+                child: MathField(
+                  controller: _valueController,
+                  keyboardType: MathKeyboardType.numberOnly,
+                  onChanged: (value) {
+                    try {
+                      _value = TeXParser(value)
+                          .parse()
+                          .evaluate(EvaluationType.REAL, ContextModel());
+                      _calculateResult();
+                    } catch (_) {}
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Value for x',
+                    filled: true,
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: const Icon(Icons.arrow_right_alt_outlined),
+              ),
+              Text(
+                  'Result: ${_result?.toString() ?? 'waiting for valid input'}'),
+            ],
           ),
         ),
       ],

@@ -290,6 +290,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     _showFieldOnScreenScheduled = true;
     WidgetsBinding.instance!.addPostFrameCallback((Duration _) {
       _showFieldOnScreenScheduled = false;
+      if (!mounted) return;
 
       context.findRenderObject()!.showOnScreen(
             duration: const Duration(milliseconds: 100),
@@ -302,15 +303,21 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     _overlayEntry?.remove();
     _overlayEntry = OverlayEntry(
       builder: (context) {
-        return MathKeyboard(
-          controller: _controller,
-          type: widget.keyboardType,
-          variables: _variables,
-          onSubmit: _submit,
-          // Note that we need to pass the insets state like this because the
-          // overlay context does not have the ancestor state.
-          insetsState: MathKeyboardViewInsetsState.of(this.context),
-          slideAnimation: _keyboardSlideController,
+        return Localizations.override(
+          // Make sure to inject the same locale the math field uses in order
+          // to match the decimal separators.
+          context: this.context,
+          locale: Localizations.localeOf(this.context),
+          child: MathKeyboard(
+            controller: _controller,
+            type: widget.keyboardType,
+            variables: _variables,
+            onSubmit: _submit,
+            // Note that we need to pass the insets state like this because the
+            // overlay context does not have the ancestor state.
+            insetsState: MathKeyboardViewInsetsState.of(this.context),
+            slideAnimation: _keyboardSlideController,
+          ),
         );
       },
     );
