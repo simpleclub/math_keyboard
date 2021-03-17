@@ -1,0 +1,23 @@
+{
+  "name": "math_keyboard demo",
+  "short_name": "math_keyboard",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#FFC107",
+  "theme_color": "#FFD740",
+  "description": "Demo app for the math_keyboard package.",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icons/Icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/Icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
