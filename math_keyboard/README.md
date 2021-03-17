@@ -23,6 +23,8 @@ todo(creativecreatorormaybenot): insert screenshots.
 * Decimal separator based on locale
 * Converting TeX from and to math expressions
 
+You can view all features **in action** in the [demo app][demo].
+
 todo(creativecreatorormaybenot): link to video & tweet.
 
 ## Usage

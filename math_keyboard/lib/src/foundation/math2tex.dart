@@ -74,9 +74,10 @@ List<TeX> _convertToTeX(Expression mathExpression, TeXNode parent) {
   }
   if (mathExpression is Literal) {
     if (mathExpression is Number) {
+      final number = mathExpression.value as double;
+      final adjusted = number.toInt() == number ? number.toInt() : number;
       return [
-        for (final symbol in mathExpression.value.toString().split(''))
-          TeXLeaf(symbol),
+        for (final symbol in adjusted.toString().split('')) TeXLeaf(symbol),
       ];
     }
     if (mathExpression is Variable) {

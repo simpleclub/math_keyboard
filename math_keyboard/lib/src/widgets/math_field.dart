@@ -22,7 +22,7 @@ class MathField extends StatefulWidget {
     this.focusNode,
     this.controller,
     this.keyboardType = MathKeyboardType.expression,
-    this.variables = const [],
+    this.variables = const ['x'],
     this.decoration = const InputDecoration(),
     this.onChanged,
     this.onSubmitted,
@@ -48,6 +48,8 @@ class MathField extends StatefulWidget {
   /// The additional variables a user can use.
   ///
   /// Note that these are ignored for [MathKeyboardType.numberOnly].
+  ///
+  /// Defaults to including "x".
   final List<String> variables;
 
   /// The decoration to show around the math field.
@@ -288,6 +290,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     _showFieldOnScreenScheduled = true;
     WidgetsBinding.instance!.addPostFrameCallback((Duration _) {
       _showFieldOnScreenScheduled = false;
+      if (!mounted) return;
 
       context.findRenderObject()!.showOnScreen(
             duration: const Duration(milliseconds: 100),
@@ -300,22 +303,20 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     _overlayEntry?.remove();
     _overlayEntry = OverlayEntry(
       builder: (context) {
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, 1),
-            end: const Offset(0, 0),
-          ).animate(CurvedAnimation(
-            parent: _keyboardSlideController,
-            curve: Curves.ease,
-          )),
+        return Localizations.override(
+          // Make sure to inject the same locale the math field uses in order
+          // to match the decimal separators.
+          context: this.context,
+          locale: Localizations.localeOf(this.context),
           child: MathKeyboard(
             controller: _controller,
-            // Note that we need to pass the insets state like this because the
-            // overlay context does not have the ancestor state.
-            insetsState: MathKeyboardViewInsetsState.of(this.context),
             type: widget.keyboardType,
             variables: _variables,
             onSubmit: _submit,
+            // Note that we need to pass the insets state like this because the
+            // overlay context does not have the ancestor state.
+            insetsState: MathKeyboardViewInsetsState.of(this.context),
+            slideAnimation: _keyboardSlideController,
           ),
         );
       },
@@ -513,14 +514,52 @@ class _FieldPreview extends StatelessWidget {
   /// The decoration to show around the text field.
   final InputDecoration decoration;
 
+  // Adapted from InputDecorator._getFillColor.
+  Color _getDisabledCursorColor(ThemeData themeData) {
+    if (!(decoration.filled ?? false)) {
+      return themeData.colorScheme.surface;
+    }
+
+    if (decoration.fillColor != null) {
+      return Color.alphaBlend(
+          decoration.fillColor!, themeData.colorScheme.surface);
+    }
+
+    // dark theme: 10% white (enabled), 5% white (disabled)
+    // light theme: 4% black (enabled), 2% black (disabled)
+    const darkEnabled = Color(0x1AFFFFFF);
+    const darkDisabled = Color(0x0DFFFFFF);
+    const lightEnabled = Color(0x0A000000);
+    const lightDisabled = Color(0x05000000);
+
+    final Color foregroundColor;
+    switch (themeData.brightness) {
+      case Brightness.dark:
+        foregroundColor = decoration.enabled ? darkEnabled : darkDisabled;
+        break;
+      case Brightness.light:
+        foregroundColor = decoration.enabled ? lightEnabled : lightDisabled;
+        break;
+    }
+    return Color.alphaBlend(foregroundColor, themeData.colorScheme.surface);
+  }
+
+  // Adapted from InputDecorator._getInlineStyle.
+  TextStyle _getHintStyle(ThemeData themeData) {
+    return themeData.textTheme.subtitle1!
+        .copyWith(
+            color: decoration.enabled
+                ? themeData.hintColor
+                : themeData.disabledColor)
+        .merge(decoration.hintStyle);
+  }
+
   @override
   Widget build(BuildContext context) {
     final tex = controller.root
         .buildTeXString(
           cursorColor: Color.lerp(
-            (decoration.filled ?? false)
-                ? decoration.fillColor
-                : Theme.of(context).colorScheme.surface,
+            _getDisabledCursorColor(Theme.of(context)),
             Theme.of(context).textSelectionTheme.cursorColor ??
                 Theme.of(context).accentColor,
             cursorOpacity,
@@ -549,22 +588,32 @@ class _FieldPreview extends StatelessWidget {
         child: SingleChildScrollView(
           controller: scrollController,
           scrollDirection: Axis.horizontal,
-          // TODO: Let InputDecorator care about hint.
-          child: (hasFocus || !controller.isEmpty)
-              ? Opacity(
-                  opacity: (hasFocus || !controller.isEmpty) ? 1 : 0,
-                  child: Math.tex(
-                    tex,
-                    options: MathOptions(
-                      fontSize: MathOptions.defaultFontSize,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+          child: Stack(
+            children: [
+              Transform.translate(
+                offset: !controller.isEmpty
+                    ? Offset.zero
+                    // This is a workaround for aligning the cursor properly
+                    // when the math field is empty. This way it matches the
+                    // TextField behavior.
+                    : Offset(-4, 0),
+                child: Math.tex(
+                  tex,
+                  options: MathOptions(
+                    fontSize: MathOptions.defaultFontSize,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
-                )
-              : Text(
-                  decoration.hintText ?? '',
-                  style: decoration.hintStyle,
                 ),
+              ),
+              // todo: let InputDecorator take care of the hint text (as soon as
+              // todo| we figure out how to deal with the baseline problem).
+              if (controller.isEmpty)
+                Text(
+                  decoration.hintText ?? '',
+                  style: _getHintStyle(Theme.of(context)),
+                )
+            ],
+          ),
         ),
       ),
     );

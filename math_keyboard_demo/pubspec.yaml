@@ -1,0 +1,24 @@
+name: math_keyboard_demo
+description: Demo app for the math_keyboard package.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+  flutter: '>=2.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  math_keyboard:
+    path: ../math_keyboard
+
+  url_launcher: ^6.0.2
+  url_strategy: ^0.2.0
+
+dev_dependencies:
+  pedantic: ^1.11.0
+
+flutter:
+  uses-material-design: true
