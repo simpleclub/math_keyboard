@@ -5,7 +5,7 @@ const pubLabel = 'Pub';
 const pubUrl = 'https://pub.dev/packages/math_keyboard';
 
 /// Pub shields badge for math_keyboard.
-const pubBadgeUrl = 'https://raster.shields.io/pub/v/math_keyboard.png';
+const pubBadgeUrl = 'https://shields.io/pub/v/math_keyboard.svg';
 
 /// Label for the GitHub link button.
 const gitHubLabel = 'GitHub';

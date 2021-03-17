@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 import 'package:math_keyboard_demo/data/strings.dart';
 import 'package:math_keyboard_demo/widgets/link_button.dart';
@@ -23,7 +24,7 @@ class DemoScaffold extends StatelessWidget {
       LinkButton(
         label: pubLabel,
         url: pubUrl,
-        child: Image.network(pubBadgeUrl),
+        child: SvgPicture.network(pubBadgeUrl),
       ),
       LinkButton(
         label: gitHubLabel,
