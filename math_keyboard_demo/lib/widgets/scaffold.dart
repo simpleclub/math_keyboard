@@ -28,7 +28,15 @@ class DemoScaffold extends StatelessWidget {
       LinkButton(
         label: gitHubLabel,
         url: gitHubUrl,
-        child: Image.network(darkMode ? darkGitHubIconUrl : lightGitHubIconUrl),
+        child: Stack(
+          children: [
+            // Always insert both icons into the tree in order to prevent the
+            // layout from jumping around when changing the brightness (because
+            // the dark version would need to be loaded later).
+            Image.network(darkGitHubIconUrl),
+            if (!darkMode) Image.network(lightGitHubIconUrl),
+          ],
+        ),
       ),
       const LinkButton(
         label: docsLabel,

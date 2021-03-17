@@ -537,6 +537,16 @@ class _FieldPreview extends StatelessWidget {
     return Color.alphaBlend(foregroundColor, themeData.colorScheme.surface);
   }
 
+  // Adapted from InputDecorator._getInlineStyle.
+  TextStyle _getHintStyle(ThemeData themeData) {
+    return themeData.textTheme.subtitle1!
+        .copyWith(
+            color: decoration.enabled
+                ? themeData.hintColor
+                : themeData.disabledColor)
+        .merge(decoration.hintStyle);
+  }
+
   @override
   Widget build(BuildContext context) {
     final tex = controller.root
@@ -571,22 +581,32 @@ class _FieldPreview extends StatelessWidget {
         child: SingleChildScrollView(
           controller: scrollController,
           scrollDirection: Axis.horizontal,
-          // TODO: Let InputDecorator care about hint.
-          child: (hasFocus || !controller.isEmpty)
-              ? Opacity(
-                  opacity: (hasFocus || !controller.isEmpty) ? 1 : 0,
-                  child: Math.tex(
-                    tex,
-                    options: MathOptions(
-                      fontSize: MathOptions.defaultFontSize,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+          child: Stack(
+            children: [
+              Transform.translate(
+                offset: !controller.isEmpty
+                    ? Offset.zero
+                    // This is a workaround for aligning the cursor properly
+                    // when the math field is empty. This way it matches the
+                    // TextField behavior.
+                    : Offset(-4, 0),
+                child: Math.tex(
+                  tex,
+                  options: MathOptions(
+                    fontSize: MathOptions.defaultFontSize,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
-                )
-              : Text(
-                  decoration.hintText ?? '',
-                  style: decoration.hintStyle,
                 ),
+              ),
+              // todo: let InputDecorator take care of the hint text (as soon as
+              // todo| we figure out how to deal with the baseline problem).
+              if (controller.isEmpty)
+                Text(
+                  decoration.hintText ?? '',
+                  style: _getHintStyle(Theme.of(context)),
+                )
+            ],
+          ),
         ),
       ),
     );

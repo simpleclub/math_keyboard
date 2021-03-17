@@ -21,14 +21,14 @@ class _DemoPageViewState extends State<DemoPageView> {
   Widget build(BuildContext context) {
     final pages = const [
       _Page(child: _PrimaryPage()),
-      _Page(child: _NumberModePage()),
+      _Page(child: _InputDecorationPage()),
     ];
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          height: 325,
+          height: 420,
           child: Stack(
             children: [
               PageView(
@@ -39,7 +39,7 @@ class _DemoPageViewState extends State<DemoPageView> {
               Positioned(
                 top: 0,
                 bottom: 0,
-                left: 0,
+                left: 8,
                 child: MouseRegion(
                   cursor: MaterialStateMouseCursor.clickable,
                   child: GestureDetector(
@@ -51,7 +51,7 @@ class _DemoPageViewState extends State<DemoPageView> {
                       );
                     },
                     child: Padding(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(16),
                       child: const Icon(Icons.chevron_left_outlined),
                     ),
                   ),
@@ -60,7 +60,7 @@ class _DemoPageViewState extends State<DemoPageView> {
               Positioned(
                 top: 0,
                 bottom: 0,
-                right: 0,
+                right: 8,
                 child: MouseRegion(
                   cursor: MaterialStateMouseCursor.clickable,
                   child: GestureDetector(
@@ -72,7 +72,7 @@ class _DemoPageViewState extends State<DemoPageView> {
                       );
                     },
                     child: Padding(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(16),
                       child: const Icon(Icons.chevron_right_outlined),
                     ),
                   ),
@@ -118,7 +118,7 @@ class _Page extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(
         vertical: 16,
-        horizontal: 40,
+        horizontal: 56,
       ),
       child: child,
     );
@@ -183,7 +183,8 @@ class _PrimaryPage extends StatefulWidget {
 
 class _PrimaryPageState extends State<_PrimaryPage> {
   late final _expressionController = MathFieldEditingController()
-    ..updateValue(Parser().parse('sqrt(4.2) - (cos(x)/(x^3 - sin(x))) + e^(4^2)'));
+    ..updateValue(
+        Parser().parse('sqrt(4.2) - (cos(x)/(x^3 - sin(x))) + e^(4^2)'));
   late final _numberController = MathFieldEditingController()
     ..updateValue(Parser().parse('42'));
 
@@ -199,12 +200,27 @@ class _PrimaryPageState extends State<_PrimaryPage> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.only(
+            bottom: 16,
+          ),
           child: Text(
-            'Try it now!\nYou can tap on the math field and enter math '
-            'expressions using the on-screen keyboard on mobile and using '
-            'your physical keyboard on desktop - or a combination of both :)',
+            'Try it now!',
+            style: Theme.of(context).textTheme.headline5!.copyWith(
+                  fontStyle: FontStyle.italic,
+                ),
             textAlign: TextAlign.center,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(32),
+          child: SizedBox(
+            width: 5e2,
+            child: Text(
+              'You can tap on the math fields and enter math '
+              'expressions using the on-screen keyboard on mobile and/or using '
+              'your physical keyboard on desktop 🚀',
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
         SizedBox(
@@ -240,44 +256,63 @@ class _PrimaryPageState extends State<_PrimaryPage> {
   }
 }
 
-class _NumberModePage extends StatelessWidget {
-  const _NumberModePage({Key? key}) : super(key: key);
+class _InputDecorationPage extends StatelessWidget {
+  const _InputDecorationPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text('And look! We have number-only mode this math field:'),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+            bottom: 16,
           ),
-          SizedBox(
+          child: Text(
+            'Completely customizable with InputDecoration!',
+            style: Theme.of(context).textTheme.headline5!.copyWith(
+                  fontStyle: FontStyle.italic,
+                ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(32),
+          child: SizedBox(
+            width: 5e2,
+            child: Text(
+              'Math fields are configurable using InputDecoration from the '
+              'framework, which means that you can use everything with it '
+              'you are used to from TextField e.g. 🔥',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 420,
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: 'This is a text field',
+              filled: true,
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(
+            top: 32,
+          ),
+          child: SizedBox(
             width: 420,
             child: MathField(
               decoration: InputDecoration(
+                hintText: 'And this is a math field',
                 filled: true,
                 border: OutlineInputBorder(),
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text('And expression mode in this one:'),
-          ),
-          SizedBox(
-            width: 420,
-            child: MathField(
-              keyboardType: MathKeyboardType.numberOnly,
-              decoration: InputDecoration(
-                filled: true,
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
