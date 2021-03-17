@@ -70376,7 +70376,7 @@ at:function(){return new D.Rm(C.p)}}
 D.Rm.prototype={
 gpt:function(){var s=this.d
 if(s==null){s=U.jn()
-s.mv(new X.kW(X.t1()).mf(0,"sqrt(4.2) - (cos(x)/(x^3 - sin(x))) + e^(4^2)"))
+s.mv(new X.kW(X.t1()).mf(0,"4.2 - (cos(x)/(x^3 - sin(x))) + e^(4^2)"))
 if(this.d==null)this.d=s
 else s=H.f(H.b_("_expressionController"))}return s},
 gJi:function(){var s=this.e
