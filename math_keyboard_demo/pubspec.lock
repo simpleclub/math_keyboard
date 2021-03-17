@@ -40,7 +40,7 @@ packages:
     source: hosted
     version: "0.3.0+2"
   flutter_svg:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_svg
       url: "https://pub.dartlang.org"
@@ -92,7 +92,7 @@ packages:
       path: "../math_keyboard"
       relative: true
     source: path
-    version: "0.0.1+1"
+    version: "0.0.1+2"
   meta:
     dependency: transitive
     description:
