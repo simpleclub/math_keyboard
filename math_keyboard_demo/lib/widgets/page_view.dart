@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:math_keyboard/math_keyboard.dart';
+import 'package:math_expressions/math_expressions.dart';
 
 /// Page view for presenting the features that math_keyboard has to offer.
 class DemoPageView extends StatefulWidget {
@@ -173,8 +174,25 @@ class _PageIndicator extends StatelessWidget {
   }
 }
 
-class _PrimaryPage extends StatelessWidget {
+class _PrimaryPage extends StatefulWidget {
   const _PrimaryPage({Key? key}) : super(key: key);
+
+  @override
+  _PrimaryPageState createState() => _PrimaryPageState();
+}
+
+class _PrimaryPageState extends State<_PrimaryPage> {
+  late final _expressionController = MathFieldEditingController()
+    ..updateValue(Parser().parse('sqrt(4.2) - (cos(x)/(x^3 - sin(x))) + e^(4^2)'));
+  late final _numberController = MathFieldEditingController()
+    ..updateValue(Parser().parse('42'));
+
+  @override
+  void dispose() {
+    _expressionController.dispose();
+    _numberController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -192,6 +210,7 @@ class _PrimaryPage extends StatelessWidget {
         SizedBox(
           width: 420,
           child: MathField(
+            controller: _expressionController,
             decoration: InputDecoration(
               labelText: 'Expression math field',
               filled: true,
@@ -206,6 +225,7 @@ class _PrimaryPage extends StatelessWidget {
           child: SizedBox(
             width: 420,
             child: MathField(
+              controller: _numberController,
               keyboardType: MathKeyboardType.numberOnly,
               decoration: InputDecoration(
                 labelText: 'Number-only math field',

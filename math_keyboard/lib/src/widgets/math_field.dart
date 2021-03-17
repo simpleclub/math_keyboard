@@ -22,7 +22,7 @@ class MathField extends StatefulWidget {
     this.focusNode,
     this.controller,
     this.keyboardType = MathKeyboardType.expression,
-    this.variables = const [],
+    this.variables = const ['x'],
     this.decoration = const InputDecoration(),
     this.onChanged,
     this.onSubmitted,
@@ -48,6 +48,8 @@ class MathField extends StatefulWidget {
   /// The additional variables a user can use.
   ///
   /// Note that these are ignored for [MathKeyboardType.numberOnly].
+  ///
+  /// Defaults to including "x".
   final List<String> variables;
 
   /// The decoration to show around the math field.
