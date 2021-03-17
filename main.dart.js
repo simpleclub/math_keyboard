@@ -70584,7 +70584,7 @@ $.aoc().toString
 s=t.p
 r=H.a([U.alg("https://i.imgur.com/dxmmhk4.png",p)],s)
 if(!o)r.push(U.alg("https://i.imgur.com/B9jYEyK.png",p))
-q=H.a([new E.oN("Pub","https://pub.dev/packages/math_keyboard",new G.AN(new D.kP(n,"https://img.shields.io/pub/v/math_keyboard.svg",p,p),p,p),p),new E.oN("GitHub",u.m,T.jL(C.c4,r,C.co),p),C.af1],t.ZE)
+q=H.a([new E.oN("Pub","https://pub.dev/packages/math_keyboard",new G.AN(new D.kP(n,"https://img.shields.io/pub/v/math_keyboard",p,p),p,p),p),new E.oN("GitHub",u.m,T.jL(C.c4,r,C.co),p),C.af1],t.ZE)
 X.aEi(o?C.arY:C.arZ)
 n=B.aC9(L.ale(o?C.aeq:C.aep,p,p),this.c,20,"Toggle brightness")
 r=K.aH(b).ai.e
