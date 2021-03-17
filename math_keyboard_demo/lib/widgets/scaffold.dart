@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 import 'package:math_keyboard_demo/data/strings.dart';
@@ -44,6 +45,9 @@ class DemoScaffold extends StatelessWidget {
         url: docsUrl,
       ),
     ];
+
+    SystemChrome.setSystemUIOverlayStyle(
+        darkMode ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
 
     return MathKeyboardViewInsets(
       child: Scaffold(
