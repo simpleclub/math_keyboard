@@ -570,7 +570,11 @@ class _FieldPreview extends StatelessWidget {
           // that can simply be replaced by an alternate decimal separator
           // for the preview.
           '.',
-          decimalSeparator(context),
+          // We need to wrap the decimal separator in an extra group ("{}")
+          // because commas will otherwise be spaced as if they created a
+          // list, e.g. in vector notation (there is a padding to the right
+          // of the comma).
+          '{${decimalSeparator(context)}}',
         );
 
     return ConstrainedBox(
