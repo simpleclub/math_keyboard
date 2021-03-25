@@ -9,6 +9,7 @@ on:
       - 'math_keyboard_demo/lib/**'
       - 'math_keyboard_demo/web/**'
       - 'math_keyboard_demo/pubspec.yaml'
+      - 'math_keyboard/pubspec.yaml'
 
 jobs:
   demo-deploy:
