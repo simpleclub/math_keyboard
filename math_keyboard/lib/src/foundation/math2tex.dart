@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:math_expressions/math_expressions.dart';
 import 'package:math_keyboard/src/foundation/node.dart';
 
@@ -24,8 +26,9 @@ List<TeX> _convertToTeX(Expression mathExpression, TeXNode parent) {
     ];
   }
   if (mathExpression is BinaryOperator) {
+    List<TeX>? result;
     if (mathExpression is Divide) {
-      return [
+      result = [
         TeXFunction(
           r'\frac',
           parent,
@@ -36,30 +39,26 @@ List<TeX> _convertToTeX(Expression mathExpression, TeXNode parent) {
           ],
         ),
       ];
-    }
-    if (mathExpression is Plus) {
-      return [
+    } else if (mathExpression is Plus) {
+      result = [
         ..._convertToTeX(mathExpression.first, parent),
         const TeXLeaf('+'),
         ..._convertToTeX(mathExpression.second, parent),
       ];
-    }
-    if (mathExpression is Minus) {
-      return [
+    } else if (mathExpression is Minus) {
+      result = [
         ..._convertToTeX(mathExpression.first, parent),
         const TeXLeaf('-'),
         ..._convertToTeX(mathExpression.second, parent),
       ];
-    }
-    if (mathExpression is Times) {
-      return [
+    } else if (mathExpression is Times) {
+      result = [
         ..._convertToTeX(mathExpression.first, parent),
         const TeXLeaf(r'\cdot'),
         ..._convertToTeX(mathExpression.second, parent),
       ];
-    }
-    if (mathExpression is Power) {
-      return [
+    } else if (mathExpression is Power) {
+      result = [
         ..._convertToTeX(mathExpression.first, parent),
         TeXFunction(
           '^',
@@ -69,12 +68,26 @@ List<TeX> _convertToTeX(Expression mathExpression, TeXNode parent) {
         ),
       ];
     }
-    // Note that modulo is unsupported.
-    throw UnimplementedError();
+    if (result == null) {
+      // Note that modulo is unsupported.
+      throw UnimplementedError();
+    }
+    // Wrap with parentheses to keep precedence.
+    return [
+      TeXLeaf('('),
+      ...result,
+      TeXLeaf(')'),
+    ];
   }
   if (mathExpression is Literal) {
     if (mathExpression is Number) {
       final number = mathExpression.value as double;
+      if (number == math.pi) {
+        return [TeXLeaf(r'{\pi}')];
+      }
+      if (number == math.e) {
+        return [TeXLeaf('{e}')];
+      }
       final adjusted = number.toInt() == number ? number.toInt() : number;
       return [
         for (final symbol in adjusted.toString().split('')) TeXLeaf(symbol),
