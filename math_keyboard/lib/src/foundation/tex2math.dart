@@ -290,7 +290,11 @@ class TeXParser {
         case '-':
           right = result.removeLast();
           left = result.removeLast();
-          result.add(left - right);
+          if (left.toString() == '0') {
+            result.add(-right);
+          } else {
+            result.add(left - right);
+          }
           break;
         case r'\times':
         case r'\cdot':
