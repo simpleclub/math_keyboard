@@ -83,10 +83,10 @@ List<TeX> _convertToTeX(Expression mathExpression, TeXNode parent) {
     if (mathExpression is Number) {
       final number = mathExpression.value as double;
       if (number == math.pi) {
-        return [TeXLeaf(r'\pi')];
+        return [TeXLeaf(r'{\pi}')];
       }
       if (number == math.e) {
-        return [TeXLeaf('e')];
+        return [TeXLeaf('{e}')];
       }
       final adjusted = number.toInt() == number ? number.toInt() : number;
       return [
