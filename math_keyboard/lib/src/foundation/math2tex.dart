@@ -24,8 +24,9 @@ List<TeX> _convertToTeX(Expression mathExpression, TeXNode parent) {
     ];
   }
   if (mathExpression is BinaryOperator) {
+    List<TeX>? result;
     if (mathExpression is Divide) {
-      return [
+      result = [
         TeXFunction(
           r'\frac',
           parent,
@@ -37,29 +38,29 @@ List<TeX> _convertToTeX(Expression mathExpression, TeXNode parent) {
         ),
       ];
     }
-    if (mathExpression is Plus) {
-      return [
+    else if (mathExpression is Plus) {
+      result = [
         ..._convertToTeX(mathExpression.first, parent),
         const TeXLeaf('+'),
         ..._convertToTeX(mathExpression.second, parent),
       ];
     }
-    if (mathExpression is Minus) {
-      return [
+    else if (mathExpression is Minus) {
+      result = [
         ..._convertToTeX(mathExpression.first, parent),
         const TeXLeaf('-'),
         ..._convertToTeX(mathExpression.second, parent),
       ];
     }
-    if (mathExpression is Times) {
-      return [
+    else if (mathExpression is Times) {
+      result = [
         ..._convertToTeX(mathExpression.first, parent),
         const TeXLeaf(r'\cdot'),
         ..._convertToTeX(mathExpression.second, parent),
       ];
     }
-    if (mathExpression is Power) {
-      return [
+    else if (mathExpression is Power) {
+      result = [
         ..._convertToTeX(mathExpression.first, parent),
         TeXFunction(
           '^',
@@ -69,8 +70,16 @@ List<TeX> _convertToTeX(Expression mathExpression, TeXNode parent) {
         ),
       ];
     }
-    // Note that modulo is unsupported.
-    throw UnimplementedError();
+    if (result == null) {
+      // Note that modulo is unsupported.
+      throw UnimplementedError();
+    }
+    // Wrap with parentheses to keep precedence.
+    return [
+      TeXLeaf('('),
+      ...result,
+      TeXLeaf(')'),
+    ];
   }
   if (mathExpression is Literal) {
     if (mathExpression is Number) {
