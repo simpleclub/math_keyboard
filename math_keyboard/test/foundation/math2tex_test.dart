@@ -8,7 +8,18 @@ import 'package:math_keyboard/src/foundation/tex2math.dart';
 // todo: refactor the conversion to enable sensible tests.
 void main() {
   group('constants', () {
+
     test('pi', () {
+      final node = convertMathExpressionToTeXNode(Parser().parse('$pi'));
+      expect(node.children[0].expression, r'{\pi}');
+    });
+
+    test('e', () {
+      final node = convertMathExpressionToTeXNode(Parser().parse('$e'));
+      expect(node.children[0].expression, r'{e}');
+    });
+
+    test('pi2', () {
       const tex = r'23+{\pi}+{x}';
       const exp = '23+$pi+x';
       expect(
@@ -20,7 +31,7 @@ void main() {
       );
     });
 
-    test('e', () {
+    test('e2', () {
       const tex = '{x}+{e}^2';
       const exp = 'x+$e^2';
       expect(
