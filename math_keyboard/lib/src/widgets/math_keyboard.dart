@@ -443,7 +443,7 @@ class _BasicButton extends StatelessWidget {
     result = KeyboardButton(
       onTap: onTap,
       color: highlightLevel > 1
-          ? Theme.of(context).accentColor
+          ? Theme.of(context).colorScheme.secondary
           : highlightLevel == 1
               ? Colors.grey[900]
               : null,
