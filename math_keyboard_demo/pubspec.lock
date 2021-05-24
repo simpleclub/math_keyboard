@@ -38,14 +38,14 @@ packages:
       name: flutter_math_fork
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.0+2"
+    version: "0.3.3"
   flutter_svg:
     dependency: "direct main"
     description:
       name: flutter_svg
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.21.0-nullsafety.0"
+    version: "0.22.0"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -57,7 +57,7 @@ packages:
       name: holding_gesture
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.1.0"
   intl:
     dependency: transitive
     description:
@@ -92,7 +92,7 @@ packages:
       path: "../math_keyboard"
       relative: true
     source: path
-    version: "0.0.1+2"
+    version: "0.1.1+1"
   meta:
     dependency: transitive
     description:
@@ -120,14 +120,14 @@ packages:
       name: path_drawing
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.0-nullsafety.0"
+    version: "0.5.1"
   path_parsing:
     dependency: transitive
     description:
       name: path_parsing
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.0-nullsafety.0"
+    version: "0.2.1"
   pedantic:
     dependency: "direct dev"
     description:

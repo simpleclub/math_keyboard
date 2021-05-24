@@ -1,3 +1,8 @@
+## 0.1.1+1
+
+* Fixed `numpadBackspace` breaking change.
+* Addressed `ThemeData.accentColor` deprecations.
+
 ## 0.1.1
 
 * Unary minus support when converting to an expression.

@@ -424,8 +424,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   KeyEventResult? _handleLogicalKey(
       LogicalKeyboardKey logicalKey, List<KeyboardButtonConfig> configs) {
     // Check logical, fixed keyboard bindings (like backspace and arrow keys).
-    if ((logicalKey == LogicalKeyboardKey.backspace ||
-            logicalKey == LogicalKeyboardKey.numpadBackspace) &&
+    if (logicalKey == LogicalKeyboardKey.backspace &&
         configs.any((element) => element is DeleteButtonConfig)) {
       _controller.goBack(deleteMode: true);
       return KeyEventResult.handled;
@@ -561,7 +560,7 @@ class _FieldPreview extends StatelessWidget {
           cursorColor: Color.lerp(
             _getDisabledCursorColor(Theme.of(context)),
             Theme.of(context).textSelectionTheme.cursorColor ??
-                Theme.of(context).accentColor,
+                Theme.of(context).colorScheme.secondary,
             cursorOpacity,
           ),
         )
