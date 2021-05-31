@@ -201,7 +201,7 @@ Note that this returns an internal `TeXNode` format, which you can convert to a 
 final texString = texNode.buildTexString();
 ```
 
-[logo]: https://i.imgur.com/gCdWyka.png
+[logo]: https://user-images.githubusercontent.com/19204050/120233149-ab27a980-c244-11eb-8a7e-0bc6cd3fd607.png
 [repo]: https://github.com/simpleclub/math_keyboard
 [repo shield]: https://img.shields.io/github/stars/simpleclub/math_keyboard?style=social
 [demo]: https://simpleclub.github.io/math_keyboard
