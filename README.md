@@ -102,7 +102,7 @@ The main difference between that app and this package (apart from one being a ca
 other being a generalized usable package) is the fact that Num++ uses a web view and MathQuill for
 editing the expression while we built the input field and editing ourselves.
 
-[logo]: https://i.imgur.com/gCdWyka.png
+[logo]: https://i.imgur.com/JCpYHL8.png
 [simpleclub]: https://github.com/simpleclub
 [demo]: https://simpleclub.github.io/math_keyboard
 [demo shield]: https://img.shields.io/badge/math_keyboard-demo-FFC107
