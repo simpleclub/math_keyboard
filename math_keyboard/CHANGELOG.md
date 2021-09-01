@@ -1,3 +1,7 @@
+## 0.1.2
+
+* Bumped `flutter_math_fork`.
+
 ## 0.1.1+1
 
 * Fixed `numpadBackspace` breaking change.
