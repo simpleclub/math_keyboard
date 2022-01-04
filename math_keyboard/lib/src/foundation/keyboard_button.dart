@@ -116,6 +116,12 @@ const _subtractButton = BasicKeyboardButtonConfig(
 final functionKeyboard = [
   [
     const BasicKeyboardButtonConfig(
+      label: r'\frac{\Box}{\Box}',
+      value: r'\frac',
+      args: [TeXArg.braces, TeXArg.braces],
+      asTex: true,
+    ),
+    const BasicKeyboardButtonConfig(
       label: r'\Box^2',
       value: '^2',
       args: [TeXArg.braces],
