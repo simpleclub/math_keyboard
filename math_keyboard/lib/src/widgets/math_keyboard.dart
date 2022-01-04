@@ -342,8 +342,10 @@ class _Buttons extends StatelessWidget {
                         else if (config is PageButtonConfig)
                           _BasicButton(
                             flex: config.flex,
-                            icon: CustomKeyIcons.key_symbols,
-                            // label: controller.secondPage ? '123' : 'f(x)',
+                            icon: controller.secondPage
+                                ? null
+                                : CustomKeyIcons.key_symbols,
+                            label: controller.secondPage ? '123' : null,
                             onTap: controller.togglePage,
                             highlightLevel: 1,
                           )
