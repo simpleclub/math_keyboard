@@ -1,7 +1,7 @@
 ## 0.1.3
 
-* Added new symbols icon
-* Added fraction button to second keyboard page
+* Added new symbols icon for functions button.
+* Added fraction button to second keyboard page.
 
 ## 0.1.2
 
