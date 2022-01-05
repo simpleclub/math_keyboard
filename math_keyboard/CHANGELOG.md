@@ -1,3 +1,8 @@
+## 0.1.3
+
+* Added new symbols icon for functions button.
+* Added fraction button to second keyboard page.
+
 ## 0.1.2
 
 * Bumped `flutter_math_fork`.

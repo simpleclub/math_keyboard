@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
+import 'package:math_keyboard/src/custom_key_icons/custom_key_icons.dart';
 import 'package:math_keyboard/src/foundation/keyboard_button.dart';
 import 'package:math_keyboard/src/widgets/decimal_separator.dart';
 import 'package:math_keyboard/src/widgets/keyboard_button.dart';
@@ -341,7 +342,10 @@ class _Buttons extends StatelessWidget {
                         else if (config is PageButtonConfig)
                           _BasicButton(
                             flex: config.flex,
-                            label: controller.secondPage ? '123' : 'f(x)',
+                            icon: controller.secondPage
+                                ? null
+                                : CustomKeyIcons.key_symbols,
+                            label: controller.secondPage ? '123' : null,
                             onTap: controller.togglePage,
                             highlightLevel: 1,
                           )

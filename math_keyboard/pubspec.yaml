@@ -2,7 +2,7 @@ name: math_keyboard
 description: >-2
   Math expression editing using an on-screen software keyboard or physical keyboard input in a
   typeset input field in Flutter.
-version: 0.1.2
+version: 0.1.3
 homepage: https://github.com/simpleclub/math_keyboard/tree/main/math_keyboard
 
 environment:
@@ -26,3 +26,9 @@ dev_dependencies:
     sdk: flutter
 
   pedantic: ^1.11.0
+
+flutter:
+  fonts:
+  - family: CustomKeyIcons
+    fonts:
+    - asset: fonts/CustomKeyIcons.ttf
