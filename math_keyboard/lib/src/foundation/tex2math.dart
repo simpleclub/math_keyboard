@@ -129,7 +129,7 @@ class TeXParser {
 
     for (var i = 0; i < _stream.length; i++) {
       /// wrong syntax: fr fo lr lo oo (b/r postfix or wrong)
-      /// need times: bb bf bl rb rf !f !l
+      /// need times: bb bf bl rb rf rl !f !l
       /// negative number: -(bfl) / l-(bfl)
 
       // negative number
@@ -164,6 +164,7 @@ class TeXParser {
         switch (_stream[i + 1][1]) {
           case 'b':
           case 'f':
+          case 'l':
             _stream.insert(i + 1, [
               r'\times',
               ['o', 3, 'l'],

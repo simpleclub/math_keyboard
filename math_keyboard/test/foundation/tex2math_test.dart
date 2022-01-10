@@ -56,6 +56,15 @@ void main() {
         Parser().parse(exp).toString(),
       );
     });
+
+    test('implicit2', () {
+      const tex = '(23)({c})';
+      const exp = '23*c';
+      expect(
+        TeXParser(tex).parse().toString(),
+        Parser().parse(exp).toString(),
+      );
+    });
   });
 
   group('frac', () {
