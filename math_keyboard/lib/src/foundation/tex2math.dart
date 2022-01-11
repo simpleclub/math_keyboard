@@ -161,18 +161,48 @@ class TeXParser {
         continue;
       }
       if (i < _stream.length - 1 && _stream[i][1] == 'r') {
+        var insertTimes = false;
         switch (_stream[i + 1][1]) {
           case 'b':
           case 'f':
+            insertTimes = true;
+            break;
           case 'l':
-            _stream.insert(i + 1, [
-              r'\times',
-              ['o', 3, 'l'],
-            ]);
-            i++;
+            // In case there is a closing parenthesis directly followed by an
+            // opening one, some further checks are necessary.
+            if (_stream[i][0] == ')' && _stream[i + 1][0] == '(') {
+              insertTimes = true;
+            } else if (_stream[i][0] == '}' && _stream[i + 1][0] == '(') {
+              // This case is unfavorable. If the '}' closes the second argument
+              // of a fraction or marks the end of an exponent, we want to
+              // insert 'times'. However, if '}' closes the base argument of a
+              // logarithm function, we don't want to insert a times symbol.
+              // That's why we have to check what's in front of the matching
+              // opening '{'.
+              final stack = ['}'];
+              var j = i - 1;
+              while (j > 0 && stack.isNotEmpty) {
+                if (_stream[j][0] == '{') {
+                  stack.removeLast();
+                } else if (_stream[j][0] == '}') {
+                  stack.add('}');
+                }
+                j--;
+              }
+              if (j >= 0 && _stream[j][0] != '_') {
+                insertTimes = true;
+              }
+            }
             break;
           default:
             break;
+        }
+        if (insertTimes) {
+          _stream.insert(i + 1, [
+            r'\times',
+            ['o', 3, 'l'],
+          ]);
+          i++;
         }
         continue;
       }
