@@ -1,3 +1,7 @@
+## 0.1.4
+
+* Fixed missing implicit times operator between a closing and an opening parenthesis. 
+
 ## 0.1.3
 
 * Added new symbols icon for functions button.

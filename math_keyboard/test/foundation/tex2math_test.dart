@@ -56,6 +56,24 @@ void main() {
         Parser().parse(exp).toString(),
       );
     });
+
+    test('implicit2', () {
+      const tex = '(23)({c})';
+      const exp = '23*c';
+      expect(
+        TeXParser(tex).parse().toString(),
+        Parser().parse(exp).toString(),
+      );
+    });
+
+    test('implicit3', () {
+      const tex = '23^{2}({c})';
+      const exp = '23^2*c';
+      expect(
+        TeXParser(tex).parse().toString(),
+        Parser().parse(exp).toString(),
+      );
+    });
   });
 
   group('frac', () {
@@ -149,6 +167,15 @@ void main() {
     test('squareRoot', () {
       const tex = r'2 \times  \sqrt{{x}}';
       const exp = '2*nrt(2,x)';
+      expect(
+        TeXParser(tex).parse().toString(),
+        Parser().parse(exp).toString(),
+      );
+    });
+
+    test('nRoot', () {
+      const tex = r'2 \times  \sqrt[3]{{x}}';
+      const exp = '(2.0 * (x^(1.0 / 3.0)))';
       expect(
         TeXParser(tex).parse().toString(),
         Parser().parse(exp).toString(),
