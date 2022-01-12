@@ -3,12 +3,12 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
-  "main.dart.js": "2092a88561af4c5e3c0d7669315f9e09",
+  "main.dart.js": "c3fef7299b3fd31bd1cbff766a7b8078",
 "version.json": "85ee2b56930f9682c881157818a639b0",
 "manifest.json": "a8e59c715d8b1fe5413e414a42684102",
 "icons/Icon-512.png": "e5ce20487d2335db97bfa5e23eb93e91",
 "icons/Icon-192.png": "5e02dc215f72e47e910d2d7bc5f6d939",
-"assets/NOTICES": "866e297bddeabb007f41efc6010acf56",
+"assets/NOTICES": "2e6f6404427edd24e28237accc5efe6d",
 "assets/AssetManifest.json": "6d45c50feac036f469e183bd8542f546",
 "assets/FontManifest.json": "e4738db94c44c696e0efab5e1da7489e",
 "assets/fonts/MaterialIcons-Regular.otf": "4e6447691c9509f7acdbf8a931a85ca1",
@@ -33,8 +33,8 @@ const RESOURCES = {
 "assets/packages/flutter_math_fork/lib/katex_fonts/fonts/KaTeX_Typewriter-Regular.ttf": "87f56927f1ba726ce0591955c8b3b42d",
 "assets/packages/flutter_math_fork/lib/katex_fonts/fonts/KaTeX_Fraktur-Bold.ttf": "46b41c4de7a936d099575185a94855c4",
 "assets/packages/flutter_math_fork/lib/katex_fonts/fonts/KaTeX_Main-Italic.ttf": "ac3b1882325add4f148f05db8cafd401",
-"index.html": "4f8262f11fbb28e2916b2d9e3af7e11f",
-"/": "4f8262f11fbb28e2916b2d9e3af7e11f",
+"index.html": "f461c0778bbc9bc516de5b19e484a2a9",
+"/": "f461c0778bbc9bc516de5b19e484a2a9",
 "favicon.png": "e89862aadfed7152acdb2ccd31ee4a53"
 };
 
