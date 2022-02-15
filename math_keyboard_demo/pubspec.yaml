@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_svg: ^1.0.3
+  flutter_svg: ^1.0.0
 
   math_keyboard:
     path: ../math_keyboard
