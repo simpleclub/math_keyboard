@@ -1,3 +1,7 @@
+## 0.1.4+1
+
+* Bumped `flutter_math_fork`.
+
 ## 0.1.4
 
 * Fixed missing implicit times operator between a closing and an opening parenthesis. 
