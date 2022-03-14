@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 
 /// Widget for math keyboards ensuring the content is pushed up by the
