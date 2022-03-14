@@ -181,6 +181,15 @@ void main() {
         Parser().parse(exp).toString(),
       );
     });
+
+    test('powRoot', () {
+      const tex = r'{x} ^ { \frac{1}{2} }';
+      const exp = 'x ^ (1 / 2)';
+      expect(
+        TeXParser(tex).parse().toString(),
+        Parser().parse(exp).toString(),
+      );
+    });
   });
 
   group('logarithm', () {
