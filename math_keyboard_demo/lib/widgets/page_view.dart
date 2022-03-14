@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:math_expressions/math_expressions.dart';
 import 'package:math_keyboard/math_keyboard.dart';
