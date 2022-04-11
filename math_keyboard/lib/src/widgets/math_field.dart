@@ -599,7 +599,7 @@ class _FieldPreview extends StatelessWidget {
                     // This is a workaround for aligning the cursor properly
                     // when the math field is empty. This way it matches the
                     // TextField behavior.
-                    : Offset(-4, 0),
+                    : Offset(-1, 0),
                 child: Math.tex(
                   tex,
                   options: MathOptions(

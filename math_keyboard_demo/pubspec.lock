@@ -38,7 +38,7 @@ packages:
       name: flutter_math_fork
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.1"
+    version: "0.6.2"
   flutter_svg:
     dependency: "direct main"
     description:
@@ -99,7 +99,7 @@ packages:
       path: "../math_keyboard"
       relative: true
     source: path
-    version: "0.1.4+1"
+    version: "0.1.5"
   meta:
     dependency: transitive
     description:
