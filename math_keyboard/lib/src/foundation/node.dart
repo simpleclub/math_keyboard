@@ -203,10 +203,7 @@ abstract class TeX {
 /// Class describing the cursor as a TeX expression.
 class Cursor extends TeX {
   /// Creates a TeX [Cursor].
-  const Cursor()
-      :
-        // todo: clean this up.
-        super('');
+  const Cursor() : super('');
 
   @override
   String buildString({required Color? cursorColor}) {
@@ -215,7 +212,7 @@ class Cursor extends TeX {
     }
     final colorString =
         '#${(cursorColor.value & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
-    return '\\textcolor{$colorString}{|}';
+    return '\\textcolor{$colorString}{\\cursor}';
   }
 }
 
