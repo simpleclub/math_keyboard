@@ -5,7 +5,7 @@ import 'package:math_keyboard/math_keyboard.dart';
 import 'package:math_keyboard_demo/data/strings.dart';
 import 'package:math_keyboard_demo/widgets/link_button.dart';
 import 'package:math_keyboard_demo/widgets/page_view.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 /// Scaffold for the demo page.
 class DemoScaffold extends StatelessWidget {
@@ -76,7 +76,7 @@ class DemoScaffold extends StatelessWidget {
                         cursor: MaterialStateMouseCursor.clickable,
                         child: GestureDetector(
                           onTap: () {
-                            launch(gitHubUrl);
+                            launchUrlString(gitHubUrl);
                           },
                           child: Text(
                             header,
@@ -192,7 +192,7 @@ class DemoScaffold extends StatelessWidget {
                 cursor: MaterialStateMouseCursor.clickable,
                 child: GestureDetector(
                   onTap: () {
-                    launch(organizationUrl);
+                    launchUrlString(organizationUrl);
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(16),
