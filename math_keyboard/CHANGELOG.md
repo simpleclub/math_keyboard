@@ -1,3 +1,7 @@
+## 0.1.6
+
+* Cleared Flutter 3.0.x warnings.
+
 ## 0.1.5
 
 * Updated field cursor using `\cursor` function from `flutter_math_fork 0.6.2`.

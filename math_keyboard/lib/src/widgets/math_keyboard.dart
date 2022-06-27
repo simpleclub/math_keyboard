@@ -199,14 +199,14 @@ class _KeyboardBodyState extends State<_KeyboardBody> {
 
   void _removeInsets(MathKeyboardViewInsetsState? insetsState) {
     if (insetsState == null) return;
-    SchedulerBinding.instance!.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
       widget.insetsState![ObjectKey(this)] = null;
     });
   }
 
   void _reportInsets(MathKeyboardViewInsetsState? insetsState) {
     if (insetsState == null) return;
-    SchedulerBinding.instance!.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
       final renderBox = context.findRenderObject() as RenderBox;

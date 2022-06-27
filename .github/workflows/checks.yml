@@ -28,7 +28,7 @@ jobs:
         channel:
           - 'stable'
           - 'beta'
-          - 'dev'
+          - 'master'
         package:
           - 'math_keyboard'
           - 'math_keyboard_demo'
@@ -57,7 +57,7 @@ jobs:
         channel:
           - 'stable'
           - 'beta'
-          - 'dev'
+          - 'master'
         package:
           - 'math_keyboard'
       fail-fast: false

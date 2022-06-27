@@ -242,7 +242,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     // We want to automatically scroll the math field to the right when the
     // cursor is all the way to the right.
     if (_controller.root.cursorAtTheEnd()) {
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 100),
@@ -288,7 +288,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       return;
     }
     _showFieldOnScreenScheduled = true;
-    WidgetsBinding.instance!.addPostFrameCallback((Duration _) {
+    WidgetsBinding.instance.addPostFrameCallback((Duration _) {
       _showFieldOnScreenScheduled = false;
       if (!mounted) return;
 

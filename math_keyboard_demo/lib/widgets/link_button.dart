@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 /// Stylized button widget for linking to outside resources.
 class LinkButton extends StatelessWidget {
@@ -25,7 +25,7 @@ class LinkButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    void onPressed() => launch(url);
+    void onPressed() => launchUrlString(url);
     final style = OutlinedButton.styleFrom(
       padding: const EdgeInsets.all(16),
       textStyle: TextStyle(
