@@ -1,3 +1,7 @@
+## 0.1.7
+
+* Updated Petitparser dependency.
+
 ## 0.1.6
 
 * Cleared Flutter 3.0.x warnings.
