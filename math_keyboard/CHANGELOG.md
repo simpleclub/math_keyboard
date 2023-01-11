@@ -1,3 +1,7 @@
+## 0.1.8
+
+* Return empty string instead of \\Box when field is empty
+
 ## 0.1.7
 
 * Updated Petitparser dependency.
