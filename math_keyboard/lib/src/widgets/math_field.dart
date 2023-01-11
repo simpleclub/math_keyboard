@@ -251,7 +251,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       });
     }
 
-    final expression = _controller.currentEditingValue();
+    final expression = _controller.currentEditingValue(
+      placeholderWhenEmpty: false,
+    );
     // We want to make sure to execute the callback after we have
     // executed all of our logic that we know has to be executed.
     // This is because the callback might throw an exception, in which
@@ -327,7 +329,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
 
   void _submit() {
     _focusNode.unfocus();
-    widget.onSubmitted?.call(_controller.currentEditingValue());
+    widget.onSubmitted?.call(
+      _controller.currentEditingValue(placeholderWhenEmpty: false),
+    );
   }
 
   KeyEventResult _handleKey(FocusNode node, RawKeyEvent keyEvent) {
@@ -641,14 +645,16 @@ class MathFieldEditingController extends ChangeNotifier {
   late TeXNode currentNode;
 
   /// Returns the current editing value (expression), which requires temporarily
-  /// removing the cursor.
-  String currentEditingValue() {
+  /// removing the cursor. When [placeholderWhenEmpty] is true, a TeX \Box
+  /// is returned as a placeholder.
+  String currentEditingValue({bool placeholderWhenEmpty = true}) {
     currentNode.removeCursor();
     // Store the expression as a TeX string.
     final expression = root.buildTeXString(
       // By passing null as the cursor color here, we are asserting
       // that the cursor is not part of the tree in a way.
       cursorColor: null,
+      placeholderWhenEmpty: placeholderWhenEmpty,
     );
     currentNode.setCursor();
 

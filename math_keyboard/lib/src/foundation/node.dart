@@ -95,9 +95,12 @@ class TeXNode {
   /// This includes the representation of the children of the node.
   ///
   /// Returns the TeX expression as a [String].
-  String buildTeXString({Color? cursorColor}) {
+  String buildTeXString({
+    Color? cursorColor,
+    bool placeholderWhenEmpty = true,
+  }) {
     if (children.isEmpty) {
-      return '\\Box';
+      return placeholderWhenEmpty ? '\\Box' : '';
     }
     final buffer = StringBuffer();
     for (final tex in children) {
