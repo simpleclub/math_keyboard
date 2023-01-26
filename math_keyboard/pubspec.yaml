@@ -32,3 +32,15 @@ flutter:
   - family: CustomKeyIcons
     fonts:
     - asset: fonts/CustomKeyIcons.ttf
+
+screenshots:
+  - description: 'Example of math keyboard on mobile and desktop.'
+    path: example/screenshots/mobile_and_desktop.png
+  - description: 'Example video showing how to interact with math keyboard.'
+    path: example/screenshots/math_keyboard.gif
+  - description: 'Example of math keyboard on mobile.'
+    path: example/screenshots/mobile.png
+  - description: 'Example of math keyboard on desktop.'
+    path: example/screenshots/mobile.png
+  - description: 'Example of math keyboard functions.'
+    path: example/screenshots/functions.png
