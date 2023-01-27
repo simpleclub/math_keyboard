@@ -28,6 +28,8 @@ jobs:
     timeout-minutes: 4
     runs-on: ubuntu-latest
     name: ${{ matrix.package }} publishing
+    permissions:
+      id-token: write # Allows to publish to pub.dev without personal credentials
     strategy:
       matrix:
         package:
@@ -51,13 +53,23 @@ jobs:
         run: |
           cd ${{ matrix.package }}
           echo "VERSION=$(awk '{if ($1 ~ /^version:/) print $2}' pubspec.yaml)" >> $GITHUB_ENV
-      - uses: sakebook/actions-flutter-pub-publisher@v1.3.1
-        if: steps.pubspec.outputs.changed == 0
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
         with:
-          package_directory: ${{ matrix.package }}
-          credential: ${{ secrets.PUB_CREDENTIALS }}
-          flutter_package: true
-          skip_test: true
+          channel: stable
+      - name: Get pub.dev token
+        run: |
+          PUB_TOKEN=$(curl --retry 5 --retry-connrefused -sLS "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=https://pub.dev" -H "User-Agent: actions/oidc-client" -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" | jq -r '.value')
+          echo "PUB_TOKEN=${PUB_TOKEN}" >> $GITHUB_ENV
+          export PUB_TOKEN
+          flutter pub token add https://pub.dev --env-var PUB_TOKEN
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ${{ matrix.package }}
+      - name: publish to pub.dev
+        if: steps.pubspec.outputs.changed == 0
+        run: flutter pub publish --force
+        working-directory: ${{ matrix.package }}
       - name: Create release
         if: steps.pubspec.outputs.changed == 0
         id: create_release
