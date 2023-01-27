@@ -28,6 +28,8 @@ jobs:
     timeout-minutes: 4
     runs-on: ubuntu-latest
     name: ${{ matrix.package }} publishing
+    permissions:
+      id-token: write # Allows to publish to pub.dev without personal credentials
     strategy:
       matrix:
         package:
@@ -51,13 +53,9 @@ jobs:
         run: |
           cd ${{ matrix.package }}
           echo "VERSION=$(awk '{if ($1 ~ /^version:/) print $2}' pubspec.yaml)" >> $GITHUB_ENV
-      - uses: sakebook/actions-flutter-pub-publisher@v1.3.1
+      - name: publish to pub.dev
         if: steps.pubspec.outputs.changed == 0
-        with:
-          package_directory: ${{ matrix.package }}
-          credential: ${{ secrets.PUB_CREDENTIALS }}
-          flutter_package: true
-          skip_test: true
+        run: dart pub publish --force --directory=${{ matrix.package }}
       - name: Create release
         if: steps.pubspec.outputs.changed == 0
         id: create_release
