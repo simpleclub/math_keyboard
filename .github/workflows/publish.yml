@@ -53,6 +53,9 @@ jobs:
         run: |
           cd ${{ matrix.package }}
           echo "VERSION=$(awk '{if ($1 ~ /^version:/) print $2}' pubspec.yaml)" >> $GITHUB_ENV
+      - uses: dart-lang/setup-dart@v1
+      - name: Install dependencies
+        run: dart pub get
       - name: publish to pub.dev
         if: steps.pubspec.outputs.changed == 0
         run: dart pub publish --force --directory=${{ matrix.package }}
