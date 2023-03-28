@@ -34,6 +34,11 @@ class MathKeyboard extends StatelessWidget {
     this.onSubmit,
     this.insetsState,
     this.slideAnimation,
+    this.padding = const EdgeInsets.only(
+      bottom: 4,
+      left: 4,
+      right: 4,
+    ),
   }) : super(key: key);
 
   /// The controller for editing the math field.
@@ -61,6 +66,11 @@ class MathKeyboard extends StatelessWidget {
   ///
   /// Can be `null`.
   final VoidCallback? onSubmit;
+
+  /// Insets of the keyboard.
+  ///
+  /// Defaults to `const EdgeInsets.only(bottom: 4, left: 4, right: 4),`.
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
@@ -91,11 +101,7 @@ class MathKeyboard extends StatelessWidget {
                     slideAnimation:
                         slideAnimation == null ? null : curvedSlideAnimation,
                     child: Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: 4,
-                        left: 4,
-                        right: 4,
-                      ),
+                      padding: padding,
                       child: Center(
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(

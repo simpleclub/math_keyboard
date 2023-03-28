@@ -51,6 +51,11 @@ class _KeyboardButtonState extends State<KeyboardButton>
     super.dispose();
   }
 
+  void _handleHover(bool entered) {
+    _animationController.value = entered ? 0.5 : 0;
+    widget.onHold?.call();
+  }
+
   void _handleTapDown(TapDownDetails details) {
     _animationController.forward();
   }
@@ -70,44 +75,49 @@ class _KeyboardButtonState extends State<KeyboardButton>
 
   @override
   Widget build(BuildContext context) {
-    Widget result = RawGestureDetector(
-      behavior: HitTestBehavior.opaque,
-      gestures: <Type, GestureRecognizerFactory>{
-        _AlwaysWinningGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-            _AlwaysWinningGestureRecognizer>(
-          () => _AlwaysWinningGestureRecognizer(),
-          (_AlwaysWinningGestureRecognizer instance) {
-            instance
-              ..onTap = widget.onTap
-              ..onTapUp = _handleTapUp
-              ..onTapDown = _handleTapDown
-              ..onTapCancel = _handleTapCancel;
-          },
-        ),
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(4),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: widget.color,
-          ),
-          child: AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              return DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.white.withOpacity(
-                    Curves.easeInOut.transform(_animationController.value) / 3,
-                  ),
-                ),
-                child: Center(
-                  child: child,
-                ),
-              );
+    Widget result = MouseRegion(
+      onEnter: (_) => _handleHover(true),
+      onExit: (_) => _handleHover(false),
+      child: RawGestureDetector(
+        behavior: HitTestBehavior.opaque,
+        gestures: <Type, GestureRecognizerFactory>{
+          _AlwaysWinningGestureRecognizer: GestureRecognizerFactoryWithHandlers<
+              _AlwaysWinningGestureRecognizer>(
+            () => _AlwaysWinningGestureRecognizer(),
+            (_AlwaysWinningGestureRecognizer instance) {
+              instance
+                ..onTap = widget.onTap
+                ..onTapUp = _handleTapUp
+                ..onTapDown = _handleTapDown
+                ..onTapCancel = _handleTapCancel;
             },
-            child: widget.child,
+          ),
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: widget.color,
+            ),
+            child: AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.white.withOpacity(
+                      Curves.easeInOut.transform(_animationController.value) /
+                          3,
+                    ),
+                  ),
+                  child: Center(
+                    child: child,
+                  ),
+                );
+              },
+              child: widget.child,
+            ),
           ),
         ),
       ),
