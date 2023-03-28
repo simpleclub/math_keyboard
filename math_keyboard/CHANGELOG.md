@@ -1,3 +1,7 @@
+## 0.1.9
+
+* Exposes `MathKeyboards` and adds padding and hover effects to it.
+
 ## 0.1.8
 
 * Return empty string instead of \\Box when field is empty
