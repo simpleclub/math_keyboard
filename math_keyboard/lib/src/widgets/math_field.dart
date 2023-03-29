@@ -26,6 +26,7 @@ class MathField extends StatefulWidget {
     this.decoration = const InputDecoration(),
     this.onChanged,
     this.onSubmitted,
+    this.opensKeyboard = true,
   }) : super(key: key);
 
   /// The controller for the math field.
@@ -106,6 +107,14 @@ class MathField extends StatefulWidget {
   ///
   /// Can be `null`.
   final ValueChanged<String>? onSubmitted;
+
+  /// Whether the field should open a keyboard on focus by itself or not.
+  ///
+  /// Set this to false if you want to provide input via an external source by
+  /// using [controller].
+  ///
+  /// Defaults to `true`.
+  final bool opensKeyboard;
 
   @override
   _MathFieldState createState() => _MathFieldState();
@@ -302,6 +311,8 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   }
 
   void _openKeyboard(BuildContext context) {
+    if (!widget.opensKeyboard) return;
+
     _overlayEntry?.remove();
     _overlayEntry = OverlayEntry(
       builder: (context) {
@@ -324,7 +335,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       },
     );
 
-    Overlay.of(context)!.insert(_overlayEntry!);
+    Overlay.of(context).insert(_overlayEntry!);
   }
 
   void _submit() {
@@ -549,7 +560,7 @@ class _FieldPreview extends StatelessWidget {
 
   // Adapted from InputDecorator._getInlineStyle.
   TextStyle _getHintStyle(ThemeData themeData) {
-    return themeData.textTheme.subtitle1!
+    return themeData.textTheme.titleMedium!
         .copyWith(
             color: decoration.enabled
                 ? themeData.hintColor
