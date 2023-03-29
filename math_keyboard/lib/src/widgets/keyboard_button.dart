@@ -53,7 +53,6 @@ class _KeyboardButtonState extends State<KeyboardButton>
 
   void _handleHover(bool entered) {
     _animationController.value = entered ? 0.5 : 0;
-    widget.onHold?.call();
   }
 
   void _handleTapDown(TapDownDetails details) {
