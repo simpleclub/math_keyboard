@@ -80,10 +80,12 @@ class DemoScaffold extends StatelessWidget {
                           },
                           child: Text(
                             header,
-                            style:
-                                Theme.of(context).textTheme.headline5?.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -135,7 +137,7 @@ class DemoScaffold extends StatelessWidget {
                                   ],
                                   style: Theme.of(context)
                                       .textTheme
-                                      .headline5
+                                      .headlineSmall
                                       ?.copyWith(
                                         fontSize: 28,
                                       ),

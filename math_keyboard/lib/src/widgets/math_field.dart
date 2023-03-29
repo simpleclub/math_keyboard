@@ -335,7 +335,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       },
     );
 
-    Overlay.of(context)!.insert(_overlayEntry!);
+    Overlay.of(context).insert(_overlayEntry!);
   }
 
   void _submit() {
@@ -560,7 +560,7 @@ class _FieldPreview extends StatelessWidget {
 
   // Adapted from InputDecorator._getInlineStyle.
   TextStyle _getHintStyle(ThemeData themeData) {
-    return themeData.textTheme.subtitle1!
+    return themeData.textTheme.titleMedium!
         .copyWith(
             color: decoration.enabled
                 ? themeData.hintColor

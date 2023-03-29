@@ -247,7 +247,7 @@ class _PrimaryPageState extends State<_PrimaryPage> {
           ),
           child: Text(
             'Try it now!',
-            style: Theme.of(context).textTheme.headline5!.copyWith(
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   fontStyle: FontStyle.italic,
                 ),
             textAlign: TextAlign.center,
@@ -311,7 +311,7 @@ class _InputDecorationPage extends StatelessWidget {
           ),
           child: Text(
             'Completely customizable with InputDecoration!',
-            style: Theme.of(context).textTheme.headline5!.copyWith(
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   fontStyle: FontStyle.italic,
                 ),
             textAlign: TextAlign.center,
@@ -422,7 +422,7 @@ class _ControllerPageState extends State<_ControllerPage> {
           ),
           child: Text(
             'Fully controllable using custom controllers!',
-            style: Theme.of(context).textTheme.headline5!.copyWith(
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   fontStyle: FontStyle.italic,
                 ),
             textAlign: TextAlign.center,
@@ -581,7 +581,7 @@ class _AutofocusPage extends StatelessWidget {
           ),
           child: Text(
             'With autofocus support!',
-            style: Theme.of(context).textTheme.headline5!.copyWith(
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   fontStyle: FontStyle.italic,
                 ),
             textAlign: TextAlign.center,
@@ -646,7 +646,7 @@ class _FocusTreePageState extends State<_FocusTreePage> {
           ),
           child: Text(
             'And focus tree integration!',
-            style: Theme.of(context).textTheme.headline5!.copyWith(
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   fontStyle: FontStyle.italic,
                 ),
             textAlign: TextAlign.center,
@@ -788,7 +788,7 @@ class _DecimalSeparatorPageState extends State<_DecimalSeparatorPage> {
           ),
           child: Text(
             'Adaptive decimal separators!',
-            style: Theme.of(context).textTheme.headline5!.copyWith(
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   fontStyle: FontStyle.italic,
                 ),
             textAlign: TextAlign.center,
@@ -900,7 +900,7 @@ class _MathExpressionsPageState extends State<_MathExpressionsPage> {
           ),
           child: Text(
             'Math expression support!',
-            style: Theme.of(context).textTheme.headline5!.copyWith(
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   fontStyle: FontStyle.italic,
                 ),
             textAlign: TextAlign.center,
@@ -1024,7 +1024,7 @@ class _FormFieldPage extends StatelessWidget {
                 ),
                 child: Text(
                   'Last but not least: form fields!',
-                  style: Theme.of(context).textTheme.headline5!.copyWith(
+                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                         fontStyle: FontStyle.italic,
                       ),
                   textAlign: TextAlign.center,
@@ -1068,7 +1068,7 @@ class _FormFieldPage extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 16),
                 child: TextButton(
                   onPressed: () {
-                    final result = Form.of(context)!.validate();
+                    final result = Form.of(context).validate();
 
                     if (result == true) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
