@@ -211,11 +211,11 @@ class MathKeyboardViewInsetsQuery extends InheritedWidget {
   static bool keyboardShowingIn(BuildContext context) {
     final maxInset = max(
       of(context).bottomInset,
-      WidgetsBinding.instance.window.viewInsets.bottom /
+      View.of(context).viewInsets.bottom /
           // Note that we obviously do not care about the pixel ratio for our
           // > 0 comparison, however, I do want to prevent any future mistake,
           // where someone forgets the pixel ratio on the window.
-          WidgetsBinding.instance.window.devicePixelRatio,
+          View.of(context).devicePixelRatio,
     );
 
     return maxInset > 0;

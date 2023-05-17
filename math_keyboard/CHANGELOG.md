@@ -1,3 +1,7 @@
+## 0.2.0
+
+* Bumped `flutter_math_fork` and `intl`.
+
 ## 0.1.9
 
 * Exposes `MathKeyboards` and adds padding and hover effects to it.
