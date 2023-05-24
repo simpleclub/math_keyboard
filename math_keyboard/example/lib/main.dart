@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:math_keyboard/math_keyboard.dart';
@@ -137,8 +138,10 @@ class _MathFieldTextFieldExample extends StatelessWidget {
                   expression = 'invalid input';
                 }
 
-                print('input expression: $value\n'
-                    'converted expression: $expression');
+                if (kDebugMode) {
+                  print('input expression: $value\n'
+                      'converted expression: $expression');
+                }
               },
             ),
           ),

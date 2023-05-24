@@ -75,7 +75,7 @@ class MathKeyboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final curvedSlideAnimation = CurvedAnimation(
-      parent: slideAnimation ?? AlwaysStoppedAnimation(1),
+      parent: slideAnimation ?? const AlwaysStoppedAnimation(1),
       curve: Curves.ease,
     );
 
@@ -348,7 +348,7 @@ class _Buttons extends StatelessWidget {
                             flex: config.flex,
                             icon: controller.secondPage
                                 ? null
-                                : CustomKeyIcons.key_symbols,
+                                : CustomKeyIcons.keySymbols,
                             label: controller.secondPage ? '123' : null,
                             onTap: controller.togglePage,
                             highlightLevel: 1,
