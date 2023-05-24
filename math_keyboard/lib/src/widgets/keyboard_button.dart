@@ -34,7 +34,7 @@ class KeyboardButton extends StatefulWidget {
   final Widget child;
 
   @override
-  _KeyboardButtonState createState() => _KeyboardButtonState();
+  State<KeyboardButton> createState() => _KeyboardButtonState();
 }
 
 class _KeyboardButtonState extends State<KeyboardButton>

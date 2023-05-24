@@ -117,7 +117,7 @@ class MathField extends StatefulWidget {
   final bool opensKeyboard;
 
   @override
-  _MathFieldState createState() => _MathFieldState();
+  State<MathField> createState() => _MathFieldState();
 }
 
 class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
@@ -614,7 +614,7 @@ class _FieldPreview extends StatelessWidget {
                     // This is a workaround for aligning the cursor properly
                     // when the math field is empty. This way it matches the
                     // TextField behavior.
-                    : Offset(-1, 0),
+                    : const Offset(-1, 0),
                 child: Math.tex(
                   tex,
                   options: MathOptions(

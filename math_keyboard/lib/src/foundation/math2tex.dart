@@ -74,19 +74,19 @@ List<TeX> _convertToTeX(Expression mathExpression, TeXNode parent) {
     }
     // Wrap with parentheses to keep precedence.
     return [
-      TeXLeaf('('),
+      const TeXLeaf('('),
       ...result,
-      TeXLeaf(')'),
+      const TeXLeaf(')'),
     ];
   }
   if (mathExpression is Literal) {
     if (mathExpression is Number) {
       final number = mathExpression.value as double;
       if (number == math.pi) {
-        return [TeXLeaf(r'{\pi}')];
+        return [const TeXLeaf(r'{\pi}')];
       }
       if (number == math.e) {
-        return [TeXLeaf('{e}')];
+        return [const TeXLeaf('{e}')];
       }
       final adjusted = number.toInt() == number ? number.toInt() : number;
       return [

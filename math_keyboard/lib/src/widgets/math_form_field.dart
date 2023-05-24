@@ -67,7 +67,7 @@ class MathFormField extends FormField<String> {
   final MathFieldEditingController? controller;
 
   @override
-  _MathFormFieldState createState() => _MathFormFieldState();
+  FormFieldState<String> createState() => _MathFormFieldState();
 }
 
 class _MathFormFieldState extends FormFieldState<String> {
@@ -111,13 +111,6 @@ class _MathFormFieldState extends FormFieldState<String> {
   void dispose() {
     widget.controller?.removeListener(_handleControllerChanged);
     super.dispose();
-  }
-
-  @override
-  void didChange(String? value) {
-    super.didChange(value);
-
-    // todo: allow changing the value from outside of the controller.
   }
 
   @override
