@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - '.github/workflows/deploy.yml'
+      - '.github/workflows/web_deploy.yml'
       - 'math_keyboard_demo/lib/**'
       - 'math_keyboard_demo/web/**'
       - 'math_keyboard_demo/pubspec.yaml'
@@ -39,6 +39,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
           FOLDER: math_keyboard_demo/build/web
-          GIT_CONFIG_NAME: creativecreatorormaybenot
-          GIT_CONFIG_EMAIL: creativecreatorormaybenot@gmail.com
+          GIT_CONFIG_NAME: simpleclub-bot
+          GIT_CONFIG_EMAIL: developers@simpleclub.com
           COMMIT_MESSAGE: Deploy math_keyboard_demo web page
