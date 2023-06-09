@@ -1,13 +1,7 @@
 name: greetings
 
 on:
-  # Cannot run the greeting job on PRs because the contributors we want to greet will open PRs
-  # from their own forks. When creating a PR from a fork, the GitHub Actions associated with that
-  # PR will be run from the fork as far as credentials are concerned. The GITHUB_TOKEN secret
-  # only has read access in that case and therefore cannot create a PR comment with the greetings
-  # message. See:
-  # https://docs.github.com/en/actions/configuring-and-managing-workflows/authenticating-with-the-github_token#permissions-for-the-github_token
-#  - pull_request
+  - pull_request_target
   - issues
 
 jobs:
@@ -23,4 +17,11 @@ jobs:
           You can expect triage from us soon 🙂
           In the meantime, you can try to search for similar issues in our [issue database].
 
-          [issue database]: https://github.com/simpleclub/math_keyboard/issues?q=is%3Aissue
+          [issue database]: https://github.com/simpleclub/design_tokens_builder/issues?q=is%3Aissue
+        pr-message: |
+          Hi 👋🏽 Thank you for opening your first PR with simpleclub/math_keyboard ❤
+          
+          You can expect a review from us soon ☺️ 
+          In the meantime, please check our [contribution guidelines], the PR checklist, and the PR checks.
+          
+          [contribution guidelines]: https://github.com/simpleclub/design_tokens_builder/blob/main/CONTRIBUTING.md
