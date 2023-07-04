@@ -1,3 +1,8 @@
+## 0.2.1
+
+* Added Android support to the demo project.
+* Closes keyboard on Android hardware back button press.
+
 ## 0.2.0
 
 * Bumped `flutter_math_fork` and `intl`.
