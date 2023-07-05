@@ -150,7 +150,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
         ...widget.variables,
       ];
 
-  bool get _isKeyboardShown => _overlayEntry != null;
+  bool get _isKeyboardShown =>
+      _overlayEntry != null &&
+      _keyboardSlideController.status != AnimationStatus.dismissed;
 
   @override
   void initState() {
@@ -340,12 +342,12 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     Overlay.of(context).insert(_overlayEntry!);
   }
 
-  /// Removes the keyboard overlay from the screen.
+  /// Launches keyboard slide animation in reversed direction.
+  /// By the end of it the [_overlayEntry] will be removed
+  /// by the [_keyboardSlideController] listener callback.
   ///
   /// Keep in mind: it does not remove the focus from the field.
   void _closeKeyboard() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
     _keyboardSlideController.reverse();
   }
 
@@ -496,10 +498,19 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
           // software keyboard from showing when a key on the physical keyboard
           // is pressed. See https://github.com/flutter/flutter/issues/44681.
           // todo: fix the problem once we have an update on flutter/flutter#44681.
-          onFocusChange: (primary) => _handleFocusChanged(context, open: primary),
+          onFocusChange: (primary) =>
+              _handleFocusChanged(context, open: primary),
           onKey: _handleKey,
           child: GestureDetector(
-            onTap: _focusNode.requestFocus,
+            onTap: () {
+              if (!_focusNode.hasFocus) {
+                _focusNode.requestFocus();
+              } else if (!_isKeyboardShown) {
+                // Sometimes the field can be focused but the keyboard is not shown.
+                // For example if it was closed with [_closeKeyboard].
+                _handleFocusChanged(context, open: true);
+              }
+            },
             child: AnimatedBuilder(
               animation: _controller,
               builder: (context, child) {
