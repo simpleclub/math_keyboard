@@ -150,6 +150,10 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
         ...widget.variables,
       ];
 
+  bool get _isKeyboardShown =>
+      _overlayEntry != null &&
+      _keyboardSlideController.status != AnimationStatus.dismissed;
+
   @override
   void initState() {
     super.initState();
@@ -338,6 +342,15 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     Overlay.of(context).insert(_overlayEntry!);
   }
 
+  /// Launches keyboard slide animation in reversed direction.
+  /// By the end of it the [_overlayEntry] will be removed
+  /// by the [_keyboardSlideController] listener callback.
+  ///
+  /// Keep in mind: it does not remove the focus from the field.
+  void _closeKeyboard() {
+    _keyboardSlideController.reverse();
+  }
+
   void _submit() {
     _focusNode.unfocus();
     widget.onSubmitted?.call(
@@ -468,31 +481,49 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: MaterialStateMouseCursor.textable,
-      child: Focus(
-        focusNode: _focusNode,
-        autofocus: widget.autofocus,
-        // On devices with software keyboards, we *cannot* (properly) prevent the
-        // software keyboard from showing when a key on the physical keyboard
-        // is pressed. See https://github.com/flutter/flutter/issues/44681.
-        // todo: fix the problem once we have an update on flutter/flutter#44681.
-        onFocusChange: (primary) => _handleFocusChanged(context, open: primary),
-        onKey: _handleKey,
-        child: GestureDetector(
-          onTap: _focusNode.requestFocus,
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return _FieldPreview(
-                controller: _controller,
-                scrollController: _scrollController,
-                cursorOpacity: _cursorOpacity,
-                hasFocus: _focusNode.hasFocus,
-                decoration: widget.decoration
-                    .applyDefaults(Theme.of(context).inputDecorationTheme),
-              );
+    return WillPopScope(
+      onWillPop: () async {
+        if (_isKeyboardShown) {
+          _closeKeyboard();
+          return false;
+        }
+        return true;
+      },
+      child: MouseRegion(
+        cursor: MaterialStateMouseCursor.textable,
+        child: Focus(
+          focusNode: _focusNode,
+          autofocus: widget.autofocus,
+          // On devices with software keyboards, we *cannot* (properly) prevent the
+          // software keyboard from showing when a key on the physical keyboard
+          // is pressed. See https://github.com/flutter/flutter/issues/44681.
+          // todo: fix the problem once we have an update on flutter/flutter#44681.
+          onFocusChange: (primary) =>
+              _handleFocusChanged(context, open: primary),
+          onKey: _handleKey,
+          child: GestureDetector(
+            onTap: () {
+              if (!_focusNode.hasFocus) {
+                _focusNode.requestFocus();
+              } else if (!_isKeyboardShown) {
+                // Sometimes the field can be focused but the keyboard is not shown.
+                // For example if it was closed with [_closeKeyboard].
+                _handleFocusChanged(context, open: true);
+              }
             },
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) {
+                return _FieldPreview(
+                  controller: _controller,
+                  scrollController: _scrollController,
+                  cursorOpacity: _cursorOpacity,
+                  hasFocus: _focusNode.hasFocus,
+                  decoration: widget.decoration
+                      .applyDefaults(Theme.of(context).inputDecorationTheme),
+                );
+              },
+            ),
           ),
         ),
       ),
