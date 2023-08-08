@@ -1,7 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
-import 'package:math_keyboard/src/custom_key_icons/custom_key_icons.dart';
+import 'package:math_keyboard/src/custom_button_pages/custom_button_page.dart';
 import 'package:math_keyboard/src/foundation/keyboard_button.dart';
 import 'package:math_keyboard/src/widgets/decimal_separator.dart';
 import 'package:math_keyboard/src/widgets/keyboard_button.dart';
@@ -21,6 +23,10 @@ enum MathKeyboardType {
 
   /// Keyboard for number input only.
   numberOnly,
+
+  /// Keyboard with a custom layout. This allows you to define completely
+  /// custom button pages and behavior.
+  custom,
 }
 
 /// Widget displaying the math keyboard.
@@ -39,6 +45,8 @@ class MathKeyboard extends StatelessWidget {
       left: 4,
       right: 4,
     ),
+    this.customPages = const [],
+    this.fontSize = 22,
   }) : super(key: key);
 
   /// The controller for editing the math field.
@@ -71,6 +79,16 @@ class MathKeyboard extends StatelessWidget {
   ///
   /// Defaults to `const EdgeInsets.only(bottom: 4, left: 4, right: 4),`.
   final EdgeInsets padding;
+
+  /// Defines custom pages that should be added to the keyboard. If
+  /// [keyboardType] is set to [MathKeyboardType.expression], then
+  /// these pages will be appended after the default keyboard pages.
+  /// If you'd like to define completely custom pages, you can use
+  /// [MathKeyboardType.custom], in which case this list must not be empty.
+  final List<CustomButtonPage> customPages;
+
+  /// The font size of the default buttons in this keyboard.
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -120,13 +138,18 @@ class MathKeyboard extends StatelessWidget {
                                 ),
                                 child: _Buttons(
                                   controller: controller,
-                                  page1: type == MathKeyboardType.numberOnly
-                                      ? numberKeyboard
-                                      : standardKeyboard,
-                                  page2: type == MathKeyboardType.numberOnly
-                                      ? null
-                                      : functionKeyboard,
+                                  pages: [
+                                    if (type == MathKeyboardType.numberOnly)
+                                      numberKeyboard
+                                    else if (type ==
+                                        MathKeyboardType.expression)
+                                      standardKeyboard,
+                                    if (type == MathKeyboardType.expression)
+                                      functionKeyboard,
+                                    ...customPages,
+                                  ],
                                   onSubmit: onSubmit,
+                                  fontSize: fontSize,
                                 ),
                               ),
                             ],
@@ -286,25 +309,25 @@ class _Buttons extends StatelessWidget {
   const _Buttons({
     Key? key,
     required this.controller,
-    this.page1,
-    this.page2,
+    this.pages,
     this.onSubmit,
+    this.fontSize = 22,
   }) : super(key: key);
 
   /// The editing controller for the math field that the variables are connected
   /// to.
   final MathFieldEditingController controller;
 
-  /// The buttons to display.
-  final List<List<KeyboardButtonConfig>>? page1;
-
-  /// The buttons to display.
-  final List<List<KeyboardButtonConfig>>? page2;
+  /// The configuration for all the pages on the keyboard.
+  final List<CustomButtonPage>? pages;
 
   /// Function that is called when the enter / submit button is tapped.
   ///
   /// Can be `null`.
   final VoidCallback? onSubmit;
+
+  /// The font size of the basic buttons in this layout
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -313,13 +336,17 @@ class _Buttons extends StatelessWidget {
       child: AnimatedBuilder(
         animation: controller,
         builder: (context, child) {
-          final layout =
-              controller.secondPage ? page2! : page1 ?? numberKeyboard;
+          // Fetch the currently selected button layout.
+          final page =
+              pages?[controller.page % (pages?.length ?? 1)] ?? numberKeyboard;
           return Column(
             children: [
-              for (final row in layout)
+              for (final row in page.buttonLayout)
                 SizedBox(
-                  height: 56,
+                  height: 56 *
+                      row.fold(0, (prev, config) {
+                        return max(prev, config.heightFactor ?? 1);
+                      }),
                   child: Row(
                     children: [
                       for (final config in row)
@@ -335,6 +362,7 @@ class _Buttons extends StatelessWidget {
                                 : () => controller.addLeaf(config.value),
                             asTex: config.asTex,
                             highlightLevel: config.highlighted ? 1 : 0,
+                            fontSize: fontSize,
                           )
                         else if (config is DeleteButtonConfig)
                           _NavigationButton(
@@ -346,12 +374,15 @@ class _Buttons extends StatelessWidget {
                         else if (config is PageButtonConfig)
                           _BasicButton(
                             flex: config.flex,
-                            icon: controller.secondPage
-                                ? null
-                                : CustomKeyIcons.key_symbols,
-                            label: controller.secondPage ? '123' : null,
+                            icon: pages?[((controller.page + 1) %
+                                    (pages?.length ?? 1))]
+                                .icon,
+                            label: pages?[((controller.page + 1) %
+                                    (pages?.length ?? 1))]
+                                .label,
                             onTap: controller.togglePage,
                             highlightLevel: 1,
+                            fontSize: fontSize,
                           )
                         else if (config is PreviousButtonConfig)
                           _NavigationButton(
@@ -371,6 +402,7 @@ class _Buttons extends StatelessWidget {
                             icon: Icons.keyboard_return,
                             onTap: onSubmit,
                             highlightLevel: 2,
+                            fontSize: fontSize,
                           ),
                     ],
                   ),
@@ -394,6 +426,7 @@ class _BasicButton extends StatelessWidget {
     this.onTap,
     this.asTex = false,
     this.highlightLevel = 0,
+    this.fontSize = 22,
   })  : assert(label != null || icon != null),
         super(key: key);
 
@@ -415,6 +448,9 @@ class _BasicButton extends StatelessWidget {
   /// Whether this button should be highlighted.
   final int highlightLevel;
 
+  /// The font size of this button
+  final double fontSize;
+
   @override
   Widget build(BuildContext context) {
     Widget result;
@@ -427,7 +463,7 @@ class _BasicButton extends StatelessWidget {
       result = Math.tex(
         label!,
         options: MathOptions(
-          fontSize: 22,
+          fontSize: fontSize,
           color: Colors.white,
         ),
       );
@@ -441,8 +477,8 @@ class _BasicButton extends StatelessWidget {
 
       result = Text(
         symbol!,
-        style: const TextStyle(
-          fontSize: 22,
+        style: TextStyle(
+          fontSize: fontSize,
           color: Colors.white,
         ),
       );

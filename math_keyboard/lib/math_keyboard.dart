@@ -1,5 +1,8 @@
 export 'package:math_keyboard/src/foundation/math2tex.dart';
 export 'package:math_keyboard/src/foundation/tex2math.dart';
+export 'package:math_keyboard/src/foundation/keyboard_button.dart';
+export 'package:math_keyboard/src/foundation/node.dart';
+export 'package:math_keyboard/src/custom_button_pages/custom_button_page.dart';
 export 'package:math_keyboard/src/widgets/decimal_separator.dart';
 export 'package:math_keyboard/src/widgets/math_field.dart';
 export 'package:math_keyboard/src/widgets/math_form_field.dart';

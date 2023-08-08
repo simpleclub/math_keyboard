@@ -1,3 +1,10 @@
+## 0.3.0
+
+* Adds support for custom keyboard pages using the new `customPages` attribute that takes a list of `CustomButtonPage`s.
+* BREAKING: `bool secondPage` has been replaced with `int page` in `MathFieldEditingController`.
+* Adds a `fontSize` attribute to `MathKeyboard` and a `keyboardButtonFontSize` attribute to `MathField`.
+* Adds a `heightFactor` attribute to `KeyboardButtonConfig`
+
 ## 0.2.1
 
 * Added Android support to the demo project.
