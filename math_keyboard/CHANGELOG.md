@@ -1,3 +1,7 @@
+## FUTURE VERSION
+
+* Adds additional `TeXArg` types `parentheses_lr`, `caret_braces`, and `underscore_braces`.
+
 ## 0.2.1
 
 * Added Android support to the demo project.
