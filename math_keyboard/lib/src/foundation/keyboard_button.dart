@@ -112,6 +112,25 @@ const _subtractButton = BasicKeyboardButtonConfig(
   highlighted: true,
 );
 
+const _equalsButton = BasicKeyboardButtonConfig(
+  label: '=',
+  value: '=',
+  keyboardCharacters: ['='],
+  highlighted: true,
+);
+const _lessThanButton = BasicKeyboardButtonConfig(
+  label: '<',
+  value: '<',
+  keyboardCharacters: ['l'],
+  highlighted: true,
+);
+const _greaterThanButton = BasicKeyboardButtonConfig(
+  label: '>',
+  value: '>',
+  keyboardCharacters: ['g'],
+  highlighted: true,
+);
+
 /// Keyboard showing extended functionality.
 final functionKeyboard = [
   [
@@ -229,6 +248,7 @@ final standardKeyboard = [
     _digitButtons[7],
     _digitButtons[8],
     _digitButtons[9],
+    _lessThanButton,
     const BasicKeyboardButtonConfig(
       label: '×',
       value: r'\cdot',
@@ -247,6 +267,7 @@ final standardKeyboard = [
     _digitButtons[4],
     _digitButtons[5],
     _digitButtons[6],
+    _greaterThanButton,
     const BasicKeyboardButtonConfig(
       label: '+',
       value: '+',
@@ -259,6 +280,7 @@ final standardKeyboard = [
     _digitButtons[1],
     _digitButtons[2],
     _digitButtons[3],
+    _equalsButton,
     _decimalButton,
     DeleteButtonConfig(),
   ],
