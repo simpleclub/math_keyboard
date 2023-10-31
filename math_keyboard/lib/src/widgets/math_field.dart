@@ -27,7 +27,10 @@ class MathField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.opensKeyboard = true,
+    this.onKeyboardHeightChanged,
   }) : super(key: key);
+
+  final ValueChanged<double>? onKeyboardHeightChanged;
 
   /// The controller for the math field.
   ///
@@ -330,6 +333,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
             type: widget.keyboardType,
             variables: _variables,
             onSubmit: _submit,
+            onHeightChanged: widget.onKeyboardHeightChanged,
             // Note that we need to pass the insets state like this because the
             // overlay context does not have the ancestor state.
             insetsState: MathKeyboardViewInsetsState.of(this.context),

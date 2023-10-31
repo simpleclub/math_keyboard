@@ -34,12 +34,17 @@ class MathKeyboard extends StatelessWidget {
     this.onSubmit,
     this.insetsState,
     this.slideAnimation,
+    this.onHeightChanged,
     this.padding = const EdgeInsets.only(
       bottom: 4,
       left: 4,
       right: 4,
     ),
   }) : super(key: key);
+
+  /// A callback that contains the current height of
+  /// the keyboard.
+  final ValueChanged<double>? onHeightChanged;
 
   /// The controller for editing the math field.
   ///
@@ -97,6 +102,7 @@ class MathKeyboard extends StatelessWidget {
                 child: SafeArea(
                   top: false,
                   child: _KeyboardBody(
+                    onHeightChanged: onHeightChanged,
                     insetsState: insetsState,
                     slideAnimation:
                         slideAnimation == null ? null : curvedSlideAnimation,
@@ -150,9 +156,12 @@ class _KeyboardBody extends StatefulWidget {
   const _KeyboardBody({
     Key? key,
     this.insetsState,
+    this.onHeightChanged,
     this.slideAnimation,
     required this.child,
   }) : super(key: key);
+
+  final ValueChanged<double>? onHeightChanged;
 
   final MathKeyboardViewInsetsState? insetsState;
 
@@ -204,19 +213,19 @@ class _KeyboardBodyState extends State<_KeyboardBody> {
   }
 
   void _removeInsets(MathKeyboardViewInsetsState? insetsState) {
-    if (insetsState == null) return;
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      widget.insetsState![ObjectKey(this)] = null;
+      widget.onHeightChanged?.call(0);
+      widget.insetsState?[ObjectKey(this)] = null;
     });
   }
 
   void _reportInsets(MathKeyboardViewInsetsState? insetsState) {
-    if (insetsState == null) return;
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-
       final renderBox = context.findRenderObject() as RenderBox;
-      insetsState[ObjectKey(this)] =
+      widget.onHeightChanged
+          ?.call(renderBox.size.height * (widget.slideAnimation?.value ?? 1));
+      insetsState?[ObjectKey(this)] =
           renderBox.size.height * (widget.slideAnimation?.value ?? 1);
     });
   }

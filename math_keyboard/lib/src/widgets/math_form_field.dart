@@ -32,6 +32,7 @@ class MathFormField extends FormField<String> {
     ValueChanged<String>? onFieldSubmitted,
     AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
     FormFieldValidator<String>? validator,
+    this.onKeyboardHeightChanged,
   }) : super(
           key: key,
           initialValue:
@@ -49,17 +50,20 @@ class MathFormField extends FormField<String> {
             }
 
             return MathField(
-              controller: state._controller,
-              focusNode: focusNode,
-              decoration: decoration.copyWith(errorText: field.errorText),
-              keyboardType: keyboardType,
-              variables: variables,
-              autofocus: autofocus,
-              onChanged: onChangedHandler,
-              onSubmitted: onFieldSubmitted,
-            );
+                controller: state._controller,
+                focusNode: focusNode,
+                decoration: decoration.copyWith(errorText: field.errorText),
+                keyboardType: keyboardType,
+                variables: variables,
+                autofocus: autofocus,
+                onChanged: onChangedHandler,
+                onSubmitted: onFieldSubmitted,
+                onKeyboardHeightChanged: onKeyboardHeightChanged);
           },
         );
+
+  /// Called when the keyboard height changes.
+  final ValueChanged<double>? onKeyboardHeightChanged;
 
   /// Controls the math input being edited.
   ///
