@@ -707,6 +707,103 @@ class MathFieldEditingController extends ChangeNotifier {
     return expression;
   }
 
+  /// Searches through a TeXNode tree and recursively removes Cursor instances,
+  /// reconstructing the tree without these cursors and returning a new TeXNode
+  /// without any cursor elements.
+  TeXNode removeCursorRecursively(TeXNode texNode) {
+    final returnNode = TeXNode(null);
+    int? rootCursorIndex;
+    final children = texNode.children;
+    final returnChildren = <TeX>[];
+    for (var i = 0; i < children.length; i++) {
+      final currentChild = children[i];
+      if (currentChild is Cursor) {
+        rootCursorIndex = i;
+        returnChildren.add(currentChild);
+      } else if (currentChild is TeXFunction) {
+        final childNodes = List.of(currentChild.argNodes);
+        final returnChildNodes = <TeXNode>[];
+        for (final innerChildNode in childNodes) {
+          final returnInnerChildNode = removeCursorRecursively(innerChildNode);
+          returnChildNodes.add(returnInnerChildNode);
+        }
+        final returnTeXFunction = TeXFunction(
+          currentChild.expression,
+          currentChild.parent,
+          currentChild.args,
+          returnChildNodes,
+        );
+        returnTeXFunction.parent = texNode;
+        returnChildren.add(returnTeXFunction);
+      } else {
+        returnChildren.add(currentChild);
+      }
+    }
+    if (rootCursorIndex != null) {
+      returnChildren.removeAt(rootCursorIndex);
+    }
+    returnNode.children.addAll(returnChildren);
+    return returnNode;
+  }
+
+  /// Traverses a TeXNode tree, setting each TeXFunction node's parent to the current node
+  /// and applies this process recursively to all argument nodes within these functions.
+  TeXNode setParentRecursively(TeXNode node) {
+    final childrenLength = node.children.length;
+    for (var i = 0; i < childrenLength; i++) {
+      final child = node.children[i];
+      if (child is TeXFunction) {
+        child.parent = node;
+        final innerNodesLength = child.argNodes.length;
+        for (var j = 0; j < innerNodesLength; j++) {
+          setParentRecursively(child.argNodes[j]);
+        }
+      }
+    }
+    return node;
+  }
+
+  /// Sets the cursor position to the end of each node's children list in a TeXNode tree.
+  /// It ensures that the cursor is correctly placed after the last child for every node in the tree.
+  TeXNode correctCursorPositionRecursively(TeXNode node) {
+    final childrenLength = node.children.length;
+    node.courserPosition = childrenLength;
+    for (var i = 0; i < childrenLength; i++) {
+      final child = node.children[i];
+      if (child is TeXFunction) {
+        final innerNodesLength = child.argNodes.length;
+        for (var j = 0; j < innerNodesLength; j++) {
+          correctCursorPositionRecursively(child.argNodes[j]);
+        }
+      }
+    }
+    return node;
+  }
+
+  /// Adds the given [TeX] to a [TeXNode] and sets it as the root node
+  void setRootNodeTeX(List<TeX> tex) {
+    final returnNode = TeXNode(null);
+    returnNode.children.addAll(tex);
+    setRootNode(returnNode);
+  }
+
+  /// Clears the current value and sets the root node to it to the given [texNode].
+  void setRootNode(TeXNode texNode) {
+    try {
+      final removedCursor = removeCursorRecursively(texNode);
+      final correctedParent = setParentRecursively(removedCursor);
+      final correctedPosition =
+          correctCursorPositionRecursively(correctedParent);
+      root = correctedPosition;
+    } catch (e) {
+      throw Exception('Unsupported input TeXNode');
+    }
+    currentNode = root;
+    currentNode.courserPosition = currentNode.children.length;
+    currentNode.setCursor();
+    notifyListeners();
+  }
+
   /// Clears the current value and sets it to the [expression] equivalent.
   void updateValue(Expression expression) {
     try {
