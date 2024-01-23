@@ -672,9 +672,10 @@ class _FieldPreview extends StatelessWidget {
 /// A controller for an editable math field.
 class MathFieldEditingController extends ChangeNotifier {
   /// Constructs a [MathKeyboardViewModel].
-  MathFieldEditingController() {
+  MathFieldEditingController({bool? showBracket}) {
     currentNode = root;
     currentNode.setCursor();
+    this.showBracket = showBracket ?? true;
   }
 
   /// Type of the Keyboard.
@@ -685,6 +686,8 @@ class MathFieldEditingController extends ChangeNotifier {
 
   /// The block the user is currently in.
   late TeXNode currentNode;
+
+  bool showBracket = true;
 
   /// Returns the current editing value (expression), which requires temporarily
   /// removing the cursor. When [placeholderWhenEmpty] is true, a TeX \Box
@@ -706,7 +709,10 @@ class MathFieldEditingController extends ChangeNotifier {
   /// Clears the current value and sets it to the [expression] equivalent.
   void updateValue(Expression expression) {
     try {
-      root = convertMathExpressionToTeXNode(expression);
+      root = convertMathExpressionToTeXNode(
+        mathExpression: expression,
+        showBracket: showBracket,
+      );
     } catch (e) {
       throw Exception('Unsupported input expression $expression ($e)');
     }

@@ -42,11 +42,15 @@ class TeXParser {
         .map(num.parse);
 
     final pi = (string('{') & string(r'\pi') & string('}')).map((a) => math.pi);
+    final pi2 = string(r'\pi').map((a) => math.pi);
     final e = (string('{') & string('e') & string('}')).map((a) => math.e);
+    final e2 = string('e').map((a) => math.e);
     final variable =
         (string('{') & letter().plus().flatten() & string('}')).pick(1);
+    final variable2 = letter().plus().flatten();
 
-    final basic = (number | pi | e | variable).map((v) => [v, 'b']);
+    final basic = (number | pi | e | variable | pi2 | e2 | variable2)
+        .map((v) => [v, 'b']);
 
     final sqrt =
         (string(r'\sqrt') & char('{').and()).map((v) => [r'\sqrt', 'f']);
