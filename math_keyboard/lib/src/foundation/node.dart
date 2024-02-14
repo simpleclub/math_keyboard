@@ -149,10 +149,16 @@ class TeXFunction extends TeX {
     switch (type) {
       case TeXArg.braces:
         return '{';
+      case TeXArg.underscore_braces:
+        return '_{';
+      case TeXArg.caret_braces:
+        return '^{';
       case TeXArg.brackets:
         return '[';
-      default:
+      case TeXArg.parentheses:
         return '(';
+      case TeXArg.parentheses_lr:
+        return r'\left(';
     }
   }
 
@@ -160,11 +166,15 @@ class TeXFunction extends TeX {
   String closingChar(TeXArg type) {
     switch (type) {
       case TeXArg.braces:
+      case TeXArg.underscore_braces:
+      case TeXArg.caret_braces:
         return '}';
       case TeXArg.brackets:
         return ']';
-      default:
+      case TeXArg.parentheses:
         return ')';
+      case TeXArg.parentheses_lr:
+        return r'\right)';
     }
   }
 
@@ -238,6 +248,18 @@ enum TeXArg {
   /// In most of the cases, braces will be used. (E.g arguments of fractions).
   braces,
 
+  /// _{ }
+  ///
+  /// This allows you to define subscript arguments on functions that support
+  /// it (like summation)
+  underscore_braces,
+
+  /// ^{ }
+  ///
+  /// This allows you to define superscript arguments on functions that support
+  /// it (like summation)
+  caret_braces,
+
   /// [ ]
   ///
   /// Brackets are only used for the nth root at the moment.
@@ -249,4 +271,10 @@ enum TeXArg {
   /// for functions like sin, cos, tan, etc. as well, so the user doesn't have
   /// to close the parentheses manually.
   parentheses,
+
+  /// \left( \right)
+  ///
+  /// These parentheses automatically expand to match the size of their content,
+  /// making them more visually appealing in most cases.
+  parentheses_lr,
 }

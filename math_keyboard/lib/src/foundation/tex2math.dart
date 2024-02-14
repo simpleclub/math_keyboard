@@ -65,10 +65,18 @@ class TeXParser {
         (string(r'\frac') | string(r'\log')).map((v) => [v, 'f']);
     final function = simpleFunction | otherFunction | sqrt | nrt;
 
-    final lp = (string('(') | char('{') | string(r'\left|') | char('['))
+    final lp = (string('(') |
+            char('{') |
+            string(r'\left|') |
+            char('[') |
+            string(r'\left('))
         .map((v) => [v, 'l']);
 
-    final rp = (string(')') | char('}') | string(r'\right|') | char(']'))
+    final rp = (string(')') |
+            char('}') |
+            string(r'\right|') |
+            char(']') |
+            string(r'\right)'))
         .map((v) => [v, 'r']);
 
     final plus = char('+').map((v) => [
@@ -170,9 +178,11 @@ class TeXParser {
           case 'l':
             // In case there is a closing parenthesis directly followed by an
             // opening one, some further checks are necessary.
-            if (_stream[i][0] == ')' && _stream[i + 1][0] == '(') {
+            if ((_stream[i][0] == ')' || _stream[i][0] == r'\right)') &&
+                (_stream[i + 1][0] == '(' || _stream[i + 1][0] == r'\left(')) {
               insertTimes = true;
-            } else if (_stream[i][0] == '}' && _stream[i + 1][0] == '(') {
+            } else if (_stream[i][0] == '}' &&
+                (_stream[i + 1][0] == '(' || _stream[i + 1][0] == r'\left(')) {
               // This case is unfavorable. If the '}' closes the second argument
               // of a fraction or marks the end of an exponent, we want to
               // insert 'times'. However, if '}' closes the base argument of a
