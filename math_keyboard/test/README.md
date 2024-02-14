@@ -10,7 +10,7 @@ On top of that, it should be noted that we have **internal test cases**
 we need it to when integrating (on the unit level) with proprietary systems.
 This is to say that if you are missing a test case (you are wondering why it
 is not covered), it might be that we have an internal test case that is not
-included in this repo that makes us feel like that particalur case is covered.
+included in this repo that makes us feel like that particular case is covered.
 Do feel free, however, to contribute any missing test cases in this repo as well
 as they will always be more focused this way :)
 

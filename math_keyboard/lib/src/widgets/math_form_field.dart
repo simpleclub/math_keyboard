@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:math_keyboard/src/custom_button_pages/custom_button_page.dart';
 import 'package:math_keyboard/src/widgets/math_field.dart';
 import 'package:math_keyboard/src/widgets/math_keyboard.dart';
 
@@ -32,6 +33,7 @@ class MathFormField extends FormField<String> {
     ValueChanged<String>? onFieldSubmitted,
     AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
     FormFieldValidator<String>? validator,
+    List<CustomButtonPage> customPages = const [],
   }) : super(
           key: key,
           initialValue:
@@ -57,6 +59,7 @@ class MathFormField extends FormField<String> {
               autofocus: autofocus,
               onChanged: onChangedHandler,
               onSubmitted: onFieldSubmitted,
+              customPages: customPages,
             );
           },
         );
