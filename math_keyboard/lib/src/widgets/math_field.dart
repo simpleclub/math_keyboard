@@ -627,9 +627,9 @@ class _FieldPreview extends StatelessWidget {
         );
 
     return ConstrainedBox(
-      constraints: const BoxConstraints(
+      constraints: BoxConstraints(
         minWidth: double.infinity,
-        minHeight: 48,
+        minHeight: (decoration.isDense ?? false) ? 0: 48,
       ),
       child: InputDecorator(
         textAlignVertical: TextAlignVertical.center,
