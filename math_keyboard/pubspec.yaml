@@ -6,7 +6,7 @@ version: 0.2.1
 homepage: https://github.com/simpleclub/math_keyboard/tree/main/math_keyboard
 
 environment:
-  sdk: ">=2.12.0 <4.0.0"
+  sdk: ">=3.0.0 <4.0.0"
   flutter: ">=2.0.0"
 
 dependencies:
