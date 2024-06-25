@@ -84,7 +84,6 @@ class _DemoPageViewState extends State<DemoPageView> {
                 bottom: 0,
                 left: 8,
                 child: MouseRegion(
-                  cursor: MaterialStateMouseCursor.clickable,
                   child: GestureDetector(
                     onTap: () {
                       _controller.animateToPage(
@@ -105,7 +104,7 @@ class _DemoPageViewState extends State<DemoPageView> {
                 bottom: 0,
                 right: 8,
                 child: MouseRegion(
-                  cursor: MaterialStateMouseCursor.clickable,
+                  cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: () {
                       _controller.animateToPage(
@@ -188,7 +187,7 @@ class _PageIndicator extends StatelessWidget {
     final size = Size.fromRadius(selected ? 6.5 : 5);
 
     return MouseRegion(
-      cursor: MaterialStateMouseCursor.clickable,
+      cursor: SystemMouseCursors.click,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
@@ -494,7 +493,7 @@ class _ControllerPageState extends State<_ControllerPage> {
                   decoration: InputDecoration(
                     helperText: 'Clear all field',
                     suffix: MouseRegion(
-                      cursor: MaterialStateMouseCursor.clickable,
+                      cursor: SystemMouseCursors.click,
                       child: GestureDetector(
                         onTap: _clearAllController.clear,
                         child: const Icon(

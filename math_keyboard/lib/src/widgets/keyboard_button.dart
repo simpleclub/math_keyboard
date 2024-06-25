@@ -132,7 +132,7 @@ class _KeyboardButtonState extends State<KeyboardButton>
     }
 
     return MouseRegion(
-      cursor: MaterialStateMouseCursor.clickable,
+      cursor: SystemMouseCursors.click,
       child: result,
     );
   }

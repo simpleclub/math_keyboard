@@ -12,7 +12,7 @@ abstract class KeyboardButtonConfig {
   /// Optional flex.
   final int? flex;
 
-  /// The list of [RawKeyEvent.character] that should trigger this keyboard
+  /// The list of [KeyEvent.character] that should trigger this keyboard
   /// button on a physical keyboard.
   ///
   /// Note that the case of the characters is ignored.

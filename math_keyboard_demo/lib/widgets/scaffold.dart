@@ -73,7 +73,7 @@ class DemoScaffold extends StatelessWidget {
                         bottom: 3,
                       ),
                       child: MouseRegion(
-                        cursor: MaterialStateMouseCursor.clickable,
+                        cursor: SystemMouseCursors.click,
                         child: GestureDetector(
                           onTap: () {
                             launchUrlString(gitHubUrl);
@@ -191,7 +191,7 @@ class DemoScaffold extends StatelessWidget {
                 height: 0,
               ),
               MouseRegion(
-                cursor: MaterialStateMouseCursor.clickable,
+                cursor: SystemMouseCursors.click,
                 child: GestureDetector(
                   onTap: () {
                     launchUrlString(organizationUrl);
