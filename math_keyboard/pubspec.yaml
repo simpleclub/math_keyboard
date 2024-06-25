@@ -6,8 +6,8 @@ version: 0.2.1
 homepage: https://github.com/simpleclub/math_keyboard/tree/main/math_keyboard
 
 environment:
-  sdk: '>=2.12.0 <4.0.0'
-  flutter: '>=2.0.0'
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.0.0'
 
 dependencies:
   flutter:
@@ -17,9 +17,9 @@ dependencies:
 
   flutter_math_fork: ^0.7.1
   holding_gesture: ^1.1.0
-  intl: ^0.18.0
-  math_expressions: ^2.1.0
-  petitparser: ^5.0.0
+  intl: ^0.19.0
+  math_expressions: ^2.5.0
+  petitparser: ^6.0.0
 
 dev_dependencies:
   flutter_test:
