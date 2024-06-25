@@ -1,3 +1,8 @@
+## 0.3.0
+
+* Updated all dependencies
+* Require flutter: `'>=3.22.2'` 
+
 ## 0.2.1
 
 * Added Android support to the demo project.
