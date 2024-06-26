@@ -358,8 +358,8 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     );
   }
 
-  KeyEventResult _handleKey(FocusNode node, RawKeyEvent keyEvent) {
-    if (keyEvent is! RawKeyDownEvent) {
+  KeyEventResult _handleKey(FocusNode node, KeyEvent keyEvent) {
+    if (keyEvent is! KeyDownEvent) {
       // We do not want to handle key up events in order to prevent double
       // detection of logical key events (pressing backspace would be triggered
       // twice - once for key down and once for key up). Characters already
@@ -392,7 +392,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     return KeyEventResult.ignored;
   }
 
-  /// Handles the given [RawKeyEvent.character].
+  /// Handles the given [KeyEvent.character].
   ///
   /// Returns `null` if not handled (indecisive) and a [KeyEventResult] if we
   /// can conclude about the complete key handling from the action taken.
@@ -445,7 +445,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     return null;
   }
 
-  /// Handles the given [RawKeyEvent.logicalKey].
+  /// Handles the given [KeyEvent.logicalKey].
   ///
   /// Returns `null` if not handled (indecisive) and a [KeyEventResult] if we
   /// can conclude about the complete key handling from the action taken.
@@ -481,16 +481,15 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (_isKeyboardShown) {
+    return PopScope(
+      canPop: !_isKeyboardShown,
+      onPopInvoked: (didPop) async {
+        if (!didPop) {
           _closeKeyboard();
-          return false;
         }
-        return true;
       },
       child: MouseRegion(
-        cursor: MaterialStateMouseCursor.textable,
+        cursor: SystemMouseCursors.text,
         child: Focus(
           focusNode: _focusNode,
           autofocus: widget.autofocus,
@@ -500,7 +499,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
           // todo: fix the problem once we have an update on flutter/flutter#44681.
           onFocusChange: (primary) =>
               _handleFocusChanged(context, open: primary),
-          onKey: _handleKey,
+          onKeyEvent: _handleKey,
           child: GestureDetector(
             onTap: () {
               if (!_focusNode.hasFocus) {

@@ -20,11 +20,6 @@ class _DemoAppState extends State<DemoApp> {
       title: appTitle,
       theme: ThemeData(
         brightness: _darkMode ? Brightness.dark : Brightness.light,
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.amber,
-        ).copyWith(
-          secondary: Colors.amberAccent,
-        ),
       ),
       home: DemoScaffold(
         onToggleBrightness: () {

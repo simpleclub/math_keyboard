@@ -187,7 +187,7 @@ class _ClearableAutofocusExampleState
               controller: _controller,
               decoration: InputDecoration(
                 suffix: MouseRegion(
-                  cursor: MaterialStateMouseCursor.clickable,
+                  cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: _controller.clear,
                     child: const Icon(
