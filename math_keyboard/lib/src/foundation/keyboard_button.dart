@@ -64,13 +64,13 @@ class DeleteButtonConfig extends KeyboardButtonConfig {
 
 /// Class representing a button configuration of the Previous Button.
 class PreviousButtonConfig extends KeyboardButtonConfig {
-  /// Constructs a [DeleteButtonConfig].
+  /// Constructs a [PreviousButtonConfig].
   PreviousButtonConfig({int? flex}) : super(flex: flex);
 }
 
 /// Class representing a button configuration of the Next Button.
 class NextButtonConfig extends KeyboardButtonConfig {
-  /// Constructs a [DeleteButtonConfig].
+  /// Constructs a [NextButtonConfig].
   NextButtonConfig({int? flex}) : super(flex: flex);
 }
 
