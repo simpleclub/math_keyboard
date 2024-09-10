@@ -86,6 +86,13 @@ class PageButtonConfig extends KeyboardButtonConfig {
   const PageButtonConfig({int? flex}) : super(flex: flex);
 }
 
+/// Class representing a button configuration of the Blank Button
+/// for spacing UI layout.
+class BlankButtonConfig extends KeyboardButtonConfig {
+  /// Constructs a [PageButtonConfig].
+  const BlankButtonConfig({int? flex}) : super(flex: flex);
+}
+
 /// List of keyboard button configs for the digits from 0-9.
 ///
 /// List access from 0 to 9 will return the appropriate digit button.
@@ -110,13 +117,6 @@ const _subtractButton = BasicKeyboardButtonConfig(
   value: '-',
   keyboardCharacters: ['-'],
   highlighted: true,
-);
-
-const _blankButton = BasicKeyboardButtonConfig(
-  label: ' ',
-  value: ' ',
-  keyboardCharacters: [' '],
-  highlighted: false,
 );
 
 /// Keyboard showing extended functionality.
@@ -411,9 +411,10 @@ final coachOnKeyboard1 = [
       highlighted: true,
       keyboardCharacters: [')'],
     ),
+    BlankButtonConfig(flex: 2),
     PreviousButtonConfig(),
     NextButtonConfig(),
-    // DeleteButtonConfig(),
-    _blankButton, 
+    BlankButtonConfig(flex: 2),
+    DeleteButtonConfig(),
   ],
 ];

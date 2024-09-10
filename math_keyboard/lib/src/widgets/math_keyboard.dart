@@ -23,7 +23,7 @@ enum MathKeyboardType {
   numberOnly,
 
   /// Keyboard for coach on app.
-  coachOnKeyboard1, 
+  coachOnKeyboard1,
 }
 
 /// Widget displaying the math keyboard.
@@ -125,14 +125,16 @@ class MathKeyboard extends StatelessWidget {
                                   controller: controller,
                                   page1: type == MathKeyboardType.numberOnly
                                       ? numberKeyboard
-                                      : type == MathKeyboardType.coachOnKeyboard1
-                                        ? standardKeyboard
-                                        : standardKeyboard,
+                                      : type ==
+                                              MathKeyboardType.coachOnKeyboard1
+                                          ? standardKeyboard
+                                          : standardKeyboard,
                                   page2: type == MathKeyboardType.numberOnly
                                       ? null
-                                      : type == MathKeyboardType.coachOnKeyboard1
-                                        ? coachOnKeyboard1
-                                        : functionKeyboard,
+                                      : type ==
+                                              MathKeyboardType.coachOnKeyboard1
+                                          ? coachOnKeyboard1
+                                          : functionKeyboard,
                                   onSubmit: onSubmit,
                                 ),
                               ),
@@ -378,6 +380,12 @@ class _Buttons extends StatelessWidget {
                             icon: Icons.keyboard_return,
                             onTap: onSubmit,
                             highlightLevel: 2,
+                          )
+                        else if (config is BlankButtonConfig)
+                          _BasicButton(
+                            label: '',
+                            flex: config.flex,
+                            onTap: null,
                           ),
                     ],
                   ),
@@ -455,15 +463,17 @@ class _BasicButton extends StatelessWidget {
       );
     }
 
-    result = KeyboardButton(
-      onTap: onTap,
-      color: highlightLevel > 1
-          ? Theme.of(context).colorScheme.secondary
-          : highlightLevel == 1
-              ? Colors.grey[900]
-              : null,
-      child: result,
-    );
+    result = (onTap == null)
+        ? SizedBox.shrink()
+        : KeyboardButton(
+            onTap: onTap,
+            color: highlightLevel > 1
+                ? Theme.of(context).colorScheme.secondary
+                : highlightLevel == 1
+                    ? Colors.grey[900]
+                    : null,
+            child: result,
+          );
 
     return Expanded(
       flex: flex ?? 2,

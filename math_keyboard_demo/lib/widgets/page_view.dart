@@ -228,7 +228,7 @@ class _PrimaryPageState extends State<_PrimaryPage> {
     ..updateValue(Parser().parse('4.2 - (cos(x)/(x^3 - sin(x))) + e^(4^2)'));
   late final _numberController = MathFieldEditingController()
     ..updateValue(Parser().parse('42'));
-    late final _customController = MathFieldEditingController()
+  late final _customController = MathFieldEditingController()
     ..updateValue(Parser().parse('0'));
 
   @override
@@ -300,29 +300,29 @@ class _PrimaryPageState extends State<_PrimaryPage> {
           child: SizedBox(
             width: 5e2,
             child: Text(
-              'test', 
+              'test',
               textAlign: TextAlign.center,
             ),
           ),
         ),
-         SizedBox(
-            width: 420,
-            child: MathField(
-              controller: _customController,
-              keyboardType: MathKeyboardType.coachOnKeyboard1,
-              decoration: InputDecoration(
-                labelText: 'coach on math field',
-                iconColor: Colors.red,
-                prefixIconColor: Colors.greenAccent, 
-                suffixIconColor: Colors.yellowAccent,
-                fillColor: Colors.amberAccent,
-                focusColor: Colors.blueAccent,
-                hoverColor: Colors.cyanAccent, 
-                filled: true,
-                border: OutlineInputBorder(),
-              ),
+        SizedBox(
+          width: 420,
+          child: MathField(
+            controller: _customController,
+            keyboardType: MathKeyboardType.coachOnKeyboard1,
+            decoration: InputDecoration(
+              labelText: 'coach on math field',
+              iconColor: Colors.red,
+              prefixIconColor: Colors.greenAccent,
+              suffixIconColor: Colors.yellowAccent,
+              fillColor: Colors.amberAccent,
+              focusColor: Colors.blueAccent,
+              hoverColor: Colors.cyanAccent,
+              filled: true,
+              border: OutlineInputBorder(),
             ),
           ),
+        ),
       ],
     );
   }
