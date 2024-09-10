@@ -312,12 +312,6 @@ class _PrimaryPageState extends State<_PrimaryPage> {
             keyboardType: MathKeyboardType.coachOnKeyboard1,
             decoration: InputDecoration(
               labelText: 'coach on math field',
-              iconColor: Colors.red,
-              prefixIconColor: Colors.greenAccent,
-              suffixIconColor: Colors.yellowAccent,
-              fillColor: Colors.amberAccent,
-              focusColor: Colors.blueAccent,
-              hoverColor: Colors.cyanAccent,
               filled: true,
               border: OutlineInputBorder(),
             ),
