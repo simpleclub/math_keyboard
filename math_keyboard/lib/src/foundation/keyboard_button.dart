@@ -112,6 +112,13 @@ const _subtractButton = BasicKeyboardButtonConfig(
   highlighted: true,
 );
 
+const _blankButton = BasicKeyboardButtonConfig(
+  label: ' ',
+  value: ' ',
+  keyboardCharacters: [' '],
+  highlighted: false,
+);
+
 /// Keyboard showing extended functionality.
 final functionKeyboard = [
   [
