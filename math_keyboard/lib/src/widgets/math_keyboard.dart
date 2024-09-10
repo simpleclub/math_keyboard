@@ -125,10 +125,14 @@ class MathKeyboard extends StatelessWidget {
                                   controller: controller,
                                   page1: type == MathKeyboardType.numberOnly
                                       ? numberKeyboard
-                                      : standardKeyboard,
+                                      : type == MathKeyboardType.coachOnKeyboard1
+                                        ? standardKeyboard
+                                        : standardKeyboard,
                                   page2: type == MathKeyboardType.numberOnly
                                       ? null
-                                      : coachOnKeyboard1, //functionKeyboard,
+                                      : type == MathKeyboardType.coachOnKeyboard1
+                                        ? coachOnKeyboard1
+                                        : functionKeyboard,
                                   onSubmit: onSubmit,
                                 ),
                               ),
