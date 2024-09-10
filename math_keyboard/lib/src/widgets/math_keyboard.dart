@@ -37,6 +37,9 @@ class MathKeyboard extends StatelessWidget {
     this.onSubmit,
     this.insetsState,
     this.slideAnimation,
+    this.backgroundColor = Colors.black,
+    this.buttonColor = Colors.transparent,
+    this.highlightColor = Colors.transparent,
     this.padding = const EdgeInsets.only(
       bottom: 4,
       left: 4,
@@ -70,6 +73,21 @@ class MathKeyboard extends StatelessWidget {
   /// Can be `null`.
   final VoidCallback? onSubmit;
 
+  /// Background color of the keyboard.
+  ///
+  /// Defaults to `Colors.black,`.
+  final Color backgroundColor;
+
+  /// Button color of the keyboard.
+  ///
+  /// Defaults to `Colors.transparent,`.
+  final Color buttonColor;
+
+  /// Button highlight color of the keyboard.
+  ///
+  /// Defaults to `Colors.grey[900],`.
+  final Color highlightColor;
+
   /// Insets of the keyboard.
   ///
   /// Defaults to `const EdgeInsets.only(bottom: 4, left: 4, right: 4),`.
@@ -96,7 +114,7 @@ class MathKeyboard extends StatelessWidget {
             child: Material(
               type: MaterialType.transparency,
               child: ColoredBox(
-                color: Colors.black,
+                color: backgroundColor,
                 child: SafeArea(
                   top: false,
                   child: _KeyboardBody(
