@@ -21,6 +21,9 @@ enum MathKeyboardType {
 
   /// Keyboard for number input only.
   numberOnly,
+
+  /// Keyboard for coach on app.
+  coachOnKeyboard1, 
 }
 
 /// Widget displaying the math keyboard.
