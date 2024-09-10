@@ -128,7 +128,7 @@ class MathKeyboard extends StatelessWidget {
                                       : standardKeyboard,
                                   page2: type == MathKeyboardType.numberOnly
                                       ? null
-                                      : functionKeyboard,
+                                      : coachOnKeyboard1, //functionKeyboard,
                                   onSubmit: onSubmit,
                                 ),
                               ),

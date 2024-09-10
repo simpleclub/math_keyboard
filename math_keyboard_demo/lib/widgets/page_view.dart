@@ -228,11 +228,14 @@ class _PrimaryPageState extends State<_PrimaryPage> {
     ..updateValue(Parser().parse('4.2 - (cos(x)/(x^3 - sin(x))) + e^(4^2)'));
   late final _numberController = MathFieldEditingController()
     ..updateValue(Parser().parse('42'));
+    late final _customController = MathFieldEditingController()
+    ..updateValue(Parser().parse('0'));
 
   @override
   void dispose() {
     _expressionController.dispose();
     _numberController.dispose();
+    _customController.dispose();
     super.dispose();
   }
 
@@ -305,7 +308,7 @@ class _PrimaryPageState extends State<_PrimaryPage> {
          SizedBox(
             width: 420,
             child: MathField(
-              controller: _numberController,
+              controller: _customController,
               keyboardType: MathKeyboardType.coachOnKeyboard1,
               decoration: InputDecoration(
                 labelText: 'coach on math field',

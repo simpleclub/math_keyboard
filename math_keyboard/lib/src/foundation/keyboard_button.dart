@@ -413,6 +413,7 @@ final coachOnKeyboard1 = [
     ),
     PreviousButtonConfig(),
     NextButtonConfig(),
-    DeleteButtonConfig(),
+    // DeleteButtonConfig(),
+    _blankButton, 
   ],
 ];
