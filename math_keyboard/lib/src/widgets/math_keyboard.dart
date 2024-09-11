@@ -553,14 +553,14 @@ class _BasicButton extends StatelessWidget {
     if (label == null) {
       result = Icon(
         icon,
-        color: Colors.white,
+        color: iconColor ?? Colors.white,
       );
     } else if (asTex) {
       result = Math.tex(
         label!,
         options: MathOptions(
           fontSize: 22,
-          color: Colors.white,
+          color: iconColor ?? Colors.white,
         ),
       );
     } else {
@@ -573,9 +573,9 @@ class _BasicButton extends StatelessWidget {
 
       result = Text(
         symbol!,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 22,
-          color: Colors.white,
+          color: iconColor ?? Colors.white,
         ),
       );
     }
