@@ -329,6 +329,11 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
             controller: _controller,
             type: widget.keyboardType,
             variables: _variables,
+            submitColor: Colors.redAccent,
+            highlightColor: Colors.lightGreenAccent,
+            buttonColor: Colors.yellow,
+            backgroundColor: Colors.lightBlueAccent,
+            iconColor: Colors.black,
             onSubmit: _submit,
             // Note that we need to pass the insets state like this because the
             // overlay context does not have the ancestor state.
