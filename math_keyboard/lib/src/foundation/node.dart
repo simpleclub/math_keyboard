@@ -149,6 +149,10 @@ class TeXFunction extends TeX {
     switch (type) {
       case TeXArg.braces:
         return '{';
+      case TeXArg.powbraces:
+        return '^{';
+      case TeXArg.undbraces:
+        return '_{';
       case TeXArg.brackets:
         return '[';
       default:
@@ -161,8 +165,14 @@ class TeXFunction extends TeX {
     switch (type) {
       case TeXArg.braces:
         return '}';
+      case TeXArg.powbraces:
+        return '}';
+      case TeXArg.undbraces:
+        return '}';
       case TeXArg.brackets:
         return ']';
+      case TeXArg.parenthesesdx:
+        return r')  dx';
       default:
         return ')';
     }
@@ -233,6 +243,16 @@ enum NavigationState {
 
 /// How the argument is marked.
 enum TeXArg {
+  /// _{ }
+  ///
+  /// In most of the cases, braces will be used. (E.g arguments of fractions).
+  undbraces,
+
+  /// ^{ }
+  ///
+  /// In most of the cases, braces will be used. (E.g arguments of fractions).
+  powbraces,
+
   /// { }
   ///
   /// In most of the cases, braces will be used. (E.g arguments of fractions).
@@ -249,4 +269,9 @@ enum TeXArg {
   /// for functions like sin, cos, tan, etc. as well, so the user doesn't have
   /// to close the parentheses manually.
   parentheses,
+
+  /// ()
+  ///
+  /// A completely custom end just to make integration work properly
+  parenthesesdx,
 }

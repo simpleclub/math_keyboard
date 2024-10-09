@@ -309,7 +309,7 @@ class _Buttons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 230,
+      height: 280,
       child: AnimatedBuilder(
         animation: controller,
         builder: (context, child) {

@@ -204,6 +204,20 @@ final functionKeyboard = [
     ),
   ],
   [
+    const BasicKeyboardButtonConfig(
+      label: r'\int_{\Box}^{\Box} (\Box) dx',
+      value: r'\int',
+      asTex: true,
+      args: [TeXArg.undbraces, TeXArg.powbraces, TeXArg.parenthesesdx],
+    ),
+    const BasicKeyboardButtonConfig(
+      label: r'\frac{d}{dx} ({\Box})',
+      value: r'\frac{d}{dx}',
+      asTex: true,
+      args: [TeXArg.braces],
+    ),
+  ],
+  [
     const PageButtonConfig(flex: 3),
     const BasicKeyboardButtonConfig(
       label: '(',
