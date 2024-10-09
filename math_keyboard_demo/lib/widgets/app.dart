@@ -17,17 +17,24 @@ class _DemoAppState extends State<DemoApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: appTitle,
-      theme: ThemeData(
-        brightness: _darkMode ? Brightness.dark : Brightness.light,
-      ),
-      home: DemoScaffold(
-        onToggleBrightness: () {
-          setState(() {
-            _darkMode = !_darkMode;
-          });
-        },
-      ),
-    );
+        title: appTitle,
+        theme: ThemeData(
+          brightness: _darkMode ? Brightness.dark : Brightness.light,
+        ),
+        home: MyTest());
+  }
+}
+
+class MyTest extends StatefulWidget {
+  const MyTest({super.key});
+
+  @override
+  State<MyTest> createState() => _MyTestState();
+}
+
+class _MyTestState extends State<MyTest> {
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
   }
 }
