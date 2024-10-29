@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:math_expressions/math_expressions.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 
@@ -53,6 +54,7 @@ class _DemoPageViewState extends State<DemoPageView> {
   @override
   Widget build(BuildContext context) {
     final pages = [
+      _Page(child: EditableMixedTextFieldExample()),
       const _Page(child: _PrimaryPage()),
       const _Page(child: _InputDecorationPage()),
       const _Page(child: _ControllerPage()),
@@ -216,6 +218,158 @@ class _PageIndicator extends StatelessWidget {
   }
 }
 
+class EditableMixedTextFieldExample extends StatefulWidget {
+  @override
+  _EditableMixedTextFieldExampleState createState() =>
+      _EditableMixedTextFieldExampleState();
+}
+
+class _EditableMixedTextFieldExampleState
+    extends State<EditableMixedTextFieldExample> {
+  List<Map<String, dynamic>> textElements = []; // 텍스트와 수식을 저장할 리스트
+  TextEditingController textController = TextEditingController();
+  MathFieldEditingController mathController = MathFieldEditingController();
+  int? editingIndex; // 현재 수정 중인 인덱스
+  bool isMathMode = false; // 현재 입력 모드 (수식/일반 텍스트)
+
+  // 텍스트 또는 수식 추가/수정
+  void _addOrEditElement() {
+    setState(() {
+      if (editingIndex != null) {
+        // 수정 모드
+        if (isMathMode) {
+          textElements[editingIndex!] = {
+            'type': 'math',
+            'value': mathController.currentEditingValue(),
+          };
+        } else {
+          textElements[editingIndex!] = {
+            'type': 'text',
+            'value': textController.text,
+          };
+        }
+        editingIndex = null; // 수정 완료 후 초기화
+      } else {
+        // 새 요소 추가 모드
+        if (isMathMode) {
+          textElements.add({
+            'type': 'math',
+            'value': mathController.currentEditingValue(),
+          });
+        } else {
+          textElements.add({
+            'type': 'text',
+            'value': textController.text,
+          });
+        }
+      }
+      textController.clear();
+      mathController.clear();
+    });
+  }
+
+  // 요소를 수정할 때 실행
+  void _editElement(int index) {
+    setState(() {
+      editingIndex = index;
+      isMathMode = textElements[index]['type'] == 'math';
+      if (isMathMode) {
+        // 수식을 MathField에 설정
+        mathController.updateValue(Parser().parse(textElements[index]['value']));
+      } else {
+        // 일반 텍스트를 TextField에 설정
+        textController.text = textElements[index]['value'];
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('한글과 수식 편집 가능'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => setState(() => isMathMode = false),
+                  child: Text('일반 텍스트'),
+                ),
+                ElevatedButton(
+                  onPressed: () => setState(() => isMathMode = true),
+                  child: Text('수식 입력'),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            isMathMode
+                ? MathField(
+                    controller: mathController,
+                    variables: const ['x', 'y', 'z'],
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: '수식을 입력하세요',
+                    ),
+                  )
+                : TextField(
+                    controller: textController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: '일반 텍스트를 입력하세요',
+                    ),
+                  ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: _addOrEditElement,
+              child: Text(editingIndex != null ? '수정 완료' : '추가'),
+            ),
+            SizedBox(height: 20),
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Wrap(
+                children: List.generate(
+                  textElements.length,
+                  (index) {
+                    final element = textElements[index];
+                    return GestureDetector(
+                      onTap: () => _editElement(index),
+                      child: element['type'] == 'math'
+                          ? Container(
+                              padding: EdgeInsets.symmetric(horizontal: 4),
+                              child: Math.tex(
+                                element['value'] ?? '', // 수식 값 설정
+                                textStyle: TextStyle(fontSize: 18),
+                              ),
+                            )
+                          : Container(
+                              padding: EdgeInsets.symmetric(horizontal: 4),
+                              child: Text(
+                                element['value'],
+                                style: TextStyle(fontSize: 18),
+                              ),
+                            ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
 class _PrimaryPage extends StatefulWidget {
   const _PrimaryPage({Key? key}) : super(key: key);
 
@@ -322,8 +476,50 @@ class _PrimaryPageState extends State<_PrimaryPage> {
   }
 }
 
-class _InputDecorationPage extends StatelessWidget {
+class _InputDecorationPage extends StatefulWidget {
   const _InputDecorationPage({Key? key}) : super(key: key);
+
+  @override
+  _InputDecorationPageState createState() => _InputDecorationPageState();
+}
+
+class _InputDecorationPageState extends State<_InputDecorationPage> {
+  final _textController = TextEditingController();
+  final _mathController = MathFieldEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _textController.addListener(_syncControllers);
+    _mathController.addListener(_syncControllers);
+  }
+
+  @override
+  void dispose() {
+    _textController.removeListener(_syncControllers);
+    _mathController.removeListener(_syncControllers);
+    _textController.dispose();
+    _mathController.dispose();
+    super.dispose();
+  }
+
+  void _syncControllers() {
+    // 수식이 변경되을 때 텍스트 컨트롤러에 반영
+    final mathValue = _mathController.currentEditingValue();
+    if (mathValue != _textController.text && mathValue != r'\Box') {
+      _textController.text = mathValue;
+    }
+
+    // 텍스트가 변경되었을 때 수식 컨트롤러에 반영
+    if (_textController.text != mathValue) {
+      try {
+        final expression = Parser().parse(_textController.text);
+        _mathController.updateValue(expression);
+      } catch (e) {
+        // 수식 파싱에 실패한 경우 예외 처리
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -356,11 +552,23 @@ class _InputDecorationPage extends StatelessWidget {
         SizedBox(
           width: 420,
           child: TextField(
+            controller: _textController,
             decoration: InputDecoration(
-              hintText: 'This is a text field',
+              hintText: 'Enter text or math expression',
               filled: true,
               border: OutlineInputBorder(),
             ),
+            onChanged: (value) {
+              try {
+                // 입력된 텍스트를 수식으로 파싱
+                final expression = Parser().parse(value);
+                // 파싱이 성공하면 MathField에 업데이트
+                _mathController.updateValue(expression);
+              } catch (e) {
+                // 수식 파싱에 실패한 경우 예외 처리
+                // 잘못된 수식이 입력된 경우 무시하거나 사용자에게 알림
+              }
+            },
           ),
         ),
         Padding(
@@ -370,6 +578,7 @@ class _InputDecorationPage extends StatelessWidget {
           child: SizedBox(
             width: 420,
             child: MathField(
+              controller: _mathController,
               decoration: InputDecoration(
                 hintText: 'And this is a math field',
                 filled: true,
