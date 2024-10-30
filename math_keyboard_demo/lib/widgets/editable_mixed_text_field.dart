@@ -12,12 +12,15 @@ class _EditableMixedTextFieldState extends State<EditableMixedTextField> {
   List<Map<String, dynamic>> textElements = []; // 텍스트와 수식을 저장할 리스트
   TextEditingController textController = TextEditingController();
   MathFieldEditingController mathController = MathFieldEditingController();
+  FocusNode textFocusNode = FocusNode();
+  FocusNode mathFocusNode = FocusNode();
   int? editingIndex; // 현재 수정 중인 인덱스
   bool isMathMode = false; // 현재 입력 모드 (수식/일반 텍스트)
+  bool isEditing = false;
 
   // 텍스트 또는 수식 추가/수정
   void _addOrEditElement() {
-    setState(() {
+    print('mathController.currentEditingValue(): ${mathController.currentEditingValue()}');
       if (editingIndex != null) {
         // 수정 모드
         if (isMathMode) {
@@ -37,7 +40,7 @@ class _EditableMixedTextFieldState extends State<EditableMixedTextField> {
         if (isMathMode) {
           textElements.add({
             'type': 'math',
-            'value': mathController.currentEditingValue().replaceAll('{', '(').replaceAll('}', ')'),
+            'value': mathController.currentEditingValue(),
           });
         } else {
           textElements.add({
@@ -48,38 +51,41 @@ class _EditableMixedTextFieldState extends State<EditableMixedTextField> {
       }
       textController.clear();
       mathController.clear();
+      textFocusNode.unfocus();
+      mathFocusNode.unfocus();
+      isEditing = false;
+    setState(() {
     });
   }
 
   // 요소를 수정할 때 실행
   void _editElement(int index) {
-    setState(() {
+    isEditing = true;
       editingIndex = index;
       isMathMode = textElements[index]['type'] == 'math';
       if (isMathMode) {
-        // 수식을 MathField에 설정
         print(textElements[index]['value']);
-        mathController.updateValue(Parser(ParserOptions(
-          implicitMultiplication: true,
-        )).parse(textElements[index]['value']));
+        // 수식을 MathField에 설정
+        try {
+        mathController.updateValue(Parser().parse(textElements[index]['value']));
+        } catch (e) {
+          print(e.toString());
+        }
+        mathFocusNode.requestFocus();
       } else {
         // 일반 텍스트를 TextField에 설정
         textController.text = textElements[index]['value'];
+        textFocusNode.requestFocus();
       }
+      print('mathFocusNode.hasFocus: ${mathFocusNode.hasFocus}');
+      print('textFocusNode.hasFocus: ${textFocusNode.hasFocus}');
+    setState(() {
     });
   }
 
   String convertApiLatexToMathKeyboard(String apiLatex) {
     // '$' 문자 제거
-    String cleanedLatex = apiLatex.replaceAll('\$', '');
-
-    // '<br>' 태그 제거 (대소문자 구분 없이)
-    cleanedLatex = cleanedLatex.replaceAll(RegExp(r'<br>'), '');
-
-    // 중괄호를 괄호로 변경
-    cleanedLatex = cleanedLatex.replaceAll('{', '(').replaceAll('}', ')');
-
-    return cleanedLatex;
+    return apiLatex.replaceAll('\$', '');
   }
 
   void parseAndAddApiLatex(String apiLatex) {
@@ -103,7 +109,7 @@ class _EditableMixedTextFieldState extends State<EditableMixedTextField> {
         // 짝수 인덱스는 일반 텍스트
         textElements.add({
           'type': 'text',
-          'value': part,
+          'value': part.replaceAll('<br>', '').replaceAll('\n', ' '),
         });
       }
     }
@@ -112,33 +118,36 @@ class _EditableMixedTextFieldState extends State<EditableMixedTextField> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
       body: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Column(
-              children: [
-                Container(
-                  width: 300,
-                  height: 200,
-                  child: Image.asset('assets/images/ocr_test.png'), // 이미지 경로 설정
-                ),
-                SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: () {
-                    // apiLatex 문자열을 textElements에 변환하여 추가
-                    String apiLatex =
-                        "이차함수 \$(y)=(x^2)-3(x)+2\$의<br>해를 구하시오.<br>\$x = 2\$ 또는 \$x = 1\$";
-                    parseAndAddApiLatex(apiLatex);
-                    setState(() {});
-                  },
-                  child: Text('변환하기', style: TextStyle(color: Colors.white, fontSize: 20)),
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all<Color>(Colors.green),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    width: 300,
+                    height: 200,
+                    child: Image.asset('assets/images/ocr_test.png'), // 이미지 경로 설정
                   ),
-                )
-              ],
+                  SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: () {
+                      // apiLatex 문자열을 textElements에 변환하여 추가
+                      String apiLatex =
+                          "이차함수 \$y=x^2-3x+2\$의<br>\n해를 구하시오.<br>\n\$x=2\$ 또는 \$x=1\$";
+                      parseAndAddApiLatex(apiLatex);
+                      setState(() {});
+                    },
+                    child: Text('변환하기', style: TextStyle(color: Colors.white, fontSize: 20)),
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all<Color>(Colors.green),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           VerticalDivider(),
@@ -150,50 +159,40 @@ class _EditableMixedTextFieldState extends State<EditableMixedTextField> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // 기존 화면의 위젯들
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () => setState(() => isMathMode = false),
-                        child: Text('일반 텍스트'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => setState(() => isMathMode = true),
-                        child: Text('수식 입력'),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
+                  if (isEditing)
                   isMathMode
                       ? MathField(
+                        focusNode: mathFocusNode,
+                        autofocus: true,
                           controller: mathController,
                           variables: const ['x', 'y', 'z'],
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             labelText: '수식을 입력하세요',
-                            suffixIcon: IconButton(
-                              icon: Icon(Icons.functions), // '=' 버튼 아이콘
-                              onPressed: () {
-                                // '=' 문자를 수식에 추가
-                                mathController.addLeaf('=');
-                              },
-                            ),
+                            suffix: ElevatedButton(
+                    onPressed: _addOrEditElement,
+                    child: Text('수정'),
+                  ),
+                            
                           ),
                         )
                       : TextField(
+                        focusNode: textFocusNode,
+                        autofocus: true,
                           controller: textController,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             labelText: '일반 텍스트를 입력하세요',
+                            suffix: ElevatedButton(
+                    onPressed: _addOrEditElement,
+                    child: Text('수정'),
+                  ),
                           ),
+                          
                         ),
                   SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: _addOrEditElement,
-                    child: Text(editingIndex != null ? '수정 완료' : '추가'),
-                  ),
-                  SizedBox(height: 20),
+                  
+                  
                   Container(
                     padding: EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -206,13 +205,23 @@ class _EditableMixedTextFieldState extends State<EditableMixedTextField> {
                         (index) {
                           final element = textElements[index];
                           return GestureDetector(
-                            onTap: () => _editElement(index),
+                            onTap: () {
+                              textFocusNode.requestFocus();
+                              mathFocusNode.requestFocus();
+
+                              _editElement(index);
+                            },
                             child: element['type'] == 'math'
                                 ? Container(
                                     padding: EdgeInsets.symmetric(horizontal: 4),
-                                    child: Math.tex(
-                                      element['value'] ?? '', // 수식 값 설정
-                                      textStyle: TextStyle(fontSize: 18),
+                                    child: Baseline(
+                                      baseline: 16,
+                baselineType: TextBaseline.alphabetic,
+                                      child: Math.tex(
+                                        element['value'] ?? '', // 수식 값 설정
+                                        textStyle: TextStyle(fontSize: 18),
+                                        options: MathOptions(fontSize: 18),
+                                      ),
                                     ),
                                   )
                                 : Container(
@@ -227,6 +236,7 @@ class _EditableMixedTextFieldState extends State<EditableMixedTextField> {
                       ),
                     ),
                   ),
+                  SizedBox(height: 80),
                 ],
               ),
             ),
