@@ -17,11 +17,11 @@ jobs:
           You can expect triage from us soon 🙂
           In the meantime, you can try to search for similar issues in our [issue database].
 
-          [issue database]: https://github.com/simpleclub/design_tokens_builder/issues?q=is%3Aissue
+          [issue database]: https://github.com/simpleclub/math_keyboard/issues
         pr-message: |
           Hi 👋🏽 Thank you for opening your first PR with simpleclub/math_keyboard ❤
           
           You can expect a review from us soon ☺️ 
           In the meantime, please check our [contribution guidelines], the PR checklist, and the PR checks.
           
-          [contribution guidelines]: https://github.com/simpleclub/design_tokens_builder/blob/main/CONTRIBUTING.md
+          [contribution guidelines]: https://github.com/simpleclub/math_keyboard/blob/main/CONTRIBUTING.md
