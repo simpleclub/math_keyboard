@@ -53,5 +53,5 @@ In order for us to review and merge your code, please follow the link and sign t
 [create pr]: https://help.github.com/en/articles/creating-a-pull-request-from-a-fork
 [GitHub hub]: https://hub.github.com
 [ssh key]: https://help.github.com/articles/generating-ssh-keys
-[CLA]: https://simpleclub.page.link/cla
+[CLA]: https://bit.ly/simpleclub-cla
 [versioning]: https://stackoverflow.com/questions/66201337/how-do-dart-package-versions-work-how-should-i-version-my-flutter-plugins/66201338#66201338
