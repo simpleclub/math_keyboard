@@ -125,10 +125,22 @@ class MathKeyboard extends StatelessWidget {
             right: 0,
             child: Material(
               type: MaterialType.transparency,
-              child: ColoredBox(
-                color: backgroundColor,
-                child: SafeArea(
-                  top: false,
+              child: SafeArea(
+                top: false,
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(50),
+                      topRight: Radius.circular(16),
+                    ),
+                    boxShadow: [
+                      BoxShadow(offset: Offset(0, -10), blurRadius: 20,
+                      color: Color(0xFFCCCCCC))
+                    ]
+                  ),
+                  padding: EdgeInsets.only(top: 16.0),
                   child: _KeyboardBody(
                     insetsState: insetsState,
                     slideAnimation:
@@ -148,7 +160,7 @@ class MathKeyboard extends StatelessWidget {
                                   variables: variables,
                                   submitColor:submitColor, 
                                   buttonColor: buttonColor,
-                                  highlightColor: highlightColor,
+                                  highlightColor: Colors.transparent,
                                   iconColor: iconColor,
                                 ),
                               Padding(
