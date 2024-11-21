@@ -1,15 +1,26 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:math_expressions/math_expressions.dart';
 import 'package:math_keyboard/math_keyboard.dart';
+import 'package:math_parser/math_parser.dart';
 
 class EditableMixedTextField extends StatefulWidget {
+  /// Creates an instance of [EditableMixedTextField].
+  ///
+  /// This widget allows users to input and edit both text and mathematical expressions.
+  EditableMixedTextField({super.key});
+
   @override
-  _EditableMixedTextFieldState createState() => _EditableMixedTextFieldState();
+  EditableMixedTextFieldState createState() => EditableMixedTextFieldState();
 }
 
-class _EditableMixedTextFieldState extends State<EditableMixedTextField> {
-  List<Map<String, dynamic>> textElements = []; // 텍스트와 수식을 저장할 리스트
+class EditableMixedTextFieldState extends State<EditableMixedTextField> {
+  /// A list to store text and mathematical expressions.
+  List<Map<String, dynamic>> textElements = [];
+
+  /// Controller for managing text input.
   TextEditingController textController = TextEditingController();
   MathFieldEditingController mathController = MathFieldEditingController();
   FocusNode textFocusNode = FocusNode();
@@ -17,22 +28,28 @@ class _EditableMixedTextFieldState extends State<EditableMixedTextField> {
   int? editingIndex; // 현재 수정 중인 인덱스
   bool isMathMode = false; // 현재 입력 모드 (수식/일반 텍스트)
   bool isEditing = false;
+  Color editingColor = Colors.green;
+  String? latexExpression;
+
 
   // 텍스트 또는 수식 추가/수정
   void _addOrEditElement() {
-    print('mathController.currentEditingValue(): ${mathController.currentEditingValue()}');
       if (editingIndex != null) {
         // 수정 모드
         if (isMathMode) {
           textElements[editingIndex!] = {
             'type': 'math',
-            'value': mathController.currentEditingValue(),
+            'value': mathController.currentEditingValue().replaceAll('{', '').replaceAll('}', ''),
           };
+          mathController.clear();
         } else {
           textElements[editingIndex!] = {
             'type': 'text',
             'value': textController.text,
           };
+          textController.clear();
+      // textFocusNode.unfocus();
+
         }
         editingIndex = null; // 수정 완료 후 초기화
       } else {
@@ -49,10 +66,6 @@ class _EditableMixedTextFieldState extends State<EditableMixedTextField> {
           });
         }
       }
-      textController.clear();
-      mathController.clear();
-      textFocusNode.unfocus();
-      mathFocusNode.unfocus();
       isEditing = false;
     setState(() {
     });
@@ -64,10 +77,15 @@ class _EditableMixedTextFieldState extends State<EditableMixedTextField> {
       editingIndex = index;
       isMathMode = textElements[index]['type'] == 'math';
       if (isMathMode) {
+        
+        mathController.clear();
         print(textElements[index]['value']);
         // 수식을 MathField에 설정
         try {
-        mathController.updateValue(Parser().parse(textElements[index]['value']));
+          // final Expression before = TeXParser(textElements[index]['value']).parse();
+          // mathController.updateValue(before);
+        mathController.updateValue(TeXParser(textElements[index]['value']).parse());
+        // mathController.updateValue(Parser().parse(textElements[index]['value']));
         } catch (e) {
           print(e.toString());
         }
@@ -85,8 +103,33 @@ class _EditableMixedTextFieldState extends State<EditableMixedTextField> {
 
   String convertApiLatexToMathKeyboard(String apiLatex) {
     // '$' 문자 제거
-    return apiLatex.replaceAll('\$', '');
+    print(TeXParser(apiLatex.replaceAll('\$', '')).parse().toString());
+    return TeXParser(apiLatex.replaceAll('\$', '')).parse().toString();
+    // return apiLatex.replaceAll('\$', '');
   }
+
+  String preProcessEquation(String equation) {
+  // '=' 기호를 기준으로 방정식을 분리
+  List<String> parts = equation.split('=');
+String rightSide = '';
+
+  if (equation.contains('=') && parts.length != 2) {
+    throw FormatException('Invalid equation format');
+  }
+
+  if (parts.length > 1) {
+  // 우변만 LaTeX 형식으로 변환
+    rightSide = parts[1].trim();
+
+    rightSide = rightSide.replaceAllMapped(RegExp(r'(\d)([a-zA-Z])'), (match) {
+    return '${match.group(1)}*${match.group(2)}';
+  });
+
+  return '${parts[0].trim()}=$rightSide';
+  } else {
+    return equation;
+  }
+}
 
   void parseAndAddApiLatex(String apiLatex) {
     // '$'를 기준으로 문자열을 분리
@@ -100,7 +143,7 @@ class _EditableMixedTextFieldState extends State<EditableMixedTextField> {
 
       if (i % 2 == 1) {
         // 홀수 인덱스는 LaTeX 수식
-        String convertedLatex = convertApiLatexToMathKeyboard(part);
+        String convertedLatex = preProcessEquation(part);
         textElements.add({
           'type': 'math',
           'value': convertedLatex,
@@ -118,131 +161,183 @@ class _EditableMixedTextFieldState extends State<EditableMixedTextField> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Container(
-                    width: 300,
-                    height: 200,
-                    child: Image.asset('assets/images/ocr_test.png'), // 이미지 경로 설정
-                  ),
-                  SizedBox(height: 30),
-                  ElevatedButton(
-                    onPressed: () {
-                      // apiLatex 문자열을 textElements에 변환하여 추가
-                      String apiLatex =
-                          "이차함수 \$y=x^2-3x+2\$의<br>\n해를 구하시오.<br>\n\$x=2\$ 또는 \$x=1\$";
-                      parseAndAddApiLatex(apiLatex);
-                      setState(() {});
-                    },
-                    child: Text('변환하기', style: TextStyle(color: Colors.white, fontSize: 20)),
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all<Color>(Colors.green),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          VerticalDivider(),
-          Expanded(
-            child: Container(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (isEditing)
-                  isMathMode
-                      ? MathField(
-                        focusNode: mathFocusNode,
-                        autofocus: true,
-                          controller: mathController,
-                          variables: const ['x', 'y', 'z'],
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: '수식을 입력하세요',
-                            suffix: ElevatedButton(
-                    onPressed: _addOrEditElement,
-                    child: Text('수정'),
-                  ),
-                            
-                          ),
-                        )
-                      : TextField(
-                        focusNode: textFocusNode,
-                        autofocus: true,
-                          controller: textController,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: '일반 텍스트를 입력하세요',
-                            suffix: ElevatedButton(
-                    onPressed: _addOrEditElement,
-                    child: Text('수정'),
-                  ),
-                          ),
-                          
-                        ),
-                  SizedBox(height: 10),
-                  
-                  
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Wrap(
-                      children: List.generate(
-                        textElements.length,
-                        (index) {
-                          final element = textElements[index];
-                          return GestureDetector(
-                            onTap: () {
-                              textFocusNode.requestFocus();
-                              mathFocusNode.requestFocus();
-
-                              _editElement(index);
-                            },
-                            child: element['type'] == 'math'
-                                ? Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 4),
-                                    child: Baseline(
-                                      baseline: 16,
-                baselineType: TextBaseline.alphabetic,
-                                      child: Math.tex(
-                                        element['value'] ?? '', // 수식 값 설정
-                                        textStyle: TextStyle(fontSize: 18),
-                                        options: MathOptions(fontSize: 18),
-                                      ),
-                                    ),
-                                  )
-                                : Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 4),
-                                    child: Text(
-                                      element['value'],
-                                      style: TextStyle(fontSize: 18),
-                                    ),
-                                  ),
-                          );
-                        },
+      body: GestureDetector(
+        onTap: () {
+          mathFocusNode.unfocus();
+          textFocusNode.unfocus();
+          isEditing = false;
+          setState(() {});
+        },
+        child: Container(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 500,
+                        height: 400,
+                        child: Image.asset('assets/images/ocr_test3.png'), // 이미지 경로 설정
                       ),
-                    ),
+                      SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: () {
+                          // apiLatex 문자열을 textElements에 변환하여 추가
+                          String apiLatex =
+                              "3은 분수 \$\\frac{3}{1}\$ - 0.2<br>\n포함할 수 있는 \$\\frac{6}{2}\$ 으로 표현도니";
+                              // "30.1% 12시간 300g → 3.6% \$\\times \\frac{3}{100}\$ = 90g<br><br>\n10% 12시간 x g → 0.1x g<br><br>\n\$\\frac{90 + 0.1x}{300 + x \\leq 0.18\$<br><br>\n\$90 + 0.1x \\leq 54 + 0.18x\$<br><br>\n36 \$\\\leq 0.08x\$<br><br>\n\$\\frac{3600}{8} \\leq x\$<br>\n\$450 \\leq x\$";
+                              // "이차함수 \$y = x^2 - 3x + 2\$의<br>\n해를 구하시오.<br>\n\$x = 2\$ 또는 \$x = 1\$";
+                          parseAndAddApiLatex(apiLatex);
+                          setState(() {});
+                        },
+                        child: Text('변환하기', style: TextStyle(color: Colors.white, fontSize: 20)),
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all<Color>(Colors.green),
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: () {
+                          // convertToLatex();
+                        },
+                        child: Text('LaTeX변환', style: TextStyle(color: Colors.white, fontSize: 20)),
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all<Color>(Colors.green),
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 80),
-                ],
+                ),
               ),
-            ),
+              VerticalDivider(),
+              Expanded(
+                child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (isEditing)
+                      SingleChildScrollView(
+                        child: 
+                      isMathMode
+                          ? MathField(
+                            focusNode: mathFocusNode,
+                            autofocus: true,
+                              controller: mathController,
+                              variables: const ['x', 'y', 'z', '='],
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: '수식을 입력하세요',
+                                suffix: editOrCancelButton(),
+                                
+                              ),
+                            )
+                          : TextField(
+                            focusNode: textFocusNode,
+                            autofocus: true,
+                              controller: textController,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: '일반 텍스트를 입력하세요',
+                                suffix: FittedBox(
+                                  child: Row(
+                                    children: [
+                                      ElevatedButton(
+                                                          onPressed: _addOrEditElement,
+                                                          child: Text('수정'),
+                                                        ),
+                                                        ElevatedButton(
+                                                          onPressed: () {
+                                                            textFocusNode.unfocus();
+                                                            isEditing = false;
+                                                            editingIndex = null;
+                                                            setState(() {});
+                                                          },
+                                                          child: Text('취소'),
+                                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              
+                            ),
+                      ),
+                      SizedBox(height: 10),
+                      
+                      
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Wrap(
+                          children: List.generate(
+                            textElements.length,
+                            (index) {
+                              final element = textElements[index];
+                              return GestureDetector(
+                                onTap: () {        
+                                  _editElement(index);
+                                },
+                                child: element['type'] == 'math'
+                                    ? Container(
+                                      color: Colors.transparent,
+                                        margin: EdgeInsets.symmetric(horizontal: 2),
+                                        child: Baseline(
+                                          baseline: 16,
+                    baselineType: TextBaseline.alphabetic,
+                                          child: Math.tex(
+                                            element['value'] ?? '', // 수식 값 설정
+                                            textStyle: TextStyle(fontSize: 18, color: editingIndex == index ? editingColor : Colors.black),
+                                            options: MathOptions(fontSize: 18, color: editingIndex == index ? editingColor : Colors.black),
+                                          ),
+                                        ),
+                                      )
+                                    : Container(
+                                      color: Colors.transparent,
+                                        margin: EdgeInsets.symmetric(horizontal: 2),
+                                        child: Text(
+                                          element['value'],
+                                          style: TextStyle(fontSize: 18, color: editingIndex == index ? editingColor : Colors.black),
+                                        ),
+                                      ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 80),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  Widget editOrCancelButton() {
+    return FittedBox(
+      child: Row(children: [ElevatedButton(onPressed: _addOrEditElement, child: Text('수정')), ElevatedButton(onPressed: () {
+        // if (isMathMode) {
+        //   mathController.clear();
+        // mathFocusNode.unfocus();
+        // } else {
+        //   textController.clear();
+        //   textFocusNode.unfocus();
+        // }
+        isEditing = false;
+        editingIndex = null;
+        setState(() {});
+      }, child: Text('취소'))],),);
   }
 }

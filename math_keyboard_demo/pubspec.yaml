@@ -13,6 +13,7 @@ dependencies:
 
   flutter_svg: ^2.0.5
   flutter_math_fork:
+  math_parser: ^1.5.1
 
   math_keyboard:
     path: ../math_keyboard

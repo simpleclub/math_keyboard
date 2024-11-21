@@ -98,14 +98,14 @@ class DemoScaffold extends StatelessWidget {
             ],
           ),
         ),
-        body: Material(
-          child: Padding(
-            padding: EdgeInsets.only(
-              top: 32,
-            ),
-            child: EditableMixedTextField(),
-          ),
-        ),
+        // body: Material(
+        //   child: Padding(
+        //     padding: EdgeInsets.only(
+        //       top: 32,
+        //     ),
+        //     child: EditableMixedTextField(),
+        //   ),
+        // ),
         // bottomNavigationBar: SizedBox(
         //   height: 42 + 16 * 2,
         //   child: Column(
