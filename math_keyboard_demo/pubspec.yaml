@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
 
   flutter_svg: ^2.0.5
+  flutter_math_fork:
+  math_parser: ^1.5.1
 
   math_keyboard:
     path: ../math_keyboard
@@ -24,3 +26,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/
