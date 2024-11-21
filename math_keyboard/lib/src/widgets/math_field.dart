@@ -656,7 +656,7 @@ class _FieldPreview extends StatelessWidget {
                 child: Math.tex(
                   tex,
                   options: MathOptions(
-                    fontSize: MathOptions.defaultFontSize,
+                    fontSize: 16,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
