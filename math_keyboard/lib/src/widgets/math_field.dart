@@ -332,7 +332,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
             submitColor: Color(0xFF11F0A9),
             highlightColor: Color(0xFFCCCCCC),
             buttonColor: Colors.white,
-            backgroundColor: Color(0xFFCCCCCC),
+            backgroundColor: Color(0xFFEEEEEE),
             iconColor: Colors.black,
             onSubmit: _submit,
             // Note that we need to pass the insets state like this because the
