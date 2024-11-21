@@ -256,11 +256,13 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     // cursor is all the way to the right.
     if (_controller.root.cursorAtTheEnd()) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 100),
-          curve: Curves.fastOutSlowIn,
-        );
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 100),
+            curve: Curves.fastOutSlowIn,
+          );
+        }
       });
     }
 
