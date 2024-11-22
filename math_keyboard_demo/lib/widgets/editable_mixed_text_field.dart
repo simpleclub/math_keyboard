@@ -230,7 +230,7 @@ String rightSide = '';
                             focusNode: mathFocusNode,
                             autofocus: true,
                               controller: mathController,
-                              variables: const ['x', 'y', 'z', '='],
+                              variables: const ['a', 'b', 'c', 'x', 'y', 'z', '='],
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
                                 labelText: '수식을 입력하세요',

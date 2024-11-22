@@ -140,7 +140,7 @@ class MathKeyboard extends StatelessWidget {
                       color: Color(0xFFCCCCCC))
                     ]
                   ),
-                  padding: EdgeInsets.only(top: 16.0),
+                  padding: EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
                   child: _KeyboardBody(
                     insetsState: insetsState,
                     slideAnimation:
@@ -150,7 +150,7 @@ class MathKeyboard extends StatelessWidget {
                       child: Center(
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(
-                            maxWidth: 5e2,
+                            maxWidth: double.infinity,
                           ),
                           child: Column(
                             children: [
@@ -167,25 +167,33 @@ class MathKeyboard extends StatelessWidget {
                                 padding: const EdgeInsets.only(
                                   top: 4,
                                 ),
-                                child: _Buttons(
-                                  controller: controller,
-                                  page1: type == MathKeyboardType.numberOnly
-                                      ? numberKeyboard
-                                      : type ==
-                                              MathKeyboardType.coachOnKeyboard1
-                                          ? standardKeyboard
-                                          : standardKeyboard,
-                                  page2: type == MathKeyboardType.numberOnly
-                                      ? null
-                                      : type ==
-                                              MathKeyboardType.coachOnKeyboard1
-                                          ? coachOnKeyboard1
-                                          : functionKeyboard,
-                                  onSubmit: onSubmit,
-                                  buttonColor: buttonColor,
-                                  highlightColor: highlightColor,
-                                  iconColor: iconColor,
-                                  submitColor: submitColor,
+                                child: Row(
+                                  children: [
+                                    Flexible(
+                                      child: _Buttons(
+                                        controller: controller,
+                                        page1: functionKeyboard,
+                                        page2: functionKeyboard,
+                                        onSubmit: onSubmit,
+                                        buttonColor: buttonColor,
+                                        highlightColor: highlightColor,
+                                        iconColor: iconColor,
+                                        submitColor: submitColor,
+                                      ),
+                                    ),
+                                    Flexible(
+                                      child: _Buttons(
+                                                                        controller: controller,
+                                                                        page1: standardKeyboard,
+                                                                        page2: coachOnKeyboard1,
+                                                                        onSubmit: onSubmit,
+                                                                        buttonColor: buttonColor,
+                                                                        highlightColor: highlightColor,
+                                                                        iconColor: iconColor,
+                                                                        submitColor: submitColor,
+                                                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
