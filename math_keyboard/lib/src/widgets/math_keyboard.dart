@@ -132,7 +132,7 @@ class MathKeyboard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: backgroundColor,
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(50),
+                      topLeft: Radius.circular(16),
                       topRight: Radius.circular(16),
                     ),
                     boxShadow: [
