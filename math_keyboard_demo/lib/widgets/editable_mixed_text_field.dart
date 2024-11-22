@@ -39,7 +39,7 @@ class EditableMixedTextFieldState extends State<EditableMixedTextField> {
         if (isMathMode) {
           textElements[editingIndex!] = {
             'type': 'math',
-            'value': mathController.currentEditingValue().replaceAll('{', '').replaceAll('}', ''),
+            'value': mathController.currentEditingValue(),
           };
           mathController.clear();
         } else {
@@ -122,7 +122,7 @@ String rightSide = '';
     rightSide = parts[1].trim();
 
     rightSide = rightSide.replaceAllMapped(RegExp(r'(\d)([a-zA-Z])'), (match) {
-    return '${match.group(1)}*${match.group(2)}';
+    return '${match.group(1)}${match.group(2)}';
   });
 
   return '${parts[0].trim()}=$rightSide';
@@ -220,7 +220,7 @@ String rightSide = '';
                   width: MediaQuery.of(context).size.width,
                   padding: EdgeInsets.all(16.0),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       if (isEditing)
                       SingleChildScrollView(

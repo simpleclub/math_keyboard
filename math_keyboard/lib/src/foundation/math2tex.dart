@@ -55,7 +55,7 @@ List<TeX> _convertToTeX(Expression mathExpression, TeXNode parent) {
     } else if (mathExpression is Times) {
       result = [
         ..._convertToTeX(mathExpression.first, parent),
-        const TeXLeaf(r'\cdot'),
+        // const TeXLeaf(r'\cdot'),
         ..._convertToTeX(mathExpression.second, parent),
       ];
     } else if (mathExpression is Power) {
