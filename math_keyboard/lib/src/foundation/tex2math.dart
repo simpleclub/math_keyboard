@@ -114,8 +114,10 @@ class TeXParser {
 
     final other = (subNumber | underline).map((v) => [v, 'u']);
 
+    final equals = char('=').map((v) => [v, 'o']);
+
     final tokenize =
-        (basic | function | lp | rp | operator | other).star().end();
+        (basic | function | lp | rp | operator | equals | other).star().end();
 
     final tex = inputString.replaceAll(' ', '');
     _stream = tokenize.parse(tex).value;
