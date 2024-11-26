@@ -483,7 +483,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: !_isKeyboardShown,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         if (!didPop) {
           _closeKeyboard();
         }
