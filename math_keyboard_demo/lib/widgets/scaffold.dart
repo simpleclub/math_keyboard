@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 import 'package:math_keyboard_demo/data/strings.dart';
+import 'package:math_keyboard_demo/widgets/editable_mixed_text_field.dart';
 import 'package:math_keyboard_demo/widgets/link_button.dart';
-import 'package:math_keyboard_demo/widgets/page_view.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 /// Scaffold for the demo page.
@@ -59,14 +59,14 @@ class DemoScaffold extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    IconButton(
-                      tooltip: brightnessSwitchTooltip,
-                      onPressed: onToggleBrightness,
-                      splashRadius: 20,
-                      icon: Icon(darkMode
-                          ? Icons.brightness_6_outlined
-                          : Icons.brightness_2_outlined),
-                    ),
+                    // IconButton(
+                    //   tooltip: brightnessSwitchTooltip,
+                    //   onPressed: onToggleBrightness,
+                    //   splashRadius: 20,
+                    //   icon: Icon(darkMode
+                    //       ? Icons.brightness_6_outlined
+                    //       : Icons.brightness_2_outlined),
+                    // ),
                     Padding(
                       padding: const EdgeInsets.only(
                         left: 3,
@@ -80,10 +80,7 @@ class DemoScaffold extends StatelessWidget {
                           },
                           child: Text(
                             header,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.w500,
                                 ),
                             textAlign: TextAlign.center,
@@ -101,113 +98,41 @@ class DemoScaffold extends StatelessWidget {
             ],
           ),
         ),
-        body: Column(
-          children: [
-            Expanded(
-              child: Material(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 32,
-                    ),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                left: 64,
-                                right: 64,
-                                bottom: 8,
-                              ),
-                              child: Text.rich(
-                                TextSpan(
-                                  children: const [
-                                    TextSpan(
-                                      text: descriptionPrefix,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: ' $description',
-                                    ),
-                                  ],
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall
-                                      ?.copyWith(
-                                        fontSize: 28,
-                                      ),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            if (constraints.maxWidth < 6e2) ...[
-                              for (final button in buttons)
-                                Padding(
-                                  padding: const EdgeInsets.all(4),
-                                  child: button,
-                                ),
-                            ] else
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  for (final button in buttons)
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 8,
-                                        horizontal: 16,
-                                      ),
-                                      child: button,
-                                    ),
-                                ],
-                              ),
-                            const Padding(
-                              padding: EdgeInsets.only(
-                                top: 32,
-                              ),
-                              child: DemoPageView(),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        bottomNavigationBar: SizedBox(
-          height: 42 + 16 * 2,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Divider(
-                thickness: 1,
-                height: 0,
-              ),
-              MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () {
-                    launchUrlString(organizationUrl);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Image.network(
-                      darkMode ? darkLogoUrl : lightLogoUrl,
-                      height: 42,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        // body: Material(
+        //   child: Padding(
+        //     padding: EdgeInsets.only(
+        //       top: 32,
+        //     ),
+        //     child: EditableMixedTextField(),
+        //   ),
+        // ),
+        // bottomNavigationBar: SizedBox(
+        //   height: 42 + 16 * 2,
+        //   child: Column(
+        //     mainAxisSize: MainAxisSize.min,
+        //     children: [
+        //       const Divider(
+        //         thickness: 1,
+        //         height: 0,
+        //       ),
+        //       MouseRegion(
+        //         cursor: SystemMouseCursors.click,
+        //         child: GestureDetector(
+        //           onTap: () {
+        //             launchUrlString(organizationUrl);
+        //           },
+        //           child: Padding(
+        //             padding: const EdgeInsets.all(16),
+        //             child: Image.network(
+        //               darkMode ? darkLogoUrl : lightLogoUrl,
+        //               height: 42,
+        //             ),
+        //           ),
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ),
       ),
     );
   }

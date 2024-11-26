@@ -27,6 +27,7 @@ List<TeX> _convertToTeX(Expression mathExpression, TeXNode parent) {
   }
   if (mathExpression is BinaryOperator) {
     List<TeX>? result;
+    
     if (mathExpression is Divide) {
       result = [
         TeXFunction(
@@ -54,7 +55,7 @@ List<TeX> _convertToTeX(Expression mathExpression, TeXNode parent) {
     } else if (mathExpression is Times) {
       result = [
         ..._convertToTeX(mathExpression.first, parent),
-        const TeXLeaf(r'\cdot'),
+        // const TeXLeaf(r'\cdot'),
         ..._convertToTeX(mathExpression.second, parent),
       ];
     } else if (mathExpression is Power) {
@@ -68,16 +69,21 @@ List<TeX> _convertToTeX(Expression mathExpression, TeXNode parent) {
         ),
       ];
     }
+
     if (result == null) {
-      // Note that modulo is unsupported.
       throw UnimplementedError();
     }
-    // Wrap with parentheses to keep precedence.
-    return [
-      TeXLeaf('('),
-      ...result,
-      TeXLeaf(')'),
-    ];
+
+    final expressionString = mathExpression.toString();
+    if (!expressionString.startsWith('(') || !expressionString.endsWith(')')) {
+      return [
+        TeXLeaf('('),
+        ...result,
+        TeXLeaf(')'),
+      ];
+    }
+
+    return result;
   }
   if (mathExpression is Literal) {
     if (mathExpression is Number) {

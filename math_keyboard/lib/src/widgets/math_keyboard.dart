@@ -21,6 +21,9 @@ enum MathKeyboardType {
 
   /// Keyboard for number input only.
   numberOnly,
+
+  /// Keyboard for coach on app.
+  coachOnKeyboard1,
 }
 
 /// Widget displaying the math keyboard.
@@ -34,6 +37,11 @@ class MathKeyboard extends StatelessWidget {
     this.onSubmit,
     this.insetsState,
     this.slideAnimation,
+    this.backgroundColor = Colors.black,
+    this.buttonColor = Colors.transparent,
+    this.highlightColor = Colors.grey,
+    this.submitColor = Colors.greenAccent,
+    this.iconColor = Colors.white,
     this.padding = const EdgeInsets.only(
       bottom: 4,
       left: 4,
@@ -67,6 +75,31 @@ class MathKeyboard extends StatelessWidget {
   /// Can be `null`.
   final VoidCallback? onSubmit;
 
+  /// Background color of the keyboard.
+  ///
+  /// Defaults to `Colors.black,`.
+  final Color backgroundColor;
+
+  /// Button color of the keyboard.
+  ///
+  /// Defaults to `Colors.transparent,`.
+  final Color buttonColor;
+
+  /// Button highlight color of the keyboard.
+  ///
+  /// Defaults to `Colors.grey[900],`.
+  final Color highlightColor;
+
+  /// Button submit color of the keyboard.
+  ///
+  /// Defaults to `Colors.greenAccent,`.
+  final Color? submitColor;
+  
+  /// Button icon color of the keyboard.
+  ///
+  /// Defaults to `Colors.white,`.
+  final Color iconColor;
+
   /// Insets of the keyboard.
   ///
   /// Defaults to `const EdgeInsets.only(bottom: 4, left: 4, right: 4),`.
@@ -92,10 +125,22 @@ class MathKeyboard extends StatelessWidget {
             right: 0,
             child: Material(
               type: MaterialType.transparency,
-              child: ColoredBox(
-                color: Colors.black,
-                child: SafeArea(
-                  top: false,
+              child: SafeArea(
+                top: false,
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                    boxShadow: [
+                      BoxShadow(offset: Offset(0, -10), blurRadius: 20,
+                      color: Color(0xFFCCCCCC))
+                    ]
+                  ),
+                  padding: EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
                   child: _KeyboardBody(
                     insetsState: insetsState,
                     slideAnimation:
@@ -105,7 +150,7 @@ class MathKeyboard extends StatelessWidget {
                       child: Center(
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(
-                            maxWidth: 5e2,
+                            maxWidth: double.infinity,
                           ),
                           child: Column(
                             children: [
@@ -113,20 +158,42 @@ class MathKeyboard extends StatelessWidget {
                                 _Variables(
                                   controller: controller,
                                   variables: variables,
+                                  submitColor:submitColor, 
+                                  buttonColor: buttonColor,
+                                  highlightColor: Colors.transparent,
+                                  iconColor: iconColor,
                                 ),
                               Padding(
                                 padding: const EdgeInsets.only(
                                   top: 4,
                                 ),
-                                child: _Buttons(
-                                  controller: controller,
-                                  page1: type == MathKeyboardType.numberOnly
-                                      ? numberKeyboard
-                                      : standardKeyboard,
-                                  page2: type == MathKeyboardType.numberOnly
-                                      ? null
-                                      : functionKeyboard,
-                                  onSubmit: onSubmit,
+                                child: Row(
+                                  children: [
+                                    Flexible(
+                                      child: _Buttons(
+                                        controller: controller,
+                                        page1: functionKeyboard,
+                                        page2: functionKeyboard,
+                                        onSubmit: onSubmit,
+                                        buttonColor: buttonColor,
+                                        highlightColor: highlightColor,
+                                        iconColor: iconColor,
+                                        submitColor: submitColor,
+                                      ),
+                                    ),
+                                    Flexible(
+                                      child: _Buttons(
+                                                                        controller: controller,
+                                                                        page1: standardKeyboard,
+                                                                        page2: coachOnKeyboard1,
+                                                                        onSubmit: onSubmit,
+                                                                        buttonColor: buttonColor,
+                                                                        highlightColor: highlightColor,
+                                                                        iconColor: iconColor,
+                                                                        submitColor: submitColor,
+                                                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -235,6 +302,10 @@ class _Variables extends StatelessWidget {
     Key? key,
     required this.controller,
     required this.variables,
+    this.buttonColor,
+    this.highlightColor,
+    this.submitColor,
+    this.iconColor,
   }) : super(key: key);
 
   /// The editing controller for the math field that the variables are connected
@@ -244,11 +315,23 @@ class _Variables extends StatelessWidget {
   /// The variables to show.
   final List<String> variables;
 
+  /// Button color of the keyboard.
+  final Color? buttonColor;
+
+  /// Button highlight color of the keyboard.
+  final Color? highlightColor;
+
+  /// Button submit color of the keyboard.
+  final Color? submitColor;
+  
+  /// Button icon color of the keyboard.
+  final Color? iconColor;
+
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 54,
-      color: Colors.grey[900],
+      color: highlightColor,
       child: AnimatedBuilder(
         animation: controller,
         builder: (context, child) {
@@ -260,7 +343,7 @@ class _Variables extends StatelessWidget {
                 child: Container(
                   height: 24,
                   width: 1,
-                  color: Colors.white,
+                  color: iconColor,
                 ),
               );
             },
@@ -270,6 +353,9 @@ class _Variables extends StatelessWidget {
                 child: _VariableButton(
                   name: variables[index],
                   onTap: () => controller.addLeaf('{${variables[index]}}'),
+                  buttonColor: buttonColor,
+                  highlightColor: highlightColor,
+                  iconColor: iconColor,
                 ),
               );
             },
@@ -289,6 +375,10 @@ class _Buttons extends StatelessWidget {
     this.page1,
     this.page2,
     this.onSubmit,
+    this.buttonColor,
+    this.highlightColor,
+    this.submitColor,
+    this.iconColor,
   }) : super(key: key);
 
   /// The editing controller for the math field that the variables are connected
@@ -305,6 +395,24 @@ class _Buttons extends StatelessWidget {
   ///
   /// Can be `null`.
   final VoidCallback? onSubmit;
+
+  /// Button color of the keyboard.
+  /// 
+  /// Can be `null`.
+  final Color? buttonColor;
+
+  /// Button highlight color of the keyboard.
+  ///
+  /// Can be `null`.
+  final Color? highlightColor;
+
+  /// Button submit color of the keyboard.
+  final Color? submitColor;
+  
+  /// Button icon color of the keyboard.
+  ///
+  /// Can be `null`.
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -335,6 +443,9 @@ class _Buttons extends StatelessWidget {
                                 : () => controller.addLeaf(config.value),
                             asTex: config.asTex,
                             highlightLevel: config.highlighted ? 1 : 0,
+                            buttonColor: buttonColor,
+                            highlightColor: highlightColor,
+                            iconColor: iconColor,
                           )
                         else if (config is DeleteButtonConfig)
                           _NavigationButton(
@@ -342,6 +453,9 @@ class _Buttons extends StatelessWidget {
                             icon: Icons.backspace,
                             iconSize: 22,
                             onTap: () => controller.goBack(deleteMode: true),
+                            buttonColor: buttonColor,
+                            highlightColor: highlightColor,
+                            iconColor: iconColor,
                           )
                         else if (config is PageButtonConfig)
                           _BasicButton(
@@ -352,18 +466,27 @@ class _Buttons extends StatelessWidget {
                             label: controller.secondPage ? '123' : null,
                             onTap: controller.togglePage,
                             highlightLevel: 1,
+                            buttonColor: buttonColor,
+                            highlightColor: highlightColor,
+                            iconColor: iconColor,
                           )
                         else if (config is PreviousButtonConfig)
                           _NavigationButton(
                             flex: config.flex,
                             icon: Icons.chevron_left_rounded,
                             onTap: controller.goBack,
+                            buttonColor: buttonColor,
+                            highlightColor: highlightColor,
+                            iconColor: iconColor,
                           )
                         else if (config is NextButtonConfig)
                           _NavigationButton(
                             flex: config.flex,
                             icon: Icons.chevron_right_rounded,
                             onTap: controller.goNext,
+                            buttonColor: buttonColor,
+                            highlightColor: highlightColor,
+                            iconColor: iconColor,
                           )
                         else if (config is SubmitButtonConfig)
                           _BasicButton(
@@ -371,6 +494,19 @@ class _Buttons extends StatelessWidget {
                             icon: Icons.keyboard_return,
                             onTap: onSubmit,
                             highlightLevel: 2,
+                            buttonColor: buttonColor,
+                            highlightColor: highlightColor,
+                            submitColor: submitColor, 
+                            iconColor: iconColor,
+                          )
+                        else if (config is BlankButtonConfig)
+                          _BasicButton(
+                            label: '',
+                            flex: config.flex,
+                            onTap: null,
+                            buttonColor: buttonColor,
+                            highlightColor: highlightColor,
+                            iconColor: iconColor,
                           ),
                     ],
                   ),
@@ -394,6 +530,10 @@ class _BasicButton extends StatelessWidget {
     this.onTap,
     this.asTex = false,
     this.highlightLevel = 0,
+    this.buttonColor,
+    this.highlightColor,
+    this.submitColor,
+    this.iconColor,
   })  : assert(label != null || icon != null),
         super(key: key);
 
@@ -415,20 +555,32 @@ class _BasicButton extends StatelessWidget {
   /// Whether this button should be highlighted.
   final int highlightLevel;
 
+  /// Button color of the keyboard.
+  final Color? buttonColor;
+
+  /// Button highlight color of the keyboard.
+  final Color? highlightColor;
+
+  /// Button submit color of the keyboard.
+  final Color? submitColor;
+  
+  /// Button icon color of the keyboard.
+  final Color? iconColor;
+
   @override
   Widget build(BuildContext context) {
     Widget result;
     if (label == null) {
       result = Icon(
         icon,
-        color: Colors.white,
+        color: iconColor ?? Colors.white,
       );
     } else if (asTex) {
       result = Math.tex(
         label!,
         options: MathOptions(
           fontSize: 22,
-          color: Colors.white,
+          color: iconColor ?? Colors.white,
         ),
       );
     } else {
@@ -441,22 +593,24 @@ class _BasicButton extends StatelessWidget {
 
       result = Text(
         symbol!,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 22,
-          color: Colors.white,
+          color: iconColor ?? Colors.white,
         ),
       );
     }
 
-    result = KeyboardButton(
-      onTap: onTap,
-      color: highlightLevel > 1
-          ? Theme.of(context).colorScheme.secondary
-          : highlightLevel == 1
-              ? Colors.grey[900]
-              : null,
-      child: result,
-    );
+    result = (onTap == null)
+        ? SizedBox.shrink()
+        : KeyboardButton(
+            onTap: onTap,
+            color: highlightLevel > 1
+                ? submitColor
+                : highlightLevel == 1
+                    ? highlightColor
+                    : buttonColor,
+            child: result,
+          );
 
     return Expanded(
       flex: flex ?? 2,
@@ -474,6 +628,9 @@ class _NavigationButton extends StatelessWidget {
     this.icon,
     this.iconSize = 36,
     this.onTap,
+    this.buttonColor,
+    this.highlightColor,
+    this.iconColor,
   }) : super(key: key);
 
   /// The flexible flex value.
@@ -488,6 +645,15 @@ class _NavigationButton extends StatelessWidget {
   /// Function used when user holds the button down.
   final VoidCallback? onTap;
 
+  /// Button color of the keyboard.
+  final Color? buttonColor;
+
+  /// Button highlight color of the keyboard.
+  final Color? highlightColor;
+  
+  /// Button icon color of the keyboard.
+  final Color? iconColor;
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -495,10 +661,10 @@ class _NavigationButton extends StatelessWidget {
       child: KeyboardButton(
         onTap: onTap,
         onHold: onTap,
-        color: Colors.grey[900],
+        color: highlightColor ?? Colors.grey[900],
         child: Icon(
           icon,
-          color: Colors.white,
+          color: iconColor ?? Colors.white,
           size: iconSize,
         ),
       ),
@@ -513,6 +679,9 @@ class _VariableButton extends StatelessWidget {
     Key? key,
     required this.name,
     this.onTap,
+    this.buttonColor,
+    this.highlightColor,
+    this.iconColor,
   }) : super(key: key);
 
   /// The variable name.
@@ -521,15 +690,25 @@ class _VariableButton extends StatelessWidget {
   /// Called when the button is tapped.
   final VoidCallback? onTap;
 
+  /// Button color of the keyboard.
+  final Color? buttonColor;
+
+  /// Button highlight color of the keyboard.
+  final Color? highlightColor;
+  
+  /// Button icon color of the keyboard.
+  final Color? iconColor;
+
   @override
   Widget build(BuildContext context) {
     return KeyboardButton(
       onTap: onTap,
+      color: buttonColor, 
       child: Math.tex(
         name,
         options: MathOptions(
           fontSize: 22,
-          color: Colors.white,
+          color: iconColor ?? Colors.white,
         ),
       ),
     );

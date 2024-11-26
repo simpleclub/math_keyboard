@@ -64,13 +64,13 @@ class DeleteButtonConfig extends KeyboardButtonConfig {
 
 /// Class representing a button configuration of the Previous Button.
 class PreviousButtonConfig extends KeyboardButtonConfig {
-  /// Constructs a [DeleteButtonConfig].
+  /// Constructs a [PreviousButtonConfig].
   PreviousButtonConfig({int? flex}) : super(flex: flex);
 }
 
 /// Class representing a button configuration of the Next Button.
 class NextButtonConfig extends KeyboardButtonConfig {
-  /// Constructs a [DeleteButtonConfig].
+  /// Constructs a [NextButtonConfig].
   NextButtonConfig({int? flex}) : super(flex: flex);
 }
 
@@ -84,6 +84,13 @@ class SubmitButtonConfig extends KeyboardButtonConfig {
 class PageButtonConfig extends KeyboardButtonConfig {
   /// Constructs a [PageButtonConfig].
   const PageButtonConfig({int? flex}) : super(flex: flex);
+}
+
+/// Class representing a button configuration of the Blank Button
+/// for spacing UI layout.
+class BlankButtonConfig extends KeyboardButtonConfig {
+  /// Constructs a [PageButtonConfig].
+  const BlankButtonConfig({int? flex}) : super(flex: flex);
 }
 
 /// List of keyboard button configs for the digits from 0-9.
@@ -204,7 +211,18 @@ final functionKeyboard = [
     ),
   ],
   [
-    const PageButtonConfig(flex: 3),
+    // const PageButtonConfig(flex: 3),
+    const BasicKeyboardButtonConfig(
+      label: '[',
+      value: '[',
+      highlighted: true,
+      keyboardCharacters: ['['],
+    ),const BasicKeyboardButtonConfig(
+      label: ']',
+      value: ']',
+      highlighted: true,
+      keyboardCharacters: [']'],
+    ),
     const BasicKeyboardButtonConfig(
       label: '(',
       value: '(',
@@ -217,9 +235,9 @@ final functionKeyboard = [
       highlighted: true,
       keyboardCharacters: [')'],
     ),
-    PreviousButtonConfig(),
-    NextButtonConfig(),
-    DeleteButtonConfig(),
+    // PreviousButtonConfig(),
+    // NextButtonConfig(),
+    // DeleteButtonConfig(),
   ],
 ];
 
@@ -263,11 +281,11 @@ final standardKeyboard = [
     DeleteButtonConfig(),
   ],
   [
-    const PageButtonConfig(),
-    _digitButtons[0],
+    // const PageButtonConfig(),
     PreviousButtonConfig(),
+    _digitButtons[0],
     NextButtonConfig(),
-    SubmitButtonConfig(),
+    SubmitButtonConfig(flex: 4),
   ],
 ];
 
@@ -296,5 +314,118 @@ final numberKeyboard = [
     _digitButtons[0],
     NextButtonConfig(),
     SubmitButtonConfig(),
+  ],
+];
+
+/// coach on app custom keyboard.
+final coachOnKeyboard1 = [
+  [
+    const BasicKeyboardButtonConfig(
+      label: r'\frac{\Box}{\Box}',
+      value: r'\frac',
+      args: [TeXArg.braces, TeXArg.braces],
+      asTex: true,
+    ),
+    const BasicKeyboardButtonConfig(
+      label: r'\Box^2',
+      value: '^2',
+      args: [TeXArg.braces],
+      asTex: true,
+    ),
+    const BasicKeyboardButtonConfig(
+      label: r'\Box^{\Box}',
+      value: '^',
+      args: [TeXArg.braces],
+      asTex: true,
+      keyboardCharacters: [
+        '^',
+        // This is a workaround for keyboard layout that use ^ as a toggle key.
+        // In that case, "Dead" is reported as the character (e.g. for German
+        // keyboards).
+        'Dead',
+      ],
+    ),
+    const BasicKeyboardButtonConfig(
+      label: r'\sin',
+      value: r'\sin(',
+      asTex: true,
+      keyboardCharacters: ['s'],
+    ),
+    const BasicKeyboardButtonConfig(
+      label: r'\sin^{-1}',
+      value: r'\sin^{-1}(',
+      asTex: true,
+    ),
+  ],
+  [
+    const BasicKeyboardButtonConfig(
+      label: r'\sqrt{\Box}',
+      value: r'\sqrt',
+      args: [TeXArg.braces],
+      asTex: true,
+      keyboardCharacters: ['r'],
+    ),
+    const BasicKeyboardButtonConfig(
+      label: r'\sqrt[\Box]{\Box}',
+      value: r'\sqrt',
+      args: [TeXArg.brackets, TeXArg.braces],
+      asTex: true,
+    ),
+    const BasicKeyboardButtonConfig(
+      label: r'\cos',
+      value: r'\cos(',
+      asTex: true,
+      keyboardCharacters: ['c'],
+    ),
+    const BasicKeyboardButtonConfig(
+      label: r'\cos^{-1}',
+      value: r'\cos^{-1}(',
+      asTex: true,
+    ),
+  ],
+  [
+    const BasicKeyboardButtonConfig(
+      label: r'\log_{\Box}(\Box)',
+      value: r'\log_',
+      asTex: true,
+      args: [TeXArg.braces, TeXArg.parentheses],
+    ),
+    const BasicKeyboardButtonConfig(
+      label: r'\ln(\Box)',
+      value: r'\ln(',
+      asTex: true,
+      keyboardCharacters: ['l'],
+    ),
+    const BasicKeyboardButtonConfig(
+      label: r'\tan',
+      value: r'\tan(',
+      asTex: true,
+      keyboardCharacters: ['t'],
+    ),
+    const BasicKeyboardButtonConfig(
+      label: r'\tan^{-1}',
+      value: r'\tan^{-1}(',
+      asTex: true,
+    ),
+  ],
+  [
+    const PageButtonConfig(flex: 3),
+    const BasicKeyboardButtonConfig(
+      label: '(',
+      value: '(',
+      highlighted: true,
+      keyboardCharacters: ['('],
+    ),
+    const BasicKeyboardButtonConfig(
+      label: ')',
+      value: ')',
+      highlighted: true,
+      keyboardCharacters: [')'],
+    ),
+    BlankButtonConfig(flex: 2),
+    PreviousButtonConfig(),
+    NextButtonConfig(),
+    BlankButtonConfig(flex: 2),
+    DeleteButtonConfig(),
   ],
 ];

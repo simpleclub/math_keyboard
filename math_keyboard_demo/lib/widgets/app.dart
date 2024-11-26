@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:math_keyboard_demo/data/strings.dart';
+import 'package:math_keyboard_demo/widgets/editable_mixed_text_field.dart';
 import 'package:math_keyboard_demo/widgets/scaffold.dart';
 
 /// Demo application for `math_keyboard`.
@@ -21,13 +22,7 @@ class _DemoAppState extends State<DemoApp> {
       theme: ThemeData(
         brightness: _darkMode ? Brightness.dark : Brightness.light,
       ),
-      home: DemoScaffold(
-        onToggleBrightness: () {
-          setState(() {
-            _darkMode = !_darkMode;
-          });
-        },
-      ),
+      home: EditableMixedTextField(),
     );
   }
 }

@@ -256,11 +256,13 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     // cursor is all the way to the right.
     if (_controller.root.cursorAtTheEnd()) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 100),
-          curve: Curves.fastOutSlowIn,
-        );
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 100),
+            curve: Curves.fastOutSlowIn,
+          );
+        }
       });
     }
 
@@ -329,6 +331,11 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
             controller: _controller,
             type: widget.keyboardType,
             variables: _variables,
+            submitColor: Color(0xFF11F0A9),
+            highlightColor: Color(0xFFCCCCCC),
+            buttonColor: Colors.white,
+            backgroundColor: Color(0xFFEEEEEE),
+            iconColor: Colors.black,
             onSubmit: _submit,
             // Note that we need to pass the insets state like this because the
             // overlay context does not have the ancestor state.
@@ -375,6 +382,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
         ...functionKeyboard,
       ] else if (widget.keyboardType == MathKeyboardType.numberOnly) ...[
         ...numberKeyboard,
+      ] else if (widget.keyboardType == MathKeyboardType.coachOnKeyboard1) ...[
+        ...numberKeyboard,
+        ...coachOnKeyboard1,
       ],
     ].fold<List<KeyboardButtonConfig>>([], (previousValue, element) {
       return previousValue..addAll(element);
@@ -648,7 +658,7 @@ class _FieldPreview extends StatelessWidget {
                 child: Math.tex(
                   tex,
                   options: MathOptions(
-                    fontSize: MathOptions.defaultFontSize,
+                    fontSize: 16,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
