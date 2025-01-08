@@ -105,8 +105,9 @@ class _KeyboardButtonState extends State<KeyboardButton>
                 return DecoratedBox(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    color: Colors.white.withOpacity(
-                      Curves.easeInOut.transform(_animationController.value) /
+                    color: Colors.white.withValues(
+                      alpha: Curves.easeInOut
+                              .transform(_animationController.value) /
                           3,
                     ),
                   ),

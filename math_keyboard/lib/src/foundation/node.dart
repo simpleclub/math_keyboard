@@ -213,9 +213,20 @@ class Cursor extends TeX {
     if (cursorColor == null) {
       throw FlutterError('Cursor.buildString() called without a cursorColor.');
     }
-    final colorString =
-        '#${(cursorColor.value & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
-    return '\\textcolor{$colorString}{\\cursor}';
+    return '\\textcolor{${cursorColor.toHex()}}{\\cursor}';
+  }
+}
+
+/// Extension to convert a [Color] to a hex string.
+extension HexColor on Color {
+  /// Converts a [Color] to a hex string to be used in TeX.
+  String toHex() => '#'
+      '${_floatToInt8(r).toRadixString(16).padLeft(2, '0')}'
+      '${_floatToInt8(g).toRadixString(16).padLeft(2, '0')}'
+      '${_floatToInt8(b).toRadixString(16).padLeft(2, '0')}';
+
+  int _floatToInt8(double x) {
+    return (x * 255.0).round() & 0xff;
   }
 }
 

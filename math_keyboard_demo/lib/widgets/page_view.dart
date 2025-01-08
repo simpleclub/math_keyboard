@@ -204,7 +204,7 @@ class _PageIndicator extends StatelessWidget {
                   color: Theme.of(context)
                       .colorScheme
                       .onSurface
-                      .withOpacity(selected ? 1 : 1 / 2),
+                      .withValues(alpha: selected ? 1 : 1 / 2),
                   shape: BoxShape.circle,
                 ),
               ),
