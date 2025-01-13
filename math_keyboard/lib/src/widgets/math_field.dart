@@ -17,7 +17,7 @@ import 'package:math_keyboard/src/widgets/view_insets.dart';
 class MathField extends StatefulWidget {
   /// Constructs a [MathField] widget.
   const MathField({
-    Key? key,
+    super.key,
     this.autofocus = false,
     this.focusNode,
     this.controller,
@@ -27,7 +27,7 @@ class MathField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.opensKeyboard = true,
-  }) : super(key: key);
+  });
 
   /// The controller for the math field.
   ///
