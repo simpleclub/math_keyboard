@@ -311,8 +311,8 @@ class TeXParser {
     final result = <Expression>[];
     Expression left;
     Expression right;
-    for (var i = 0; i < _outputStack.length; i++) {
-      switch (_outputStack[i]) {
+    for (final element in _outputStack) {
+      switch (element) {
         case '+':
           right = result.removeLast();
           left = result.removeLast();
@@ -391,11 +391,14 @@ class TeXParser {
             // ignore: empty_catches
           } catch (e) {}
           break;
+        // workaround for WASM casting bug, needs at least one non-string case
+        // remove when https://github.com/dart-lang/sdk/issues/59782 is fixed
+        case 0:
         default:
-          if (_outputStack[i] is String) {
-            result.add(Variable(_outputStack[i]));
+          if (element is String) {
+            result.add(Variable(element));
           } else {
-            result.add(Number(_outputStack[i]));
+            result.add(Number(element));
           }
       }
     }

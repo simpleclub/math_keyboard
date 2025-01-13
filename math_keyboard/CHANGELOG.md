@@ -1,3 +1,7 @@
+## 0.3.2
+
+* Workaround for dart2wasm [bug](https://github.com/dart-lang/sdk/issues/59782).
+
 ## 0.3.1
 
 * Updated README
