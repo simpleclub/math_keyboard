@@ -122,11 +122,22 @@ class TeXParser {
     final tex = inputString.replaceAll(' ', '');
     _stream = tokenize.parse(tex).value;
 
-    if (_stream[0][0] == '-' && _stream[1][1].contains(RegExp('[bfl]'))) {
-      _stream.insert(0, [0, 'b']);
-    }
+    // if (_stream[0][0] == '-' && _stream[1][1].contains(RegExp('[bfl]'))) {
+    //   _stream.insert(0, [0, 'b']);
+    // }
     if (_stream[0][0] == '!') {
       throw 'Unable to parse';
+    }
+
+    // ★ 단항 마이너스 처리: 
+    // 토큰 스트림에서 '-' 토큰이 앞에 올 경우(또는 이전 토큰이 기본(basic)이나 오른쪽 괄호가 아니면)
+    for (int i = 0; i < _stream.length; i++) {
+      if (_stream[i][0] == '-') {
+        if (i == 0 || (_stream[i - 1][1] != 'b' && _stream[i - 1][1] != 'r')) {
+          // '-' 토큰을 단항 마이너스 토큰 "u-"로 변경 (우선순위 6, 우측 결합)
+          _stream[i] = ['u-', ['o', 6, 'r']];
+        }
+      }
     }
 
     for (var i = 0; i < _stream.length; i++) {
@@ -328,6 +339,9 @@ class TeXParser {
           } else {
             result.add(left - right);
           }
+          break;
+        case 'u-': // ★ 단항 마이너스 처리 추가
+          result.add(-result.removeLast());
           break;
         case r'\times':
         case r'\cdot':
