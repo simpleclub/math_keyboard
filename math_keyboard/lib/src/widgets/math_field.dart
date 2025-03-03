@@ -26,7 +26,7 @@ class MathField extends StatefulWidget {
     this.decoration = const InputDecoration(),
     this.onChanged,
     this.onSubmitted,
-    this.opensKeyboard = true,
+    this.opensKeyboard = true,  this.isShowMultiplyAsDot=true,
   });
 
   /// The controller for the math field.
@@ -116,6 +116,9 @@ class MathField extends StatefulWidget {
   /// Defaults to `true`.
   final bool opensKeyboard;
 
+  ///  if true Show multiply tag as dot else show as x
+  final  bool isShowMultiplyAsDot;
+
   @override
   _MathFieldState createState() => _MathFieldState();
 }
@@ -145,14 +148,14 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   late var _controller = widget.controller ?? MathFieldEditingController();
 
   List<String> get _variables => [
-        r'\pi',
-        'e',
-        ...widget.variables,
-      ];
+    r'\pi',
+    'e',
+    ...widget.variables,
+  ];
 
   bool get _isKeyboardShown =>
       _overlayEntry != null &&
-      _keyboardSlideController.status != AnimationStatus.dismissed;
+          _keyboardSlideController.status != AnimationStatus.dismissed;
 
   @override
   void initState() {
@@ -308,9 +311,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       if (!mounted) return;
 
       context.findRenderObject()!.showOnScreen(
-            duration: const Duration(milliseconds: 100),
-            curve: Curves.fastOutSlowIn,
-          );
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.fastOutSlowIn,
+      );
     });
   }
 
@@ -326,6 +329,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
           context: this.context,
           locale: Localizations.localeOf(this.context),
           child: MathKeyboard(
+            isShowMultiplyAsDot: widget.isShowMultiplyAsDot,
             controller: _controller,
             type: widget.keyboardType,
             variables: _variables,
@@ -371,7 +375,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     final configs = <List<KeyboardButtonConfig>>[
       if (widget.keyboardType ==
           MathKeyboardType.expression) ...<List<KeyboardButtonConfig>>[
-        ...standardKeyboard,
+        ...standardKeyboard(),
         ...functionKeyboard,
       ] else if (widget.keyboardType == MathKeyboardType.numberOnly) ...[
         ...numberKeyboard,
@@ -458,19 +462,19 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       return KeyEventResult.handled;
     }
     if ((logicalKey == LogicalKeyboardKey.arrowRight ||
-            logicalKey == LogicalKeyboardKey.arrowDown) &&
+        logicalKey == LogicalKeyboardKey.arrowDown) &&
         configs.any((element) => element is NextButtonConfig)) {
       _controller.goNext();
       return KeyEventResult.handled;
     }
     if ((logicalKey == LogicalKeyboardKey.arrowLeft ||
-            logicalKey == LogicalKeyboardKey.arrowUp) &&
+        logicalKey == LogicalKeyboardKey.arrowUp) &&
         configs.any((element) => element is PreviousButtonConfig)) {
       _controller.goBack();
       return KeyEventResult.handled;
     }
     if ((logicalKey == LogicalKeyboardKey.enter ||
-            logicalKey == LogicalKeyboardKey.numpadEnter) &&
+        logicalKey == LogicalKeyboardKey.numpadEnter) &&
         configs.any((element) => element is SubmitButtonConfig)) {
       _submit();
       return KeyEventResult.handled;
@@ -592,9 +596,9 @@ class _FieldPreview extends StatelessWidget {
   TextStyle _getHintStyle(ThemeData themeData) {
     return themeData.textTheme.titleMedium!
         .copyWith(
-            color: decoration.enabled
-                ? themeData.hintColor
-                : themeData.disabledColor)
+        color: decoration.enabled
+            ? themeData.hintColor
+            : themeData.disabledColor)
         .merge(decoration.hintStyle);
   }
 
@@ -602,24 +606,24 @@ class _FieldPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final tex = controller.root
         .buildTeXString(
-          cursorColor: Color.lerp(
-            _getDisabledCursorColor(Theme.of(context)),
-            Theme.of(context).textSelectionTheme.cursorColor ??
-                Theme.of(context).colorScheme.secondary,
-            cursorOpacity,
-          ),
-        )
+      cursorColor: Color.lerp(
+        _getDisabledCursorColor(Theme.of(context)),
+        Theme.of(context).textSelectionTheme.cursorColor ??
+            Theme.of(context).colorScheme.secondary,
+        cursorOpacity,
+      ),
+    )
         .replaceAll(
-          // We assume that every dot in the tex string is a decimal dot
-          // that can simply be replaced by an alternate decimal separator
-          // for the preview.
-          '.',
-          // We need to wrap the decimal separator in an extra group ("{}")
-          // because commas will otherwise be spaced as if they created a
-          // list, e.g. in vector notation (there is a padding to the right
-          // of the comma).
-          '{${decimalSeparator(context)}}',
-        );
+      // We assume that every dot in the tex string is a decimal dot
+      // that can simply be replaced by an alternate decimal separator
+      // for the preview.
+      '.',
+      // We need to wrap the decimal separator in an extra group ("{}")
+      // because commas will otherwise be spaced as if they created a
+      // list, e.g. in vector notation (there is a padding to the right
+      // of the comma).
+      '{${decimalSeparator(context)}}',
+    );
 
     return ConstrainedBox(
       constraints: const BoxConstraints(
@@ -641,9 +645,9 @@ class _FieldPreview extends StatelessWidget {
               Transform.translate(
                 offset: !controller.isEmpty
                     ? Offset.zero
-                    // This is a workaround for aligning the cursor properly
-                    // when the math field is empty. This way it matches the
-                    // TextField behavior.
+                // This is a workaround for aligning the cursor properly
+                // when the math field is empty. This way it matches the
+                // TextField behavior.
                     : Offset(-1, 0),
                 child: Math.tex(
                   tex,
@@ -718,14 +722,14 @@ class MathFieldEditingController extends ChangeNotifier {
   /// Navigate to the previous node.
   void goBack({bool deleteMode = false}) {
     final state =
-        deleteMode ? currentNode.remove() : currentNode.shiftCursorLeft();
+    deleteMode ? currentNode.remove() : currentNode.shiftCursorLeft();
     switch (state) {
-      // CASE 1: Courser was moved 1 position to the left in the current node.
+    // CASE 1: Courser was moved 1 position to the left in the current node.
       case NavigationState.success:
         notifyListeners();
         return;
-      // CASE 2: The upcoming tex is a function.
-      // We want to step in this function rather than skipping/deleting it.
+    // CASE 2: The upcoming tex is a function.
+    // We want to step in this function rather than skipping/deleting it.
       case NavigationState.func:
         final pos = currentNode.courserPosition;
         currentNode = (currentNode.children[pos] as TeXFunction).argNodes.last;
@@ -733,9 +737,9 @@ class MathFieldEditingController extends ChangeNotifier {
         currentNode.setCursor();
         notifyListeners();
         return;
-      // CASE 3: The courser is already at the beginning of this node.
+    // CASE 3: The courser is already at the beginning of this node.
       case NavigationState.end:
-        // If the current node is the root, we can't navigate further.
+      // If the current node is the root, we can't navigate further.
         if (currentNode.parent == null) {
           return;
         }
@@ -766,12 +770,12 @@ class MathFieldEditingController extends ChangeNotifier {
   void goNext() {
     final state = currentNode.shiftCursorRight();
     switch (state) {
-      // CASE 1: Courser was moved 1 position to the right in the current node.
+    // CASE 1: Courser was moved 1 position to the right in the current node.
       case NavigationState.success:
         notifyListeners();
         return;
-      // CASE 2: The upcoming tex is a function.
-      // We want to step in this function rather than skipping it.
+    // CASE 2: The upcoming tex is a function.
+    // We want to step in this function rather than skipping it.
       case NavigationState.func:
         final pos = currentNode.courserPosition - 1;
         currentNode = (currentNode.children[pos] as TeXFunction).argNodes.first;
@@ -779,9 +783,9 @@ class MathFieldEditingController extends ChangeNotifier {
         currentNode.setCursor();
         notifyListeners();
         return;
-      // CASE 3: The courser is already at the end of this node.
+    // CASE 3: The courser is already at the end of this node.
       case NavigationState.end:
-        // If the current node is the root, we can't navigate further.
+      // If the current node is the root, we can't navigate further.
         if (currentNode.parent == null) {
           return;
         }

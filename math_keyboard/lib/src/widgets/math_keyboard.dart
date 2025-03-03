@@ -38,7 +38,7 @@ class MathKeyboard extends StatelessWidget {
       bottom: 4,
       left: 4,
       right: 4,
-    ),
+    ),  this.isShowMultiplyAsDot=true,
   }) : super(key: key);
 
   /// The controller for editing the math field.
@@ -71,6 +71,8 @@ class MathKeyboard extends StatelessWidget {
   ///
   /// Defaults to `const EdgeInsets.only(bottom: 4, left: 4, right: 4),`.
   final EdgeInsets padding;
+  /// Show multiply as dot
+  final  bool isShowMultiplyAsDot;
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +101,7 @@ class MathKeyboard extends StatelessWidget {
                   child: _KeyboardBody(
                     insetsState: insetsState,
                     slideAnimation:
-                        slideAnimation == null ? null : curvedSlideAnimation,
+                    slideAnimation == null ? null : curvedSlideAnimation,
                     child: Padding(
                       padding: padding,
                       child: Center(
@@ -122,7 +124,7 @@ class MathKeyboard extends StatelessWidget {
                                   controller: controller,
                                   page1: type == MathKeyboardType.numberOnly
                                       ? numberKeyboard
-                                      : standardKeyboard,
+                                      : standardKeyboard(isShowMultiplyAsDot: isShowMultiplyAsDot),
                                   page2: type == MathKeyboardType.numberOnly
                                       ? null
                                       : functionKeyboard,
@@ -314,7 +316,7 @@ class _Buttons extends StatelessWidget {
         animation: controller,
         builder: (context, child) {
           final layout =
-              controller.secondPage ? page2! : page1 ?? numberKeyboard;
+          controller.secondPage ? page2! : page1 ?? numberKeyboard;
           return Column(
             children: [
               for (final row in layout)
@@ -329,9 +331,9 @@ class _Buttons extends StatelessWidget {
                             label: config.label,
                             onTap: config.args != null
                                 ? () => controller.addFunction(
-                                      config.value,
-                                      config.args!,
-                                    )
+                              config.value,
+                              config.args!,
+                            )
                                 : () => controller.addLeaf(config.value),
                             asTex: config.asTex,
                             highlightLevel: config.highlighted ? 1 : 0,
@@ -344,34 +346,34 @@ class _Buttons extends StatelessWidget {
                             onTap: () => controller.goBack(deleteMode: true),
                           )
                         else if (config is PageButtonConfig)
-                          _BasicButton(
-                            flex: config.flex,
-                            icon: controller.secondPage
-                                ? null
-                                : CustomKeyIcons.key_symbols,
-                            label: controller.secondPage ? '123' : null,
-                            onTap: controller.togglePage,
-                            highlightLevel: 1,
-                          )
-                        else if (config is PreviousButtonConfig)
-                          _NavigationButton(
-                            flex: config.flex,
-                            icon: Icons.chevron_left_rounded,
-                            onTap: controller.goBack,
-                          )
-                        else if (config is NextButtonConfig)
-                          _NavigationButton(
-                            flex: config.flex,
-                            icon: Icons.chevron_right_rounded,
-                            onTap: controller.goNext,
-                          )
-                        else if (config is SubmitButtonConfig)
-                          _BasicButton(
-                            flex: config.flex,
-                            icon: Icons.keyboard_return,
-                            onTap: onSubmit,
-                            highlightLevel: 2,
-                          ),
+                            _BasicButton(
+                              flex: config.flex,
+                              icon: controller.secondPage
+                                  ? null
+                                  : CustomKeyIcons.key_symbols,
+                              label: controller.secondPage ? '123' : null,
+                              onTap: controller.togglePage,
+                              highlightLevel: 1,
+                            )
+                          else if (config is PreviousButtonConfig)
+                              _NavigationButton(
+                                flex: config.flex,
+                                icon: Icons.chevron_left_rounded,
+                                onTap: controller.goBack,
+                              )
+                            else if (config is NextButtonConfig)
+                                _NavigationButton(
+                                  flex: config.flex,
+                                  icon: Icons.chevron_right_rounded,
+                                  onTap: controller.goNext,
+                                )
+                              else if (config is SubmitButtonConfig)
+                                  _BasicButton(
+                                    flex: config.flex,
+                                    icon: Icons.keyboard_return,
+                                    onTap: onSubmit,
+                                    highlightLevel: 2,
+                                  ),
                     ],
                   ),
                 ),
@@ -453,8 +455,8 @@ class _BasicButton extends StatelessWidget {
       color: highlightLevel > 1
           ? Theme.of(context).colorScheme.secondary
           : highlightLevel == 1
-              ? Colors.grey[900]
-              : null,
+          ? Colors.grey[900]
+          : null,
       child: result,
     );
 

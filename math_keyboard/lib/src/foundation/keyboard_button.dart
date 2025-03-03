@@ -36,9 +36,9 @@ class BasicKeyboardButtonConfig extends KeyboardButtonConfig {
     List<String> keyboardCharacters = const [],
     int? flex,
   }) : super(
-          flex: flex,
-          keyboardCharacters: keyboardCharacters,
-        );
+    flex: flex,
+    keyboardCharacters: keyboardCharacters,
+  );
 
   /// The label of the button.
   final String label;
@@ -224,52 +224,57 @@ final functionKeyboard = [
 ];
 
 /// Standard keyboard for math expression input.
-final standardKeyboard = [
-  [
-    _digitButtons[7],
-    _digitButtons[8],
-    _digitButtons[9],
-    const BasicKeyboardButtonConfig(
-      label: '×',
-      value: r'\cdot',
-      keyboardCharacters: ['*'],
-      highlighted: true,
-    ),
-    const BasicKeyboardButtonConfig(
-      label: '÷',
-      value: r'\frac',
-      keyboardCharacters: ['/'],
-      args: [TeXArg.braces, TeXArg.braces],
-      highlighted: true,
-    ),
-  ],
-  [
-    _digitButtons[4],
-    _digitButtons[5],
-    _digitButtons[6],
-    const BasicKeyboardButtonConfig(
-      label: '+',
-      value: '+',
-      keyboardCharacters: ['+'],
-      highlighted: true,
-    ),
-    _subtractButton,
-  ],
-  [
-    _digitButtons[1],
-    _digitButtons[2],
-    _digitButtons[3],
-    _decimalButton,
-    DeleteButtonConfig(),
-  ],
-  [
-    const PageButtonConfig(),
-    _digitButtons[0],
-    PreviousButtonConfig(),
-    NextButtonConfig(),
-    SubmitButtonConfig(),
-  ],
-];
+List<List<KeyboardButtonConfig>>  standardKeyboard ({bool isShowMultiplyAsDot =true}) {
+  final multiplyValue = isShowMultiplyAsDot ? r'\cdot' : r'\times ';
+  return [
+
+    [
+      _digitButtons[7],
+      _digitButtons[8],
+      _digitButtons[9],
+      BasicKeyboardButtonConfig(
+        label: '×',
+        value: multiplyValue,
+        keyboardCharacters: ['*'],
+        highlighted: true,
+      ),
+      const BasicKeyboardButtonConfig(
+        label: '÷',
+        value: r'\frac',
+        keyboardCharacters: ['/'],
+        args: [TeXArg.braces, TeXArg.braces],
+        highlighted: true,
+      ),
+    ],
+    [
+      _digitButtons[4],
+      _digitButtons[5],
+      _digitButtons[6],
+      const BasicKeyboardButtonConfig(
+        label: '+',
+        value: '+',
+        keyboardCharacters: ['+'],
+        highlighted: true,
+      ),
+      _subtractButton,
+    ],
+    [
+      _digitButtons[1],
+      _digitButtons[2],
+      _digitButtons[3],
+      _decimalButton,
+      DeleteButtonConfig(),
+    ],
+    [
+      const PageButtonConfig(),
+      _digitButtons[0],
+      PreviousButtonConfig(),
+      NextButtonConfig(),
+      SubmitButtonConfig(),
+    ],
+  ];
+}
+
 
 /// Keyboard getting shown for number input only.
 final numberKeyboard = [
