@@ -256,6 +256,8 @@ class _Variables extends StatelessWidget {
           return ListView.separated(
             itemCount: variables.length,
             scrollDirection: Axis.horizontal,
+            /// because in   ios the scroll is bouncing and we don't want that
+            physics: ClampingScrollPhysics(),
             separatorBuilder: (context, index) {
               return Center(
                 child: Container(

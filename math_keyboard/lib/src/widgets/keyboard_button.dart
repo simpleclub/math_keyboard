@@ -72,26 +72,19 @@ class _KeyboardButtonState extends State<KeyboardButton>
     _animationController.value = 0;
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     Widget result = MouseRegion(
       onEnter: (_) => _handleHover(true),
       onExit: (_) => _handleHover(false),
-      child: RawGestureDetector(
+      child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        gestures: <Type, GestureRecognizerFactory>{
-          _AlwaysWinningGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-              _AlwaysWinningGestureRecognizer>(
-            () => _AlwaysWinningGestureRecognizer(),
-            (_AlwaysWinningGestureRecognizer instance) {
-              instance
-                ..onTap = widget.onTap
-                ..onTapUp = _handleTapUp
-                ..onTapDown = _handleTapDown
-                ..onTapCancel = _handleTapCancel;
-            },
-          ),
-        },
+        onTap: widget.onTap,
+        onTapUp: _handleTapUp,
+        onTapDown: _handleTapDown,
+        onTapCancel: _handleTapCancel,
         child: Padding(
           padding: const EdgeInsets.all(4),
           child: DecoratedBox(
@@ -106,14 +99,10 @@ class _KeyboardButtonState extends State<KeyboardButton>
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     color: Colors.white.withValues(
-                      alpha: Curves.easeInOut
-                              .transform(_animationController.value) /
-                          3,
+                      alpha: Curves.easeInOut.transform(_animationController.value) / 3,
                     ),
                   ),
-                  child: Center(
-                    child: child,
-                  ),
+                  child: Center(child: child),
                 );
               },
               child: widget.child,
