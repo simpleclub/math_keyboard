@@ -38,7 +38,7 @@ class MathKeyboard extends StatelessWidget {
       bottom: 4,
       left: 4,
       right: 4,
-    ),
+    ),  this.isShowMultiplyValueAsDot =true,
   }) : super(key: key);
 
   /// The controller for editing the math field.
@@ -71,7 +71,8 @@ class MathKeyboard extends StatelessWidget {
   ///
   /// Defaults to `const EdgeInsets.only(bottom: 4, left: 4, right: 4),`.
   final EdgeInsets padding;
-
+  /// if true, the multiply value will be shown as dot else it will be shown as x
+final bool isShowMultiplyValueAsDot;
   @override
   Widget build(BuildContext context) {
     final curvedSlideAnimation = CurvedAnimation(
@@ -122,7 +123,7 @@ class MathKeyboard extends StatelessWidget {
                                   controller: controller,
                                   page1: type == MathKeyboardType.numberOnly
                                       ? numberKeyboard
-                                      : standardKeyboard,
+                                      : standardKeyboard(isShowMultiplyValueAsDot: isShowMultiplyValueAsDot ),
                                   page2: type == MathKeyboardType.numberOnly
                                       ? null
                                       : functionKeyboard,
