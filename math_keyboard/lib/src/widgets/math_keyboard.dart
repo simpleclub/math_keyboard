@@ -253,29 +253,36 @@ class _Variables extends StatelessWidget {
       child: AnimatedBuilder(
         animation: controller,
         builder: (context, child) {
-          return ListView.separated(
-            itemCount: variables.length,
-            scrollDirection: Axis.horizontal,
-            /// because in   ios the scroll is bouncing and we don't want that
-            physics: ClampingScrollPhysics(),
-            separatorBuilder: (context, index) {
-              return Center(
-                child: Container(
-                  height: 24,
-                  width: 1,
-                  color: Colors.white,
+          return Row(
+            children: [
+              _MoreVariableButton(controller: controller),
+              Expanded(
+                child: ListView.separated(
+                  itemCount: variables.length,
+                  scrollDirection: Axis.horizontal,
+                  /// because in   ios the scroll is bouncing and we don't want that
+                  physics: ClampingScrollPhysics(),
+                  separatorBuilder: (context, index) {
+                    return Center(
+                      child: Container(
+                        height: 24,
+                        width: 1,
+                        color: Colors.white,
+                      ),
+                    );
+                  },
+                  itemBuilder: (context, index) {
+                    return SizedBox(
+                      width: 56,
+                      child: _VariableButton(
+                        name: variables[index],
+                        onTap: () => controller.addLeaf('{${variables[index]}}'),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-            itemBuilder: (context, index) {
-              return SizedBox(
-                width: 56,
-                child: _VariableButton(
-                  name: variables[index],
-                  onTap: () => controller.addLeaf('{${variables[index]}}'),
-                ),
-              );
-            },
+              ),
+            ],
           );
         },
       ),
@@ -538,3 +545,183 @@ class _VariableButton extends StatelessWidget {
     );
   }
 }
+
+
+class _MoreVariableButton extends StatefulWidget {
+  const _MoreVariableButton({Key? key, required this.controller}) : super(key: key);
+
+  final MathFieldEditingController controller;
+
+  @override
+  __MoreVariableButtonState createState() => __MoreVariableButtonState();
+}
+
+class __MoreVariableButtonState extends State<_MoreVariableButton> {
+  OverlayEntry? _overlayEntry;
+
+  void _toggleOverlay() {
+    if (_overlayEntry != null) {
+      _removeOverlay();
+    } else {
+      _showOverlay();
+    }
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  void _showOverlay() {
+    final buttonBox = context.findRenderObject() as RenderBox;
+    final buttonPos = buttonBox.localToGlobal(Offset.zero);
+    final topOffset = buttonPos.dy + 45; // Offset to position overlay below button
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => _OverlayWidget(
+        controller: widget.controller,
+        topOffset: topOffset,
+        onDismiss: _removeOverlay,
+      ),
+    );
+
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  @override
+  void dispose() {
+    _removeOverlay();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 56,
+      child: _VariableButton(
+        name: '...',
+        onTap:_toggleOverlay
+      ),
+    );
+  }
+}
+
+class _OverlayWidget extends StatefulWidget {
+  final double topOffset;
+  final MathFieldEditingController controller;
+  final VoidCallback onDismiss;
+
+  const _OverlayWidget({
+    Key? key,
+    required this.topOffset,
+    required this.controller,
+    required this.onDismiss,
+  }) : super(key: key);
+
+  @override
+  _OverlayWidgetState createState() => _OverlayWidgetState();
+}
+
+class _OverlayWidgetState extends State<_OverlayWidget> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _heightAnimation;
+
+  static const List<String> _overlayItems = [
+    // Basic operators
+    '<', '>', '=', '≠', '≤', '≥', '±',
+    // Set theory & logic
+    '∈', '∉', '∋', '∌', '∪', '∩', '∅', '⊂', '⊃', '⊆', '⊇', '∀', '∃', '∄', '∧', '∨', '⇒', '⇔', '¬',
+    // Additional math symbols
+    '∞',
+    // Greek letters (lowercase)
+    'α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω',
+    // Greek letters (uppercase)
+    'Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Ο', 'Π', 'Ρ', 'Σ', 'Τ', 'Υ', 'Φ', 'Χ', 'Ψ', 'Ω',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final screenHeight = MediaQuery.of(context).size.height;
+    final availableHeight = screenHeight - widget.topOffset;
+
+    _heightAnimation = Tween<double>(begin: 0, end: availableHeight).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _dismiss() async {
+    await _controller.reverse();
+    widget.onDismiss();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _dismiss, // Tap outside to dismiss
+      child: Material(
+        color: Colors.transparent,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _heightAnimation,
+                builder: (context, child) {
+                  return Align(
+                    alignment: Alignment.topCenter,
+                    child: Container(
+                      margin: EdgeInsets.only(top: widget.topOffset),
+                      height: _heightAnimation.value,
+                      decoration: BoxDecoration(color: Colors.grey[900]),
+                      child: child,
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Scrollbar(
+                    child: SingleChildScrollView(
+                      child: Wrap(
+                        children: _overlayItems.map(
+                              (element) => SizedBox(
+                            width: 56,
+                            height: 56,
+                            child: _VariableButton(
+                              name: element,
+                              onTap: () => widget.controller.addLeaf('{$element}'),
+                            ),
+                          ),
+                        ).toList(),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
