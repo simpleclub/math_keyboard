@@ -76,6 +76,7 @@ class _KeyboardButtonState extends State<KeyboardButton>
 
   @override
   Widget build(BuildContext context) {
+    /// i make GestureDetector because the RawGestureDetector  sometimes lead to conflicts, like with scrolling
     Widget result = MouseRegion(
       onEnter: (_) => _handleHover(true),
       onExit: (_) => _handleHover(false),
@@ -131,9 +132,9 @@ class _KeyboardButtonState extends State<KeyboardButton>
 /// A gesture recognizer that wins in every arena.
 ///
 /// This prevents buttons with sqrt's from not responding.
-class _AlwaysWinningGestureRecognizer extends TapGestureRecognizer {
-  @override
-  void rejectGesture(int pointer) {
-    acceptGesture(pointer);
-  }
-}
+// class _AlwaysWinningGestureRecognizer extends TapGestureRecognizer {
+//   @override
+//   void rejectGesture(int pointer) {
+//     acceptGesture(pointer);
+//   }
+// }
