@@ -556,8 +556,25 @@ class _MoreVariableButton extends StatefulWidget {
   __MoreVariableButtonState createState() => __MoreVariableButtonState();
 }
 
-class __MoreVariableButtonState extends State<_MoreVariableButton> {
+class __MoreVariableButtonState extends State<_MoreVariableButton> with SingleTickerProviderStateMixin {
   OverlayEntry? _overlayEntry;
+  late AnimationController _controller;
+  late Animation<double> _heightAnimation;
+
+  static const List<String> _overlayItems = [
+    '<', '>', '=', '≠', '≤', '≥', '±', '∈', '∉', '∋', '∌', '∪', '∩', '∅', '⊂', '⊃', '⊆', '⊇', '∀', '∃', '∄', '∧', '∨', '⇒', '⇔', '¬', '∞',
+    'α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω',
+    'Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Ο', 'Π', 'Ρ', 'Σ', 'Τ', 'Υ', 'Φ', 'Χ', 'Ψ', 'Ω',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
+  }
 
   void _toggleOverlay() {
     if (_overlayEntry != null) {
@@ -575,107 +592,26 @@ class __MoreVariableButtonState extends State<_MoreVariableButton> {
   void _showOverlay() {
     final buttonBox = context.findRenderObject() as RenderBox;
     final buttonPos = buttonBox.localToGlobal(Offset.zero);
-    final topOffset = buttonPos.dy + 45; // Offset to position overlay below button
+    final topOffset = buttonPos.dy + 45;
 
-    _overlayEntry = OverlayEntry(
-      builder: (context) => _OverlayWidget(
-        controller: widget.controller,
-        topOffset: topOffset,
-        onDismiss: _removeOverlay,
-      ),
-    );
-
-    Overlay.of(context).insert(_overlayEntry!);
-  }
-
-  @override
-  void dispose() {
-    _removeOverlay();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 56,
-      child: _VariableButton(
-        name: '...',
-        onTap:_toggleOverlay
-      ),
-    );
-  }
-}
-
-class _OverlayWidget extends StatefulWidget {
-  final double topOffset;
-  final MathFieldEditingController controller;
-  final VoidCallback onDismiss;
-
-  const _OverlayWidget({
-    Key? key,
-    required this.topOffset,
-    required this.controller,
-    required this.onDismiss,
-  }) : super(key: key);
-
-  @override
-  _OverlayWidgetState createState() => _OverlayWidgetState();
-}
-
-class _OverlayWidgetState extends State<_OverlayWidget> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _heightAnimation;
-
-  static const List<String> _overlayItems = [
-    // Basic operators
-    '<', '>', '=', '≠', '≤', '≥', '±',
-    // Set theory & logic
-    '∈', '∉', '∋', '∌', '∪', '∩', '∅', '⊂', '⊃', '⊆', '⊇', '∀', '∃', '∄', '∧', '∨', '⇒', '⇔', '¬',
-    // Additional math symbols
-    '∞',
-    // Greek letters (lowercase)
-    'α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω',
-    // Greek letters (uppercase)
-    'Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Ο', 'Π', 'Ρ', 'Σ', 'Τ', 'Υ', 'Φ', 'Χ', 'Ψ', 'Ω',
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 250),
-      vsync: this,
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
     final screenHeight = MediaQuery.of(context).size.height;
-    final availableHeight = screenHeight - widget.topOffset;
+    final availableHeight = screenHeight - topOffset;
 
     _heightAnimation = Tween<double>(begin: 0, end: availableHeight).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
 
+    _overlayEntry = OverlayEntry(
+      builder: (context) => _buildOverlay(topOffset),
+    );
+
+    Overlay.of(context).insert(_overlayEntry!);
     _controller.forward();
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> _dismiss() async {
-    await _controller.reverse();
-    widget.onDismiss();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildOverlay(double topOffset) {
     return GestureDetector(
-      onTap: _dismiss, // Tap outside to dismiss
+      onTap: _dismissOverlay,
       child: Material(
         color: Colors.transparent,
         child: Stack(
@@ -687,7 +623,7 @@ class _OverlayWidgetState extends State<_OverlayWidget> with SingleTickerProvide
                   return Align(
                     alignment: Alignment.topCenter,
                     child: Container(
-                      margin: EdgeInsets.only(top: widget.topOffset),
+                      margin: EdgeInsets.only(top: topOffset),
                       height: _heightAnimation.value,
                       decoration: BoxDecoration(color: Colors.grey[900]),
                       child: child,
@@ -720,7 +656,31 @@ class _OverlayWidgetState extends State<_OverlayWidget> with SingleTickerProvide
       ),
     );
   }
+
+  Future<void> _dismissOverlay() async {
+    await _controller.reverse();
+    _removeOverlay();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _removeOverlay();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 56,
+      child: _VariableButton(
+        name: '...',
+        onTap: _toggleOverlay,
+      ),
+    );
+  }
 }
+
 
 
 
