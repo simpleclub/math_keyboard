@@ -38,7 +38,8 @@ class MathKeyboard extends StatelessWidget {
       bottom: 4,
       left: 4,
       right: 4,
-    ),  this.isShowMultiplyValueAsDot =true,
+    ),
+    this.isShowMultiplyValueAsDot = true,
   }) : super(key: key);
 
   /// The controller for editing the math field.
@@ -71,8 +72,10 @@ class MathKeyboard extends StatelessWidget {
   ///
   /// Defaults to `const EdgeInsets.only(bottom: 4, left: 4, right: 4),`.
   final EdgeInsets padding;
+
   /// if true, the multiply value will be shown as dot else it will be shown as x
-final bool isShowMultiplyValueAsDot;
+  final bool isShowMultiplyValueAsDot;
+
   @override
   Widget build(BuildContext context) {
     final curvedSlideAnimation = CurvedAnimation(
@@ -123,7 +126,9 @@ final bool isShowMultiplyValueAsDot;
                                   controller: controller,
                                   page1: type == MathKeyboardType.numberOnly
                                       ? numberKeyboard
-                                      : standardKeyboard(isShowMultiplyValueAsDot: isShowMultiplyValueAsDot ),
+                                      : standardKeyboard(
+                                          isShowMultiplyValueAsDot:
+                                              isShowMultiplyValueAsDot),
                                   page2: type == MathKeyboardType.numberOnly
                                       ? null
                                       : functionKeyboard,
@@ -260,6 +265,7 @@ class _Variables extends StatelessWidget {
                 child: ListView.separated(
                   itemCount: variables.length,
                   scrollDirection: Axis.horizontal,
+
                   /// because in   ios the scroll is bouncing and we don't want that
                   physics: ClampingScrollPhysics(),
                   separatorBuilder: (context, index) {
@@ -276,7 +282,8 @@ class _Variables extends StatelessWidget {
                       width: 56,
                       child: _VariableButton(
                         name: variables[index],
-                        onTap: () => controller.addLeaf('{${variables[index]}}'),
+                        onTap: () =>
+                            controller.addLeaf('{${variables[index]}}'),
                       ),
                     );
                   },
@@ -546,9 +553,9 @@ class _VariableButton extends StatelessWidget {
   }
 }
 
-
 class _MoreVariableButton extends StatefulWidget {
-  const _MoreVariableButton({Key? key, required this.controller}) : super(key: key);
+  const _MoreVariableButton({Key? key, required this.controller})
+      : super(key: key);
 
   final MathFieldEditingController controller;
 
@@ -556,29 +563,107 @@ class _MoreVariableButton extends StatefulWidget {
   __MoreVariableButtonState createState() => __MoreVariableButtonState();
 }
 
-class __MoreVariableButtonState extends State<_MoreVariableButton> with SingleTickerProviderStateMixin {
+class __MoreVariableButtonState extends State<_MoreVariableButton>
+    with SingleTickerProviderStateMixin {
   OverlayEntry? _overlayEntry;
   late AnimationController _controller;
   late Animation<double> _heightAnimation;
 
   static const List<String> _overlayItems = [
-    '<', '>', '=', '≠', '≤', '≥', '±', '∈', '∉', '∋', '∌', '∪', '∩', '∅', '⊂', '⊃', '⊆', '⊇', '∀', '∃', '∄', '∧', '∨', '⇒', '⇔', '¬', '∞',
-    'α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω',
-    'Α', 'Β', 'Γ', 'Δ', 'Ε', 'Ζ', 'Η', 'Θ', 'Ι', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Ο', 'Π', 'Ρ', 'Σ', 'Τ', 'Υ', 'Φ', 'Χ', 'Ψ', 'Ω',
+    '<',
+    '>',
+    '=',
+    '≠',
+    '≤',
+    '≥',
+    '±',
+    '∈',
+    '∉',
+    '∋',
+    '∌',
+    '∪',
+    '∩',
+    '∅',
+    '⊂',
+    '⊃',
+    '⊆',
+    '⊇',
+    '∀',
+    '∃',
+    '∄',
+    '∧',
+    '∨',
+    '⇒',
+    '⇔',
+    '¬',
+    '∞',
+    'α',
+    'β',
+    'γ',
+    'δ',
+    'ε',
+    'ζ',
+    'η',
+    'θ',
+    'ι',
+    'κ',
+    'λ',
+    'μ',
+    'ν',
+    'ξ',
+    'ο',
+    'π',
+    'ρ',
+    'σ',
+    'τ',
+    'υ',
+    'φ',
+    'χ',
+    'ψ',
+    'ω',
+    'Α',
+    'Β',
+    'Γ',
+    'Δ',
+    'Ε',
+    'Ζ',
+    'Η',
+    'Θ',
+    'Ι',
+    'Κ',
+    'Λ',
+    'Μ',
+    'Ν',
+    'Ξ',
+    'Ο',
+    'Π',
+    'Ρ',
+    'Σ',
+    'Τ',
+    'Υ',
+    'Φ',
+    'Χ',
+    'Ψ',
+    'Ω',
   ];
 
+  @override
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 200),
       vsync: this,
+    );
+
+    _heightAnimation = Tween<double>(begin: 0, end: 200).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
   }
 
   void _toggleOverlay() {
     if (_overlayEntry != null) {
-      _removeOverlay();
+      _dismissOverlay();
     } else {
       _showOverlay();
     }
@@ -597,6 +682,7 @@ class __MoreVariableButtonState extends State<_MoreVariableButton> with SingleTi
     final screenHeight = MediaQuery.of(context).size.height;
     final availableHeight = screenHeight - topOffset;
 
+    // Update height animation
     _heightAnimation = Tween<double>(begin: 0, end: availableHeight).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
@@ -606,56 +692,57 @@ class __MoreVariableButtonState extends State<_MoreVariableButton> with SingleTi
     );
 
     Overlay.of(context).insert(_overlayEntry!);
-    _controller.forward();
+
+    // Wait for the next frame before starting animation
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controller.forward();
+    });
   }
 
+
   Widget _buildOverlay(double topOffset) {
-    return GestureDetector(
-      onTap: _dismissOverlay,
-      child: Material(
+    return Positioned(
+      top: topOffset,
+      left: 0,
+      right: 0,
+      child: Material( // Wrap in Material to avoid clipping issues
         color: Colors.transparent,
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: AnimatedBuilder(
-                animation: _heightAnimation,
-                builder: (context, child) {
-                  return Align(
-                    alignment: Alignment.topCenter,
-                    child: Container(
-                      margin: EdgeInsets.only(top: topOffset),
-                      height: _heightAnimation.value,
-                      decoration: BoxDecoration(color: Colors.grey[900]),
-                      child: child,
-                    ),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Scrollbar(
-                    child: SingleChildScrollView(
-                      child: Wrap(
-                        children: _overlayItems.map(
-                              (element) => SizedBox(
-                            width: 56,
-                            height: 56,
-                            child: _VariableButton(
-                              name: element,
-                              onTap: () => widget.controller.addLeaf('{$element}'),
-                            ),
-                          ),
-                        ).toList(),
-                      ),
+        child: AnimatedBuilder(
+          animation: _heightAnimation,
+          builder: (context, child) {
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              height: _heightAnimation.value,
+              decoration: BoxDecoration(
+                color: Colors.grey[900],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: child,
+            );
+          },
+          child: Scrollbar(
+            child: SingleChildScrollView(
+              child: Wrap(
+                children: _overlayItems
+                    .map(
+                      (element) => SizedBox(
+                    width: 56,
+                    height: 56,
+                    child: _VariableButton(
+                      name: element,
+                      onTap: () => widget.controller.addLeaf('{$element}'),
                     ),
                   ),
-                ),
+                )
+                    .toList(),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
   }
+
 
   Future<void> _dismissOverlay() async {
     await _controller.reverse();
@@ -664,8 +751,9 @@ class __MoreVariableButtonState extends State<_MoreVariableButton> with SingleTi
 
   @override
   void dispose() {
-    _controller.dispose();
     _removeOverlay();
+    _controller.dispose();
+
     super.dispose();
   }
 
@@ -680,8 +768,3 @@ class __MoreVariableButtonState extends State<_MoreVariableButton> with SingleTi
     );
   }
 }
-
-
-
-
-
