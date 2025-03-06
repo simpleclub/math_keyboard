@@ -27,8 +27,10 @@ class MathField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.opensKeyboard = true,
+    this.inputColor,
   }) : super(key: key);
 
+  final Color? inputColor;
   /// The controller for the math field.
   ///
   /// This can be optionally passed in order to control a math field from the
@@ -524,6 +526,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
               animation: _controller,
               builder: (context, child) {
                 return _FieldPreview(
+                  inputColor: widget.inputColor ?? Theme.of(context).colorScheme.onSurface,
                   controller: _controller,
                   scrollController: _scrollController,
                   cursorOpacity: _cursorOpacity,
@@ -550,7 +553,11 @@ class _FieldPreview extends StatelessWidget {
     required this.hasFocus,
     required this.decoration,
     required this.scrollController,
+    required this.inputColor,
   }) : super(key: key);
+
+  /// The color of the input.
+  final Color inputColor;
 
   /// The controller for the math field.
   final MathFieldEditingController controller;
@@ -659,7 +666,7 @@ class _FieldPreview extends StatelessWidget {
                   tex,
                   options: MathOptions(
                     fontSize: 16,
-                    color: decoration.inputColor ?? Theme.of(context).colorScheme.onSurface, // here!
+                    color: inputColor,
                   ),
                 ),
               ),
