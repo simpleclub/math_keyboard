@@ -28,9 +28,14 @@ class MathField extends StatefulWidget {
     this.onSubmitted,
     this.opensKeyboard = true,
     this.inputColor,
+    this.textAlign = TextAlign.start,
+    this.customCursorColor = Colors.black,
+    this.mathField,
+    this.cursorOpacity = 1.0,
   }) : super(key: key);
 
   final Color? inputColor;
+  final TextAlign textAlign;
   /// The controller for the math field.
   ///
   /// This can be optionally passed in order to control a math field from the
@@ -118,6 +123,14 @@ class MathField extends StatefulWidget {
   /// Defaults to `true`.
   final bool opensKeyboard;
 
+  /// The color of the cursor.
+  final Color customCursorColor;
+
+  /// The math field to display.
+  final MathField? mathField;
+
+  final double? cursorOpacity;
+
   @override
   _MathFieldState createState() => _MathFieldState();
 }
@@ -136,7 +149,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     // is greater than 1/2.
     value: 1 / 2,
   );
-  late var _cursorOpacity = 0.0;
+  late var _cursorOpacity = widget.cursorOpacity;
 
   OverlayEntry? _overlayEntry;
   late var _focusNode = widget.focusNode ??
@@ -330,6 +343,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
           context: this.context,
           locale: Localizations.localeOf(this.context),
           child: MathKeyboard(
+            mathField: widget.mathField,
             controller: _controller,
             type: widget.keyboardType,
             variables: _variables,
@@ -527,12 +541,14 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
               builder: (context, child) {
                 return _FieldPreview(
                   inputColor: widget.inputColor ?? Theme.of(context).colorScheme.onSurface,
+                  customCursorColor: widget.customCursorColor,
                   controller: _controller,
                   scrollController: _scrollController,
-                  cursorOpacity: _cursorOpacity,
+                  cursorOpacity: _cursorOpacity ?? 1.0,
                   hasFocus: _focusNode.hasFocus,
                   decoration: widget.decoration
                       .applyDefaults(Theme.of(context).inputDecorationTheme),
+                  textAlign: widget.textAlign,
                 );
               },
             ),
@@ -549,11 +565,13 @@ class _FieldPreview extends StatelessWidget {
   const _FieldPreview({
     Key? key,
     required this.controller,
+    this.customCursorColor = Colors.black,
     required this.cursorOpacity,
     required this.hasFocus,
     required this.decoration,
     required this.scrollController,
     required this.inputColor,
+    this.textAlign = TextAlign.start,
   }) : super(key: key);
 
   /// The color of the input.
@@ -574,6 +592,11 @@ class _FieldPreview extends StatelessWidget {
 
   /// The decoration to show around the text field.
   final InputDecoration decoration;
+
+  /// The color of the cursor.
+  final Color customCursorColor;
+
+  final TextAlign textAlign;
 
   // Adapted from InputDecorator._getFillColor.
   Color _getDisabledCursorColor(ThemeData themeData) {
@@ -621,8 +644,7 @@ class _FieldPreview extends StatelessWidget {
         .buildTeXString(
           cursorColor: Color.lerp(
             _getDisabledCursorColor(Theme.of(context)),
-            Theme.of(context).textSelectionTheme.cursorColor ??
-                Theme.of(context).colorScheme.secondary,
+            customCursorColor,
             cursorOpacity,
           ),
         )
@@ -650,10 +672,13 @@ class _FieldPreview extends StatelessWidget {
         isEmpty: false,
         isFocused: hasFocus,
         decoration: decoration,
-        child: SingleChildScrollView(
-          controller: scrollController,
-          scrollDirection: Axis.horizontal,
+        child: Container(
+          width: MediaQuery.of(context).size.width - 32,
+          alignment: textAlign == TextAlign.center ? Alignment.center : 
+                    textAlign == TextAlign.end ? Alignment.centerRight : 
+                    Alignment.centerLeft,
           child: Stack(
+            alignment: Alignment.center,
             children: [
               Transform.translate(
                 offset: !controller.isEmpty

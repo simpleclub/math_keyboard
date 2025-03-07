@@ -227,6 +227,7 @@ String rightSide = '';
                         child: 
                       isMathMode
                           ? MathField(
+                            textAlign: TextAlign.start,
                             focusNode: mathFocusNode,
                             autofocus: true,
                               controller: mathController,
@@ -237,6 +238,32 @@ String rightSide = '';
                                 suffix: editOrCancelButton(),
                                 
                               ),
+                              mathField: MathField(
+                                autofocus: true,
+                                textAlign: TextAlign.center,
+                                controller: mathController,
+                                decoration: InputDecoration(
+                                  suffixIcon: GestureDetector(
+                                    onTap: () {
+                                      mathController.clear();
+                                    },
+                                    child: Container(
+                                      margin: EdgeInsets.only(right: 8),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white,
+                                        border: Border.all(color: Color.fromRGBO(235, 235, 235, 1)),
+                                      ),
+                                      padding: EdgeInsets.all(8),
+                                      child: Icon(Icons.close)),
+                                  ),
+                                  border: InputBorder.none,
+                                ),
+                                // variables: const ['a', 'b', 'c', 'x', 'y', 'z', '='],
+                              ),
+                              // onChanged: (value) {
+                              //   setState(() {});
+                              // },
                             )
                           : TextField(
                             focusNode: textFocusNode,

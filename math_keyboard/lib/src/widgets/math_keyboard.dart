@@ -32,6 +32,7 @@ class MathKeyboard extends StatelessWidget {
   const MathKeyboard({
     Key? key,
     required this.controller,
+    this.mathField,
     this.type = MathKeyboardType.expression,
     this.variables = const [],
     this.onSubmit,
@@ -53,6 +54,9 @@ class MathKeyboard extends StatelessWidget {
   ///
   /// Must not be `null`.
   final MathFieldEditingController controller;
+
+  /// The math field to display.
+  final MathField? mathField;
 
   /// The state for reporting the keyboard insets.
   ///
@@ -127,81 +131,94 @@ class MathKeyboard extends StatelessWidget {
               type: MaterialType.transparency,
               child: SafeArea(
                 top: false,
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: backgroundColor,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
+                child: Column(
+                  children: [
+                    if (mathField != null)
+                    Container(
+                      alignment: Alignment.center,
+                      width: double.infinity,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Color.fromRGBO(0, 0, 0, 0.04),
+                          borderRadius: BorderRadius.circular(99),
+                        ),
+                        child: mathField ?? Container()),
+                      
                     ),
-                    boxShadow: [
-                      BoxShadow(offset: Offset(0, -10), blurRadius: 20,
-                      color: Color(0xFFCCCCCC))
-                    ]
-                  ),
-                  padding: EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
-                  child: _KeyboardBody(
-                    insetsState: insetsState,
-                    slideAnimation:
-                        slideAnimation == null ? null : curvedSlideAnimation,
-                    child: Padding(
-                      padding: padding,
-                      child: Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            maxWidth: double.infinity,
-                          ),
-                          child: Column(
-                            children: [
-                              if (type != MathKeyboardType.numberOnly)
-                                _Variables(
-                                  controller: controller,
-                                  variables: variables,
-                                  submitColor:submitColor, 
-                                  buttonColor: buttonColor,
-                                  highlightColor: Colors.transparent,
-                                  iconColor: iconColor,
-                                ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 4,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Flexible(
-                                      child: _Buttons(
-                                        controller: controller,
-                                        page1: functionKeyboard,
-                                        page2: functionKeyboard,
-                                        onSubmit: onSubmit,
-                                        buttonColor: buttonColor,
-                                        highlightColor: highlightColor,
-                                        iconColor: iconColor,
-                                        submitColor: submitColor,
-                                      ),
-                                    ),
-                                    Flexible(
-                                      child: _Buttons(
-                                                                        controller: controller,
-                                                                        page1: standardKeyboard,
-                                                                        page2: coachOnKeyboard1,
-                                                                        onSubmit: onSubmit,
-                                                                        buttonColor: buttonColor,
-                                                                        highlightColor: highlightColor,
-                                                                        iconColor: iconColor,
-                                                                        submitColor: submitColor,
-                                                                      ),
-                                    ),
-                                  ],
-                                ),
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: backgroundColor,
+                      ),
+                      padding: EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0),
+                      child: _KeyboardBody(
+                        insetsState: insetsState,
+                        slideAnimation:
+                            slideAnimation == null ? null : curvedSlideAnimation,
+                        child: Padding(
+                          padding: padding,
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                maxWidth: double.infinity,
                               ),
-                            ],
+                              child: Column(
+                                children: [
+                                  if (type != MathKeyboardType.numberOnly)
+                                    _Variables(
+                                      controller: controller,
+                                      variables: variables,
+                                      submitColor:submitColor, 
+                                      buttonColor: buttonColor,
+                                      highlightColor: Colors.transparent,
+                                      iconColor: iconColor,
+                                    ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 4,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Flexible(
+                                          child: _Buttons(
+                                            controller: controller,
+                                            page1: functionKeyboard,
+                                            page2: functionKeyboard,
+                                            onSubmit: onSubmit,
+                                            buttonColor: buttonColor,
+                                            highlightColor: highlightColor,
+                                            iconColor: iconColor,
+                                            submitColor: submitColor,
+                                          ),
+                                        ),
+                                        Flexible(
+                                          child: _Buttons(
+                                                                            controller: controller,
+                                                                            page1: standardKeyboard,
+                                                                            page2: coachOnKeyboard1,
+                                                                            onSubmit: onSubmit,
+                                                                            buttonColor: buttonColor,
+                                                                            highlightColor: highlightColor,
+                                                                            iconColor: iconColor,
+                                                                            submitColor: submitColor,
+                                                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
