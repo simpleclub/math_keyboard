@@ -643,7 +643,7 @@ class _FieldPreview extends StatelessWidget {
     final tex = controller.root
         .buildTeXString(
           cursorColor: Color.lerp(
-            _getDisabledCursorColor(Theme.of(context)),
+            Colors.white, // 비활성 커서 색상 흰색으로 고정 //  _getDisabledCursorColor(Theme.of(context)),
             customCursorColor,
             cursorOpacity,
           ),
