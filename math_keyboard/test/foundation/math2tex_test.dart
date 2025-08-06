@@ -9,12 +9,14 @@ import 'package:math_keyboard/src/foundation/tex2math.dart';
 void main() {
   group('constants', () {
     test('pi', () {
-      final node = convertMathExpressionToTeXNode(Parser().parse('$pi'));
+      final node =
+          convertMathExpressionToTeXNode(ShuntingYardParser().parse('$pi'));
       expect(node.children[0].expression, r'{\pi}');
     });
 
     test('e', () {
-      final node = convertMathExpressionToTeXNode(Parser().parse('$e'));
+      final node =
+          convertMathExpressionToTeXNode(ShuntingYardParser().parse('$e'));
       expect(node.children[0].expression, r'{e}');
     });
 
@@ -22,8 +24,9 @@ void main() {
       const tex = r'23+{\pi}+{x}';
       const exp = '23+$pi+x';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -34,8 +37,9 @@ void main() {
       const tex = '{x}+{e}^2';
       const exp = 'x+$e^2';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -48,8 +52,9 @@ void main() {
       const tex = r'23\cdot{x}';
       const exp = '23*x';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -60,8 +65,9 @@ void main() {
       const tex = r'23\times({var})';
       const exp = '23*var';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -72,8 +78,9 @@ void main() {
       const tex = '23{c}';
       const exp = '23*c';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -86,8 +93,9 @@ void main() {
       const tex = r'\frac{1}{{x}}';
       const exp = '1/x';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -98,8 +106,9 @@ void main() {
       const tex = r'\frac{1}{\frac{{x}}{2}}';
       const exp = '1/(x/2)';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -112,8 +121,9 @@ void main() {
       const tex = r'0.001\times{x}';
       const exp = '0.001*x';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -126,8 +136,9 @@ void main() {
       const tex = r'2\times\sin({x})';
       const exp = '2*sin(x)';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -138,8 +149,9 @@ void main() {
       const tex = r'\sin^{-1}({x})';
       const exp = 'arcsin(x)';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -150,8 +162,9 @@ void main() {
       const tex = r'\cos({x})';
       const exp = 'cos(x)';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -162,8 +175,9 @@ void main() {
       const tex = r'\cos^{-1}({x})';
       const exp = 'arccos(x)';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -174,8 +188,9 @@ void main() {
       const tex = r'\tan({y})';
       const exp = 'tan(y)';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -186,8 +201,9 @@ void main() {
       const tex = r'\tan^{-1}({y})';
       const exp = 'arctan(y)';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -200,8 +216,9 @@ void main() {
       const tex = r'2 \times  \sqrt{{x}}';
       const exp = '2*nrt(2,x)';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -214,8 +231,9 @@ void main() {
       const tex = r'\log_{2.0}({x})';
       const exp = 'log(2,x)';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -226,8 +244,9 @@ void main() {
       const tex = r'\log_{2.718281828459045}(2{x})';
       const exp = 'ln(2*x)';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -240,8 +259,9 @@ void main() {
       const tex = r'-(\frac{2 \times  \sqrt{ 16 }}{{x}^2})^2';
       const exp = '(0-((2*nrt(2,16))/(x^2))^2)';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),
@@ -252,8 +272,9 @@ void main() {
       const tex = r'\frac{3}{2}\cdot{e}^{\frac{1}{4}\cdot{x}}';
       const exp = '3/2*e^(1/4*x)';
       expect(
-        TeXParser(convertMathExpressionToTeXNode(Parser().parse(exp))
-                .buildTeXString(cursorColor: null))
+        TeXParser(
+                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
+                    .buildTeXString(cursorColor: null))
             .parse()
             .toString(),
         TeXParser(tex).parse().toString(),

@@ -225,9 +225,10 @@ class _PrimaryPage extends StatefulWidget {
 
 class _PrimaryPageState extends State<_PrimaryPage> {
   late final _expressionController = MathFieldEditingController()
-    ..updateValue(Parser().parse('4.2 - (cos(x)/(x^3 - sin(x))) + e^(4^2)'));
+    ..updateValue(
+        ShuntingYardParser().parse('4.2 - (cos(x)/(x^3 - sin(x))) + e^(4^2)'));
   late final _numberController = MathFieldEditingController()
-    ..updateValue(Parser().parse('42'));
+    ..updateValue(ShuntingYardParser().parse('42'));
 
   @override
   void dispose() {
@@ -398,10 +399,10 @@ class _ControllerPage extends StatefulWidget {
 
 class _ControllerPageState extends State<_ControllerPage> {
   late final _clipboardController = MathFieldEditingController()
-    ..updateValue(Parser().parse('log(2, x) - log(5, 2) / 24'));
+    ..updateValue(ShuntingYardParser().parse('log(2, x) - log(5, 2) / 24'));
   late final _clearAllController = MathFieldEditingController();
   late final _magicController = MathFieldEditingController()
-    ..updateValue(Parser().parse('42'));
+    ..updateValue(ShuntingYardParser().parse('42'));
 
   @override
   void dispose() {
@@ -769,7 +770,7 @@ class _DecimalSeparatorPage extends StatefulWidget {
 
 class _DecimalSeparatorPageState extends State<_DecimalSeparatorPage> {
   late final _controller = MathFieldEditingController()
-    ..updateValue(Parser().parse('4.2'));
+    ..updateValue(ShuntingYardParser().parse('4.2'));
 
   @override
   void dispose() {
@@ -858,14 +859,14 @@ class _MathExpressionsPage extends StatefulWidget {
 
 class _MathExpressionsPageState extends State<_MathExpressionsPage> {
   String? _tex;
-  late Expression _expression = Parser().parse('(x^2)/2 + 1');
+  late Expression _expression = ShuntingYardParser().parse('(x^2)/2 + 1');
   double _value = 4;
   double? _result;
 
   late final _expressionController = MathFieldEditingController()
     ..updateValue(_expression);
   late final _valueController = MathFieldEditingController()
-    ..updateValue(Parser().parse('$_value'));
+    ..updateValue(ShuntingYardParser().parse('$_value'));
 
   @override
   void initState() {

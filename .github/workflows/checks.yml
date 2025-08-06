@@ -47,7 +47,7 @@ jobs:
         working-directory: ${{ matrix.package }}
       - name: dart format
         working-directory: ${{ matrix.package }}
-        run: dart format . --fix --set-exit-if-changed
+        run: dart format . --set-exit-if-changed
       - run: flutter analyze
         working-directory: ${{ matrix.package }}
 
