@@ -15,7 +15,7 @@ void main() {
       const exp = '23+$pi+x';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
 
@@ -24,7 +24,7 @@ void main() {
       const exp = 'x+$e^2';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
   });
@@ -35,7 +35,7 @@ void main() {
       const exp = '23*x';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
 
@@ -44,7 +44,7 @@ void main() {
       const exp = '23*var';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
 
@@ -53,7 +53,7 @@ void main() {
       const exp = '23*c';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
 
@@ -62,7 +62,7 @@ void main() {
       const exp = '23*c';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
 
@@ -71,7 +71,7 @@ void main() {
       const exp = '23^2*c';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
   });
@@ -82,7 +82,7 @@ void main() {
       const exp = '1/x';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
 
@@ -91,7 +91,7 @@ void main() {
       const exp = '1/(x/2)';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
   });
@@ -102,7 +102,7 @@ void main() {
       const exp = '0.001*x';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
   });
@@ -113,7 +113,7 @@ void main() {
       const exp = '2*sin(x)';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
 
@@ -122,7 +122,7 @@ void main() {
       const exp = 'arcsin(x)';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
 
@@ -131,7 +131,7 @@ void main() {
       const exp = 'cos(x)';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
 
@@ -140,7 +140,7 @@ void main() {
       const exp = 'arccos(x)';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
 
@@ -149,7 +149,7 @@ void main() {
       const exp = 'tan(y)';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
 
@@ -158,7 +158,7 @@ void main() {
       const exp = 'arctan(y)';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
   });
@@ -169,7 +169,7 @@ void main() {
       const exp = '2*nrt(2,x)';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
 
@@ -178,7 +178,7 @@ void main() {
       const exp = '(2.0 * (x^(1.0 / 3.0)))';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
   });
@@ -189,7 +189,7 @@ void main() {
       const exp = 'log(2,x)';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
 
@@ -198,7 +198,7 @@ void main() {
       const exp = 'ln(2*x)';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
   });
@@ -209,7 +209,7 @@ void main() {
       const exp = '(0-((2*nrt(2,16))/(x^2))^2)';
       expect(
         TeXParser(tex).parse().toString(),
-        Parser().parse(exp).toString(),
+        ShuntingYardParser().parse(exp).toString(),
       );
     });
   });
