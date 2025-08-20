@@ -1,4 +1,6 @@
 name: web demo
+permissions:
+  contents: write
 
 on:
   push:
