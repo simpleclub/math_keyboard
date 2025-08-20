@@ -1,4 +1,6 @@
 name: Publish to pub.dev
+permissions:
+  contents: read
 
 on:
   push:
