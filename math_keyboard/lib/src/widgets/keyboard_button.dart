@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:holding_gesture/holding_gesture.dart';
 
@@ -72,26 +71,20 @@ class _KeyboardButtonState extends State<KeyboardButton>
     _animationController.value = 0;
   }
 
+
+
   @override
   Widget build(BuildContext context) {
+    /// i make GestureDetector because the RawGestureDetector  sometimes lead to conflicts, like with scrolling
     Widget result = MouseRegion(
       onEnter: (_) => _handleHover(true),
       onExit: (_) => _handleHover(false),
-      child: RawGestureDetector(
+      child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        gestures: <Type, GestureRecognizerFactory>{
-          _AlwaysWinningGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-              _AlwaysWinningGestureRecognizer>(
-            () => _AlwaysWinningGestureRecognizer(),
-            (_AlwaysWinningGestureRecognizer instance) {
-              instance
-                ..onTap = widget.onTap
-                ..onTapUp = _handleTapUp
-                ..onTapDown = _handleTapDown
-                ..onTapCancel = _handleTapCancel;
-            },
-          ),
-        },
+        onTap: widget.onTap,
+        onTapUp: _handleTapUp,
+        onTapDown: _handleTapDown,
+        onTapCancel: _handleTapCancel,
         child: Padding(
           padding: const EdgeInsets.all(4),
           child: DecoratedBox(
@@ -106,14 +99,10 @@ class _KeyboardButtonState extends State<KeyboardButton>
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     color: Colors.white.withValues(
-                      alpha: Curves.easeInOut
-                              .transform(_animationController.value) /
-                          3,
+                      alpha: Curves.easeInOut.transform(_animationController.value) / 3,
                     ),
                   ),
-                  child: Center(
-                    child: child,
-                  ),
+                  child: Center(child: child),
                 );
               },
               child: widget.child,
@@ -142,9 +131,9 @@ class _KeyboardButtonState extends State<KeyboardButton>
 /// A gesture recognizer that wins in every arena.
 ///
 /// This prevents buttons with sqrt's from not responding.
-class _AlwaysWinningGestureRecognizer extends TapGestureRecognizer {
-  @override
-  void rejectGesture(int pointer) {
-    acceptGesture(pointer);
-  }
-}
+// class _AlwaysWinningGestureRecognizer extends TapGestureRecognizer {
+//   @override
+//   void rejectGesture(int pointer) {
+//     acceptGesture(pointer);
+//   }
+// }

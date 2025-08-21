@@ -39,6 +39,7 @@ class MathKeyboard extends StatelessWidget {
       left: 4,
       right: 4,
     ),
+    this.isShowMultiplyValueAsDot = true,
   }) : super(key: key);
 
   /// The controller for editing the math field.
@@ -71,6 +72,9 @@ class MathKeyboard extends StatelessWidget {
   ///
   /// Defaults to `const EdgeInsets.only(bottom: 4, left: 4, right: 4),`.
   final EdgeInsets padding;
+
+  /// if true, the multiply value will be shown as dot else it will be shown as x
+  final bool isShowMultiplyValueAsDot;
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +126,9 @@ class MathKeyboard extends StatelessWidget {
                                   controller: controller,
                                   page1: type == MathKeyboardType.numberOnly
                                       ? numberKeyboard
-                                      : standardKeyboard,
+                                      : standardKeyboard(
+                                          isShowMultiplyValueAsDot:
+                                              isShowMultiplyValueAsDot),
                                   page2: type == MathKeyboardType.numberOnly
                                       ? null
                                       : functionKeyboard,
@@ -252,27 +258,38 @@ class _Variables extends StatelessWidget {
       child: AnimatedBuilder(
         animation: controller,
         builder: (context, child) {
-          return ListView.separated(
-            itemCount: variables.length,
-            scrollDirection: Axis.horizontal,
-            separatorBuilder: (context, index) {
-              return Center(
-                child: Container(
-                  height: 24,
-                  width: 1,
-                  color: Colors.white,
+          return Row(
+            children: [
+              _MoreVariableButton(controller: controller),
+              Expanded(
+                child: ListView.separated(
+                  itemCount: variables.length,
+                  scrollDirection: Axis.horizontal,
+
+                  /// because in   ios the scroll is bouncing and we don't want that
+                  physics: ClampingScrollPhysics(),
+                  separatorBuilder: (context, index) {
+                    return Center(
+                      child: Container(
+                        height: 24,
+                        width: 1,
+                        color: Colors.white,
+                      ),
+                    );
+                  },
+                  itemBuilder: (context, index) {
+                    return SizedBox(
+                      width: 56,
+                      child: _VariableButton(
+                        name: variables[index],
+                        onTap: () =>
+                            controller.addLeaf('{${variables[index]}}'),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-            itemBuilder: (context, index) {
-              return SizedBox(
-                width: 56,
-                child: _VariableButton(
-                  name: variables[index],
-                  onTap: () => controller.addLeaf('{${variables[index]}}'),
-                ),
-              );
-            },
+              ),
+            ],
           );
         },
       ),
@@ -531,6 +548,161 @@ class _VariableButton extends StatelessWidget {
           fontSize: 22,
           color: Colors.white,
         ),
+      ),
+    );
+  }
+}
+
+class _MoreVariableButton extends StatefulWidget {
+  const _MoreVariableButton({Key? key, required this.controller})
+      : super(key: key);
+
+  final MathFieldEditingController controller;
+
+  @override
+  __MoreVariableButtonState createState() => __MoreVariableButtonState();
+}
+
+class __MoreVariableButtonState extends State<_MoreVariableButton>
+    with SingleTickerProviderStateMixin {
+  OverlayEntry? _overlayEntry;
+  late AnimationController _controller;
+  late Animation<double> _heightAnimation;
+
+  static const List<String> _overlayItems = [
+    // Basic Mathematical Symbols
+     '±', '=', '≠', '<', '>', '≤', '≥',
+    // Set Theory
+    '∅', '∈', '∉', '∋', '∌', '∪', '∩', '⊂', '⊃', '⊆', '⊇',
+    // Logic
+    '¬', '∧', '∨', '⇒', '⇔', '⊥', '⊤','∼',
+    // Calculus
+     '∞',
+    // Relations
+    '∝',
+    // Arrows
+    '→', '←', '↑', '↓', '↔', '⇒', '⇔',
+
+
+  ];
+
+  @override
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+
+    _heightAnimation = Tween<double>(begin: 0, end: 200).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  void _toggleOverlay() {
+    if (_overlayEntry != null) {
+      _dismissOverlay();
+    } else {
+      _showOverlay();
+    }
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  void _showOverlay() {
+    final buttonBox = context.findRenderObject() as RenderBox;
+    final buttonPos = buttonBox.localToGlobal(Offset.zero);
+    final topOffset = buttonPos.dy + 45;
+
+    final screenHeight = MediaQuery.of(context).size.height;
+    final availableHeight = screenHeight - topOffset;
+
+    // Update height animation
+    _heightAnimation = Tween<double>(begin: 0, end: availableHeight).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => _buildOverlay(topOffset),
+    );
+
+    Overlay.of(context).insert(_overlayEntry!);
+
+    // Wait for the next frame before starting animation
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controller.forward();
+    });
+  }
+
+
+  Widget _buildOverlay(double topOffset) {
+    return Positioned(
+      top: topOffset,
+      left: 0,
+      right: 0,
+      child: Material( // Wrap in Material to avoid clipping issues
+        color: Colors.transparent,
+        child: AnimatedBuilder(
+          animation: _heightAnimation,
+          builder: (context, child) {
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              height: _heightAnimation.value,
+              decoration: BoxDecoration(
+                color: Colors.grey[900],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: child,
+            );
+          },
+          child: Scrollbar(
+            child: SingleChildScrollView(
+              child: Wrap(
+                children: _overlayItems
+                    .map(
+                      (element) => SizedBox(
+                    width: 56,
+                    height: 56,
+                    child: _VariableButton(
+                      name: element,
+                      onTap: () => widget.controller.addLeaf('{$element}'),
+                    ),
+                  ),
+                )
+                    .toList(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  Future<void> _dismissOverlay() async {
+    await _controller.reverse();
+    _removeOverlay();
+  }
+
+  @override
+  void dispose() {
+    _removeOverlay();
+    _controller.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 56,
+      child: _VariableButton(
+        name: '...',
+        onTap: _toggleOverlay,
       ),
     );
   }
