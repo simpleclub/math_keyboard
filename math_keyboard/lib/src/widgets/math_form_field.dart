@@ -49,6 +49,7 @@ class MathFormField extends FormField<String> {
             }
 
             return MathField(
+
               controller: state._controller,
               focusNode: focusNode,
               decoration: decoration.copyWith(errorText: field.errorText),
