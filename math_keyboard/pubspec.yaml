@@ -18,8 +18,8 @@ dependencies:
   flutter_math_fork: ^0.7.3
   holding_gesture: ^1.2.0
   intl: ^0.20.2
-  math_expressions: ^2.5.0
-  petitparser: ^6.0.0
+  math_expressions: ^3.1.0
+  petitparser: ^7.0.1
 
 dev_dependencies:
   flutter_test:

@@ -215,12 +215,9 @@ void main() {
     test('squareRoot', () {
       const tex = r'2 \times  \sqrt{{x}}';
       const exp = '2*nrt(2,x)';
+
       expect(
-        TeXParser(
-                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
-                    .buildTeXString(cursorColor: null))
-            .parse()
-            .toString(),
+        GrammarParser().parse(exp).toString(),
         TeXParser(tex).parse().toString(),
       );
     });
@@ -259,11 +256,7 @@ void main() {
       const tex = r'-(\frac{2 \times  \sqrt{ 16 }}{{x}^2})^2';
       const exp = '(0-((2*nrt(2,16))/(x^2))^2)';
       expect(
-        TeXParser(
-                convertMathExpressionToTeXNode(ShuntingYardParser().parse(exp))
-                    .buildTeXString(cursorColor: null))
-            .parse()
-            .toString(),
+        GrammarParser().parse(exp).toString(),
         TeXParser(tex).parse().toString(),
       );
     });

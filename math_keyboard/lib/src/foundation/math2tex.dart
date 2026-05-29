@@ -156,7 +156,7 @@ List<TeX> _convertToTeX(Expression mathExpression, TeXNode parent) {
           parent,
           const [TeXArg.brackets, TeXArg.braces],
           [
-            convertMathExpressionToTeXNode(Number(mathExpression.n)),
+            convertMathExpressionToTeXNode(mathExpression.n),
             convertMathExpressionToTeXNode(mathExpression.arg),
           ],
         ),
