@@ -1,3 +1,11 @@
+## Unreleased
+
+* Added an `allowedTools` parameter to `MathField`, `MathFormField`, and `MathKeyboard` for
+  restricting which math tools/formulas are available, along with a new `MathKeyboardTool` enum.
+* Number-only fields (`MathKeyboardType.numberOnly`) now validate and format input into well-formed
+  numbers: a single leading minus, a single decimal point, a leading zero for bare decimals
+  (`.5` → `0.5`) and stripping of redundant leading zeros (`007` → `7`).
+
 ## 0.3.3
 
 * Update `intl`

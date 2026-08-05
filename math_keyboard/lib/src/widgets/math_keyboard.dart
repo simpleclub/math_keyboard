@@ -32,6 +32,7 @@ class MathKeyboard extends StatelessWidget {
     required this.controller,
     this.type = MathKeyboardType.expression,
     this.variables = const [],
+    this.allowedTools,
     this.onSubmit,
     this.insetsState,
     this.slideAnimation,
@@ -64,6 +65,20 @@ class MathKeyboard extends StatelessWidget {
   /// The Type of the Keyboard.
   final MathKeyboardType type;
 
+  /// The set of math tools (content buttons) that the keyboard is allowed to
+  /// show.
+  ///
+  /// When `null` (the default), every tool is available. When a set is
+  /// provided, only the listed [MathKeyboardTool]s are shown on the keyboard
+  /// and typeable via a physical keyboard; all other content buttons are
+  /// hidden and the remaining buttons reflow to fill the gaps.
+  ///
+  /// Note that the digits `0`-`9` and the structural keys (delete, navigation,
+  /// submit and the page toggle) are always available and cannot be disabled.
+  /// If no tool on the second (function) page is allowed, the page toggle is
+  /// hidden and the keyboard shows a single page.
+  final Set<MathKeyboardTool>? allowedTools;
+
   /// Function that is called when the enter / submit button is tapped.
   ///
   /// Can be `null`.
@@ -86,6 +101,20 @@ class MathKeyboard extends StatelessWidget {
       curve: Curves.ease,
     );
     final colors = MathKeyboardColors.resolve(context, themeMode);
+
+    // Determine whether a second (function) page is available at all. It is
+    // dropped entirely when the keyboard is number-only or when none of its
+    // tools are allowed.
+    final hasSecondPage = type != MathKeyboardType.numberOnly &&
+        layoutHasAllowedTool(functionKeyboard, allowedTools);
+    final page1 = filterKeyboardLayout(
+      type == MathKeyboardType.numberOnly ? numberKeyboard : standardKeyboard,
+      allowedTools,
+      // When there is no second page, strip the (now pointless) page toggle.
+      removePageButton: type != MathKeyboardType.numberOnly && !hasSecondPage,
+    );
+    final page2 =
+        hasSecondPage ? filterKeyboardLayout(functionKeyboard, allowedTools) : null;
 
     return MathKeyboardColorsProvider(
       colors: colors,
@@ -130,12 +159,8 @@ class MathKeyboard extends StatelessWidget {
                                 ),
                                 child: _Buttons(
                                   controller: controller,
-                                  page1: type == MathKeyboardType.numberOnly
-                                      ? numberKeyboard
-                                      : standardKeyboard,
-                                  page2: type == MathKeyboardType.numberOnly
-                                      ? null
-                                      : functionKeyboard,
+                                  page1: page1,
+                                  page2: page2,
                                   onSubmit: onSubmit,
                                 ),
                               ),
@@ -322,8 +347,12 @@ class _Buttons extends StatelessWidget {
       child: AnimatedBuilder(
         animation: controller,
         builder: (context, child) {
-          final layout =
-              controller.secondPage ? page2! : page1 ?? numberKeyboard;
+          // Fall back to the first page when the second page is unavailable
+          // (e.g. all of its tools were filtered out) even if the controller
+          // still thinks it is on the second page.
+          final layout = (controller.secondPage && page2 != null)
+              ? page2!
+              : page1 ?? numberKeyboard;
           return Column(
             children: [
               for (final row in layout)

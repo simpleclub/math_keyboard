@@ -1,3 +1,5 @@
+export 'package:math_keyboard/src/foundation/keyboard_button.dart'
+    show MathKeyboardTool;
 export 'package:math_keyboard/src/foundation/math2tex.dart';
 export 'package:math_keyboard/src/foundation/tex2math.dart';
 export 'package:math_keyboard/src/widgets/decimal_separator.dart';

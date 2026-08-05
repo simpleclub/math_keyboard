@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:math_keyboard/src/foundation/keyboard_button.dart';
 import 'package:math_keyboard/src/widgets/math_field.dart';
 import 'package:math_keyboard/src/widgets/math_keyboard.dart';
 
@@ -27,6 +28,7 @@ class MathFormField extends FormField<String> {
     InputDecoration decoration = const InputDecoration(),
     MathKeyboardType keyboardType = MathKeyboardType.expression,
     List<String> variables = const [],
+    Set<MathKeyboardTool>? allowedTools,
     bool autofocus = false,
     ValueChanged<String>? onChanged,
     ValueChanged<String>? onFieldSubmitted,
@@ -52,6 +54,7 @@ class MathFormField extends FormField<String> {
               decoration: decoration.copyWith(errorText: field.errorText),
               keyboardType: keyboardType,
               variables: variables,
+              allowedTools: allowedTools,
               autofocus: autofocus,
               onChanged: onChangedHandler,
               onSubmitted: onFieldSubmitted,

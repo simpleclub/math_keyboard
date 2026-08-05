@@ -6,6 +6,7 @@ import 'package:math_expressions/math_expressions.dart' hide Stack;
 import 'package:math_keyboard/src/foundation/keyboard_button.dart';
 import 'package:math_keyboard/src/foundation/math2tex.dart';
 import 'package:math_keyboard/src/foundation/node.dart';
+import 'package:math_keyboard/src/foundation/number_format.dart';
 import 'package:math_keyboard/src/widgets/decimal_separator.dart';
 import 'package:math_keyboard/src/widgets/math_keyboard.dart';
 import 'package:math_keyboard/src/widgets/view_insets.dart';
@@ -23,6 +24,7 @@ class MathField extends StatefulWidget {
     this.controller,
     this.keyboardType = MathKeyboardType.expression,
     this.variables = const ['x'],
+    this.allowedTools,
     this.decoration = const InputDecoration(),
     this.onChanged,
     this.onSubmitted,
@@ -53,6 +55,20 @@ class MathField extends StatefulWidget {
   ///
   /// Defaults to including "x".
   final List<String> variables;
+
+  /// The set of math tools (content buttons) that the keyboard is allowed to
+  /// show.
+  ///
+  /// When `null` (the default), every tool is available. When a set is
+  /// provided, only the listed [MathKeyboardTool]s are shown on the keyboard
+  /// and typeable via a physical keyboard; all other content buttons are
+  /// hidden.
+  ///
+  /// Note that the digits `0`-`9` and the structural keys (delete, navigation,
+  /// submit and the page toggle) are always available and cannot be disabled.
+  ///
+  /// See [MathKeyboard.allowedTools] for more details.
+  final Set<MathKeyboardTool>? allowedTools;
 
   /// The decoration to show around the math field.
   final InputDecoration decoration;
@@ -175,6 +191,8 @@ class MathFieldState extends State<MathField> with TickerProviderStateMixin {
     });
     _cursorBlinkController.addListener(_handleBlinkUpdate);
     _controller.addListener(_handleControllerUpdate);
+    _controller.numberOnly =
+        widget.keyboardType == MathKeyboardType.numberOnly;
   }
 
   @override
@@ -193,6 +211,9 @@ class MathFieldState extends State<MathField> with TickerProviderStateMixin {
       _controller = widget.controller ?? MathFieldEditingController();
       _controller.addListener(_handleControllerUpdate);
     }
+
+    _controller.numberOnly =
+        widget.keyboardType == MathKeyboardType.numberOnly;
 
     if (oldWidget.focusNode != widget.focusNode) {
       if (oldWidget.focusNode == null) {
@@ -336,6 +357,7 @@ class MathFieldState extends State<MathField> with TickerProviderStateMixin {
             controller: _controller,
             type: widget.keyboardType,
             variables: _variables,
+            allowedTools: widget.allowedTools,
             onSubmit: _submit,
             // Note that we need to pass the insets state like this because the
             // overlay context does not have the ancestor state.
@@ -386,7 +408,11 @@ class MathFieldState extends State<MathField> with TickerProviderStateMixin {
       ],
     ].fold<List<KeyboardButtonConfig>>([], (previousValue, element) {
       return previousValue..addAll(element);
-    });
+    })
+        // Disallowed tools must be neither tappable nor typeable, so we filter
+        // the physical keyboard bindings with the same allowlist.
+        .where((config) => isKeyboardButtonAllowed(config, widget.allowedTools))
+        .toList();
 
     final characterResult = _handleCharacter(keyEvent.character, configs);
     if (characterResult != null) {
@@ -686,6 +712,14 @@ class MathFieldEditingController extends ChangeNotifier {
   /// Type of the Keyboard.
   bool secondPage = false;
 
+  /// Whether the field only accepts number input.
+  ///
+  /// When `true`, [addLeaf] validates and formats input so the field always
+  /// holds a well-formed number (single leading minus, single decimal point,
+  /// leading zero for decimals, no redundant leading zeros). This is set by the
+  /// [MathField] based on its `keyboardType`.
+  bool numberOnly = false;
+
   /// The root node of the expression.
   TeXNode root = TeXNode(null);
 
@@ -724,6 +758,10 @@ class MathFieldEditingController extends ChangeNotifier {
 
   /// Navigate to the previous node.
   void goBack({bool deleteMode = false}) {
+    if (numberOnly && deleteMode) {
+      _deleteNumber();
+      return;
+    }
     final state =
         deleteMode ? currentNode.remove() : currentNode.shiftCursorLeft();
     switch (state) {
@@ -815,7 +853,54 @@ class MathFieldEditingController extends ChangeNotifier {
 
   /// Add leaf to the current node.
   void addLeaf(String tex) {
+    if (numberOnly) {
+      _addNumberLeaf(tex);
+      return;
+    }
     currentNode.addTeX(TeXLeaf(tex));
+    notifyListeners();
+  }
+
+  /// Inserts a number character (`-`, `.`, or a digit), validating and
+  /// formatting the resulting number to be well-formed.
+  ///
+  /// In number-only mode [currentNode] is always [root] and its children are a
+  /// flat list of single-character leaves, so the current value is rebuilt from
+  /// the normalized string.
+  void _addNumberLeaf(String tex) {
+    final (current, cursor) = _readNumber();
+    _writeNumber(applyNumberInput(current, cursor, tex));
+  }
+
+  /// Deletes the character before the cursor in number-only mode and re-formats
+  /// the result so the field stays well-formed.
+  void _deleteNumber() {
+    final (current, cursor) = _readNumber();
+    if (cursor == 0) {
+      // Nothing to delete before the cursor.
+      currentNode.setCursor();
+      return;
+    }
+    final without = current.substring(0, cursor - 1) + current.substring(cursor);
+    _writeNumber(normalizeNumber(without, cursor - 1));
+  }
+
+  /// Reads the current number-only value (cursor removed) and cursor index.
+  (String, int) _readNumber() {
+    currentNode.removeCursor();
+    final current = currentNode.children
+        .map((child) => (child as TeXLeaf).expression)
+        .join();
+    return (current, currentNode.courserPosition);
+  }
+
+  /// Rebuilds the number-only value from [result] and restores the cursor.
+  void _writeNumber(NumberInputResult result) {
+    currentNode.children
+      ..clear()
+      ..addAll(result.text.split('').map((char) => TeXLeaf(char)));
+    currentNode.courserPosition = result.cursor;
+    currentNode.setCursor();
     notifyListeners();
   }
 

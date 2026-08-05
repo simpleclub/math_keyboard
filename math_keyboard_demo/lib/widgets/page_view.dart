@@ -158,12 +158,14 @@ class _Page extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: 16,
-        horizontal: 56,
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 56,
+        ),
+        child: child,
       ),
-      child: child,
     );
   }
 }
@@ -229,17 +231,21 @@ class _PrimaryPageState extends State<_PrimaryPage> {
         ShuntingYardParser().parse('4.2 - (cos(x)/(x^3 - sin(x))) + e^(4^2)'));
   late final _numberController = MathFieldEditingController()
     ..updateValue(ShuntingYardParser().parse('42'));
+  late final _restrictedController = MathFieldEditingController()
+    ..updateValue(ShuntingYardParser().parse('1.5 + 2'));
 
   @override
   void dispose() {
     _expressionController.dispose();
     _numberController.dispose();
+    _restrictedController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: const EdgeInsets.only(
@@ -293,6 +299,33 @@ class _PrimaryPageState extends State<_PrimaryPage> {
             ),
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.only(
+            top: 32,
+          ),
+          child: SizedBox(
+            width: 420,
+            child: MathField(
+              controller: _restrictedController,
+              // Only expose basic arithmetic. Everything else (trigonometry,
+              // logarithms, powers, roots, ...) is hidden, and the remaining
+              // buttons reflow to fill the gaps. Since no second-page tool is
+              // allowed here, the page toggle disappears too.
+              allowedTools: const {
+                MathKeyboardTool.add,
+                MathKeyboardTool.subtract,
+                MathKeyboardTool.multiply,
+                MathKeyboardTool.divide,
+                MathKeyboardTool.decimal,
+              },
+              decoration: InputDecoration(
+                labelText: 'Restricted math field (allowedTools)',
+                filled: true,
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -304,6 +337,7 @@ class _InputDecorationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: const EdgeInsets.only(
@@ -415,6 +449,7 @@ class _ControllerPageState extends State<_ControllerPage> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: const EdgeInsets.only(
@@ -574,6 +609,7 @@ class _AutofocusPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: const EdgeInsets.only(
@@ -639,6 +675,7 @@ class _FocusTreePageState extends State<_FocusTreePage> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: const EdgeInsets.only(
@@ -781,6 +818,7 @@ class _DecimalSeparatorPageState extends State<_DecimalSeparatorPage> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: const EdgeInsets.only(
@@ -893,6 +931,7 @@ class _MathExpressionsPageState extends State<_MathExpressionsPage> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: const EdgeInsets.only(
@@ -1017,6 +1056,7 @@ class _FormFieldPage extends StatelessWidget {
       child: Builder(
         builder: (context) {
           return Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
                 padding: const EdgeInsets.only(

@@ -15,7 +15,9 @@ no plugins, no web views.
 * Editing math expressions using a custom on-screen software keyboard
 * Editing via physical keyboard input (with shortcuts for functions and constants)
 * Support for both number and expression mode
+* Automatic validation & formatting of number-only input into well-formed numbers
 * Advanced operators and trigonometric functions (e.g. `sqrt`, `ln`, `sin`, etc.)
+* Restricting the available tools/formulas via `allowedTools`
 * View insets support (on-screen keyboard overlay pushes up e.g. the `body` in `Scaffold`)
 * Full focus tree integration: works with regular text fields, manual `FocusNode`s, tabbing, etc.
 * Autofocus support
@@ -42,6 +44,7 @@ Widget build(BuildContext context) {
     // No parameters are required.
     keyboardType: MathKeyboardType.expression, // Specify the keyboard type (expression or number only).
     variables: const ['x', 'y', 'z'], // Specify the variables the user can use (only in expression mode).
+    allowedTools: null, // Optionally restrict which tools/formulas are available (null = all).
     decoration: const InputDecoration(), // Decorate the input field using the familiar InputDecoration.
     onChanged: (String value) {}, // Respond to changes in the input field.
     onSubmitted: (String value) {}, // Respond to the user submitting their input.
@@ -54,6 +57,54 @@ Now, tapping inside of the math field (or focusing it via the focus tree) will a
 up the math keyboard and start accepting physical keyboard input on desktop.
 
 *Note* that physical keyboard input on mobile causes weird behavior due to a [Flutter issue](https://github.com/flutter/flutter/issues/44681).
+
+### Restricting the available tools
+
+By default, the expression keyboard offers every math tool (operators, fractions, powers, roots,
+trigonometric functions, logarithms, parentheses, ...). You can restrict which of these are available
+using the `allowedTools` parameter, which takes a `Set<MathKeyboardTool>`:
+
+```dart
+MathField(
+  // Only these tools are shown on the keyboard *and* typeable via a physical keyboard.
+  allowedTools: const {
+    MathKeyboardTool.add,
+    MathKeyboardTool.subtract,
+    MathKeyboardTool.multiply,
+    MathKeyboardTool.divide,
+    MathKeyboardTool.fraction,
+    MathKeyboardTool.sqrt,
+  },
+);
+```
+
+The full list of available tools is `MathKeyboardTool.values`.
+
+A few things to keep in mind:
+
+* When `allowedTools` is `null` (the default), **all** tools are available.
+* The digits `0`-`9` and the structural keys (delete, navigation, submit and the page toggle) are
+  **always** available and cannot be disabled.
+* Disabled buttons are removed and the remaining buttons reflow to fill the gaps; rows that become
+  empty collapse.
+* If none of the second (function) page's tools are allowed, the page toggle is hidden and the
+  keyboard shows a single page.
+
+The same `allowedTools` parameter is available on `MathField`, `MathFormField` and `MathKeyboard`.
+
+### Number-only input
+
+When `keyboardType` is `MathKeyboardType.numberOnly`, input is automatically validated and
+formatted so the field always holds a **well-formed number**. This applies to both on-screen taps
+and physical keyboard input (there is no extra parameter to enable it):
+
+* Only a single leading minus is allowed (`-` must be the first character).
+* Only a single decimal point is allowed.
+* Bare decimals gain a leading zero (`.5` → `0.5`, `-.5` → `-0.5`).
+* Redundant integer-part leading zeros are stripped (`007` → `7`, `00` → `0`).
+
+Invalid keystrokes (e.g. a second `.` or a misplaced `-`) are simply ignored, and deletions are
+re-formatted too (e.g. deleting the `0` from `0.5` restores it).
 
 ### View insets
 
