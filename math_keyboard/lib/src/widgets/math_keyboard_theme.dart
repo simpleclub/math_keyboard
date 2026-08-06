@@ -244,11 +244,12 @@ class MathKeyboardStyle {
       hoverColor: Color(0xFF2A353C),
       pressedColor: Color(0xFF2A353C),
     ),
-    // Delete and page-toggle keys use secondary/weak.
+    // Delete and page-toggle keys use secondary/weak at idle and
+    // secondary/base on hover and pressed.
     utilityKey: MathKeyboardKeyStyle(
       color: Color(0xFF798085),
-      hoverColor: Color(0xFF868D92),
-      pressedColor: Color(0xFF868D92),
+      hoverColor: Color(0xFF414B51),
+      pressedColor: Color(0xFF414B51),
     ),
     // Submit uses the primary tokens: idle = primary/strong,
     // hover and pressed = primary/stronger.
