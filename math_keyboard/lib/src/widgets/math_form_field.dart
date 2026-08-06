@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:math_keyboard/src/foundation/math_keyboard_semantics.dart';
 import 'package:math_keyboard/src/widgets/math_field.dart';
 import 'package:math_keyboard/src/widgets/math_keyboard.dart';
+import 'package:math_keyboard/src/widgets/math_keyboard_theme.dart';
 
 /// A [FormField] that contains a [MathField].
 ///
@@ -32,6 +34,8 @@ class MathFormField extends FormField<String> {
     ValueChanged<String>? onFieldSubmitted,
     AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
     FormFieldValidator<String>? validator,
+    MathKeyboardStyle? style,
+    MathKeyboardSemantics? semantics,
   }) : super(
           key: key,
           initialValue:
@@ -57,6 +61,8 @@ class MathFormField extends FormField<String> {
               autofocus: autofocus,
               onChanged: onChangedHandler,
               onSubmitted: onFieldSubmitted,
+              style: style,
+              semantics: semantics,
             );
           },
         );

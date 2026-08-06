@@ -116,19 +116,19 @@ const _subtractButton = BasicKeyboardButtonConfig(
 final functionKeyboard = [
   [
     const BasicKeyboardButtonConfig(
-      label: r'\frac{\Box}{\Box}',
+      label: r'\frac{x}{y}',
       value: r'\frac',
       args: [TeXArg.braces, TeXArg.braces],
       asTex: true,
     ),
     const BasicKeyboardButtonConfig(
-      label: r'\Box^2',
+      label: r'x^2',
       value: '^2',
       args: [TeXArg.braces],
       asTex: true,
     ),
     const BasicKeyboardButtonConfig(
-      label: r'\Box^{\Box}',
+      label: r'x^{y}',
       value: '^',
       args: [TeXArg.braces],
       asTex: true,
@@ -154,14 +154,14 @@ final functionKeyboard = [
   ],
   [
     const BasicKeyboardButtonConfig(
-      label: r'\sqrt{\Box}',
+      label: r'\sqrt{x}',
       value: r'\sqrt',
       args: [TeXArg.braces],
       asTex: true,
       keyboardCharacters: ['r'],
     ),
     const BasicKeyboardButtonConfig(
-      label: r'\sqrt[\Box]{\Box}',
+      label: r'\sqrt[y]{x}',
       value: r'\sqrt',
       args: [TeXArg.brackets, TeXArg.braces],
       asTex: true,
@@ -180,13 +180,13 @@ final functionKeyboard = [
   ],
   [
     const BasicKeyboardButtonConfig(
-      label: r'\log_{\Box}(\Box)',
+      label: r'\log_{y}(x)',
       value: r'\log_',
       asTex: true,
       args: [TeXArg.braces, TeXArg.parentheses],
     ),
     const BasicKeyboardButtonConfig(
-      label: r'\ln(\Box)',
+      label: r'\ln(x)',
       value: r'\ln(',
       asTex: true,
       keyboardCharacters: ['l'],
@@ -268,6 +268,37 @@ final standardKeyboard = [
     PreviousButtonConfig(),
     NextButtonConfig(),
     SubmitButtonConfig(),
+  ],
+];
+
+/// The typeset function rows shown on the left ("Symbols") section of the
+/// landscape keyboard.
+///
+/// These are the function rows of [functionKeyboard] without its final row
+/// (page toggle, parentheses, and cursor navigation), which the landscape
+/// layout places in the numbers section or omits.
+final landscapeFunctionKeyboard = [
+  functionKeyboard[0],
+  functionKeyboard[1],
+  functionKeyboard[2],
+];
+
+/// The rows shown in the right ("Numbers") section of the landscape keyboard.
+///
+/// The first three rows mirror [standardKeyboard]; the last row replaces the
+/// page toggle and submit key (the landscape layout shows a dedicated
+/// full-height submit key) with the parentheses and cursor navigation keys.
+final landscapeNumberKeyboard = [
+  standardKeyboard[0],
+  standardKeyboard[1],
+  standardKeyboard[2],
+  [
+    _digitButtons[0],
+    // The opening and closing parentheses from the function page.
+    functionKeyboard[3][1],
+    functionKeyboard[3][2],
+    PreviousButtonConfig(),
+    NextButtonConfig(),
   ],
 ];
 
