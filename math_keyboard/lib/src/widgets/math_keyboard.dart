@@ -820,7 +820,30 @@ class _LandscapeButtons extends StatelessWidget {
         // are this tall.
         final columnHeight = keyHeight * 4 + style.rowSpacing * 3;
 
-        Widget row(List<KeyboardButtonConfig> configs) {
+        // [nextOrder], when given, pins each key an explicit traversal order so
+        // tab follows the configured row-major layout instead of the geometry
+        // of the (unevenly sized) cells.
+        Widget row(
+          List<KeyboardButtonConfig> configs, {
+          int Function()? nextOrder,
+        }) {
+          Widget keyAt(int index) {
+            final key = _Keys.button(
+              context,
+              configs[index],
+              controller: controller,
+              style: style,
+              semantics: semantics,
+              fontSize: fontSize,
+              onSubmit: onSubmit,
+            );
+            if (nextOrder == null) return key;
+            return FocusTraversalOrder(
+              order: NumericFocusOrder(nextOrder().toDouble()),
+              child: key,
+            );
+          }
+
           return SizedBox(
             height: keyHeight,
             child: Row(
@@ -828,15 +851,7 @@ class _LandscapeButtons extends StatelessWidget {
               children: [
                 for (var index = 0; index < configs.length; index++) ...[
                   if (index > 0) SizedBox(width: style.rowSpacing),
-                  _Keys.button(
-                    context,
-                    configs[index],
-                    controller: controller,
-                    style: style,
-                    semantics: semantics,
-                    fontSize: fontSize,
-                    onSubmit: onSubmit,
-                  ),
+                  keyAt(index),
                 ],
               ],
             ),
@@ -879,18 +894,26 @@ class _LandscapeButtons extends StatelessWidget {
           ),
         );
 
+        // Global traversal orders, so a single OrderedTraversalPolicy sends tab
+        // through the whole keyboard as numbers → variables → functions →
+        // submit, each in reading order. The ranges keep the sections apart:
+        // numbers 0.., variables 100, functions 200.., submit 300.
+        var numberKeyOrder = 0;
+        var functionKeyOrder = 200;
+
         final functionsGroup = semanticGroup(
           semantics.functionsGroupLabel,
           column([
             for (final functionRow in landscapeFunctionKeyboard)
-              row(functionRow),
+              row(functionRow, nextOrder: () => functionKeyOrder++),
           ]),
         );
 
         final numbersGroup = semanticGroup(
           semantics.numbersGroupLabel,
           column([
-            for (final numberRow in landscapeNumberKeyboard) row(numberRow),
+            for (final numberRow in landscapeNumberKeyboard)
+              row(numberRow, nextOrder: () => numberKeyOrder++),
           ]),
         );
 
@@ -922,32 +945,25 @@ class _LandscapeButtons extends StatelessWidget {
           ),
         );
 
-        // Tab visits the number pad first, then the formula section (variables
-        // then functions), then submit — following how you build an
-        // expression rather than the left-to-right screen layout, which would
-        // otherwise zig-zag across the two side-by-side columns. Keys within a
-        // section fall back to reading order. Arrow keys still move across all
-        // keys by geometry.
-        Widget orderedSection(double order, Widget child) =>
-            FocusTraversalOrder(
-              order: NumericFocusOrder(order),
-              child: child,
-            );
+        // The variables and submit sections have no per-key order of their own,
+        // so pin them to a single order each (between and after the numbered
+        // ranges above). Arrow keys still move across all keys by geometry.
+        Widget ordered(double order, Widget child) => FocusTraversalOrder(
+          order: NumericFocusOrder(order),
+          child: child,
+        );
 
         return Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(
               flex: 322,
-              child: orderedSection(
-                2,
-                column([variablesGroup, functionsGroup]),
-              ),
+              child: column([ordered(100, variablesGroup), functionsGroup]),
             ),
             SizedBox(width: style.horizontalPadding),
-            Expanded(flex: 256, child: orderedSection(1, numbersGroup)),
+            Expanded(flex: 256, child: numbersGroup),
             SizedBox(width: style.horizontalPadding),
-            orderedSection(3, submitGroup),
+            ordered(300, submitGroup),
           ],
         );
       },
