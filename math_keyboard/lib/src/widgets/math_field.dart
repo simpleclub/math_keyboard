@@ -256,6 +256,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       _focusNode.dispose();
     }
 
+    _keyboardFocusScopeNode.removeListener(_handleKeyboardFocusChanged);
     _keyboardFocusScopeNode.dispose();
 
     super.dispose();
@@ -337,6 +338,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   }
 
   void _handleKeyboardFocusChanged() {
+    if (!mounted) return;
     // A key losing focus might mean focus is leaving the whole keyboard; the
     // deferred check decides whether to actually close.
     if (!_keyboardFocusScopeNode.hasFocus) {

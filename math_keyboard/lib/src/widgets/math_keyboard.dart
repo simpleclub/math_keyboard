@@ -854,9 +854,15 @@ class _LandscapeButtons extends StatelessWidget {
           ]),
         );
 
-        final submitGroup = semanticGroup(
-          semantics.submitLabel,
-          SizedBox(
+        // The submit key is a single button, so it only needs a semantics
+        // boundary to stay a sibling of the section landmarks (rather than
+        // merging upward and swallowing them). It is deliberately not a
+        // labelled region — that would announce "Submit" twice, once for the
+        // region and once for the button.
+        final submitGroup = Semantics(
+          container: true,
+          explicitChildNodes: true,
+          child: SizedBox(
             width: keyHeight,
             height: columnHeight,
             child: KeyboardButton(

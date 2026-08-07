@@ -38,9 +38,9 @@ void main() {
         SemanticsRole.region);
     expect(tester.getSemantics(find.bySemanticsLabel('Formula')).role,
         SemanticsRole.region);
-    // Submit is its own group (both the group node and the button carry the
-    // label), so it is a sibling of the other three.
-    expect(find.bySemanticsLabel('Submit'), findsWidgets);
+    // Submit is a single key, so it announces once (just the button) — no
+    // redundant "Submit" region wrapping it.
+    expect(find.bySemanticsLabel('Submit'), findsOneWidget);
 
     // Regression: the sections must be siblings. Previously the ungrouped
     // submit button node became their parent, nesting every group inside a
