@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:math_keyboard/src/custom_key_icons/custom_key_icons.dart';
@@ -41,6 +42,8 @@ class MathKeyboard extends StatelessWidget {
     this.semantics,
     this.focusScopeNode,
     this.onExitToField,
+    this.onExitToNext,
+    this.onClose,
     this.padding = const EdgeInsets.only(
       bottom: 4,
       left: 4,
@@ -84,14 +87,20 @@ class MathKeyboard extends StatelessWidget {
   /// The focus scope that owns the keys.
   ///
   /// The math field hands focus to this scope so a keyboard or switch-access
-  /// user can move across the keys (the field keeps ownership otherwise, which
-  /// is why physical typing still works). If `null`, the keys form their own
-  /// local scope and are not reachable from an external focus handoff.
+  /// user can move onto the keys (the field keeps ownership otherwise, which is
+  /// why physical typing still works). The keyboard is a single tab stop: the
+  /// arrow keys move between keys while tab leaves the keyboard entirely.
   final FocusScopeNode? focusScopeNode;
 
-  /// Called when the user asks to leave the keys and return to the field, e.g.
-  /// by pressing escape while a key is focused.
+  /// Called to move focus back to the field, e.g. on shift+tab from a key.
   final VoidCallback? onExitToField;
+
+  /// Called to move focus to the control after the field, e.g. on tab from a
+  /// key, so the keyboard behaves as one tab stop and never traps focus.
+  final VoidCallback? onExitToNext;
+
+  /// Called to dismiss the keyboard, e.g. on escape from a key.
+  final VoidCallback? onClose;
 
   /// Function that is called when the enter / submit button is tapped.
   ///
@@ -160,54 +169,59 @@ class MathKeyboard extends StatelessWidget {
                     // decide whether to enable the long-press magnifier, so it
                     // must remain visible here. Labels avoid double-scaling by
                     // setting `TextScaler.noScaling` on the individual `Text`s.
-                    // Wrap the whole keyboard in one group so assistive tech
-                    // announces it as a single unit containing the sections.
+                    // Group the whole keyboard so it announces as a single unit
+                    // containing the section landmarks. It is deliberately not a
+                    // landmark itself — only the sections are jump targets, to
+                    // avoid nested landmarks.
                     child: Semantics(
                       container: true,
                       explicitChildNodes: true,
                       label: semantics.keyboardGroupLabel,
                       child: FocusScope(
                         node: focusScopeNode,
-                        child: CallbackShortcuts(
-                          bindings: {
-                            if (onExitToField != null)
-                              const SingleActivator(LogicalKeyboardKey.escape):
-                                  onExitToField!,
-                          },
-                          // Arrow keys move focus across the key grid, which is
-                          // the natural way to traverse a 2D layout (Tab only
-                          // walks reading order).
-                          child: Shortcuts(
-                            shortcuts: const {
-                              SingleActivator(LogicalKeyboardKey.arrowLeft):
-                                  DirectionalFocusIntent(
-                                      TraversalDirection.left),
-                              SingleActivator(LogicalKeyboardKey.arrowRight):
-                                  DirectionalFocusIntent(
-                                      TraversalDirection.right),
-                              SingleActivator(LogicalKeyboardKey.arrowUp):
-                                  DirectionalFocusIntent(TraversalDirection.up),
-                              SingleActivator(LogicalKeyboardKey.arrowDown):
-                                  DirectionalFocusIntent(
-                                      TraversalDirection.down),
+                        child: _wrapExitTraversal(
+                          CallbackShortcuts(
+                            bindings: {
+                              if (onClose != null)
+                                const SingleActivator(
+                                    LogicalKeyboardKey.escape): onClose!,
                             },
-                            child: FocusTraversalGroup(
-                              policy: ReadingOrderTraversalPolicy(),
-                              child: isLandscape
-                                  ? _buildLandscape(
-                                      context,
-                                      style: style,
-                                      semantics: semantics,
-                                      fontSize: fontSize,
-                                      keyHeight: keyHeight,
-                                    )
-                                  : _buildPortrait(
-                                      context,
-                                      style: style,
-                                      semantics: semantics,
-                                      fontSize: fontSize,
-                                      keyHeight: keyHeight,
-                                    ),
+                            // Arrow keys move focus across the whole key grid;
+                            // tab (handled below) leaves the keyboard entirely,
+                            // so the keyboard is a single tab stop.
+                            child: Shortcuts(
+                              shortcuts: const {
+                                SingleActivator(LogicalKeyboardKey.arrowLeft):
+                                    DirectionalFocusIntent(
+                                        TraversalDirection.left),
+                                SingleActivator(LogicalKeyboardKey.arrowRight):
+                                    DirectionalFocusIntent(
+                                        TraversalDirection.right),
+                                SingleActivator(LogicalKeyboardKey.arrowUp):
+                                    DirectionalFocusIntent(
+                                        TraversalDirection.up),
+                                SingleActivator(LogicalKeyboardKey.arrowDown):
+                                    DirectionalFocusIntent(
+                                        TraversalDirection.down),
+                              },
+                              child: FocusTraversalGroup(
+                                policy: ReadingOrderTraversalPolicy(),
+                                child: isLandscape
+                                    ? _buildLandscape(
+                                        context,
+                                        style: style,
+                                        semantics: semantics,
+                                        fontSize: fontSize,
+                                        keyHeight: keyHeight,
+                                      )
+                                    : _buildPortrait(
+                                        context,
+                                        style: style,
+                                        semantics: semantics,
+                                        fontSize: fontSize,
+                                        keyHeight: keyHeight,
+                                      ),
+                              ),
                             ),
                           ),
                         ),
@@ -220,6 +234,33 @@ class MathKeyboard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  /// Wraps [child] so tab and shift+tab leave the keyboard instead of moving
+  /// between keys, keeping it a single tab stop (the arrow keys do the movement
+  /// within). Tab exits to the control after the field; shift+tab returns to
+  /// the field.
+  Widget _wrapExitTraversal(Widget child) {
+    // Without a field to hand focus back to (e.g. a standalone keyboard), keep
+    // the default tab traversal instead of swallowing it.
+    if (onExitToField == null && onExitToNext == null) return child;
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        NextFocusIntent: CallbackAction<NextFocusIntent>(
+          onInvoke: (_) {
+            onExitToNext?.call();
+            return null;
+          },
+        ),
+        PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(
+          onInvoke: (_) {
+            onExitToField?.call();
+            return null;
+          },
+        ),
+      },
+      child: child,
     );
   }
 
@@ -242,6 +283,7 @@ class MathKeyboard extends StatelessWidget {
             children: [
               if (type != MathKeyboardType.numberOnly) ...[
                 Semantics(
+                  role: SemanticsRole.region,
                   container: true,
                   explicitChildNodes: true,
                   label: semantics.variablesGroupLabel,
@@ -557,9 +599,11 @@ class _Buttons extends StatelessWidget {
       animation: controller,
       builder: (context, child) {
         final layout = controller.secondPage ? page2! : page1 ?? numberKeyboard;
-        // The visible page is a single screen-reader group, named for whichever
-        // page (numbers or functions) is currently showing.
+        // The visible page is a landmark region, named for whichever page
+        // (numbers or functions) is currently showing, so a screen reader can
+        // jump to it.
         return Semantics(
+          role: SemanticsRole.region,
           container: true,
           explicitChildNodes: true,
           label: controller.secondPage
@@ -771,50 +815,46 @@ class _LandscapeButtons extends StatelessWidget {
           );
         }
 
-        // Expose the variables, functions, and numbers as three labelled
-        // screen-reader groups so assistive tech can navigate section by
-        // section.
+        // Expose each section as a labelled landmark region so a screen reader
+        // can jump straight to variables, functions, numbers, or submit via its
+        // landmark/rotor navigation.
         Widget semanticGroup(String label, Widget child) => Semantics(
+              role: SemanticsRole.region,
               container: true,
               explicitChildNodes: true,
               label: label,
               child: child,
             );
 
-        final symbols = column([
-          semanticGroup(
-            semantics.variablesGroupLabel,
-            _Variables(
-              controller: controller,
-              variables: variables,
-              style: style,
-              semantics: semantics,
-              fontSize: fontSize,
-              keyHeight: keyHeight,
-              leadingPadding: 0,
-            ),
+        final variablesGroup = semanticGroup(
+          semantics.variablesGroupLabel,
+          _Variables(
+            controller: controller,
+            variables: variables,
+            style: style,
+            semantics: semantics,
+            fontSize: fontSize,
+            keyHeight: keyHeight,
+            leadingPadding: 0,
           ),
-          semanticGroup(
-            semantics.functionsGroupLabel,
-            column([
-              for (final functionRow in landscapeFunctionKeyboard)
-                row(functionRow),
-            ]),
-          ),
-        ]);
+        );
 
-        final numbers = semanticGroup(
+        final functionsGroup = semanticGroup(
+          semantics.functionsGroupLabel,
+          column([
+            for (final functionRow in landscapeFunctionKeyboard)
+              row(functionRow),
+          ]),
+        );
+
+        final numbersGroup = semanticGroup(
           semantics.numbersGroupLabel,
           column([
             for (final numberRow in landscapeNumberKeyboard) row(numberRow),
           ]),
         );
 
-        // Wrap the submit key in its own group so it is a sibling boundary of
-        // the other sections. Without this the bare button node merges upward
-        // and swallows the variables, functions, and numbers groups as its
-        // children.
-        final submit = semanticGroup(
+        final submitGroup = semanticGroup(
           semantics.submitLabel,
           SizedBox(
             width: keyHeight,
@@ -836,31 +876,21 @@ class _LandscapeButtons extends StatelessWidget {
           ),
         );
 
-        // Each side-by-side panel is its own traversal group so focus walks a
-        // whole panel before crossing to the next, instead of stepping across
-        // both columns row by row. The groups are then ordered numbers ->
-        // functions -> submit (rather than the visual left-to-right order) so
-        // focus reaches the number pad first.
-        Widget group(Widget child, int order) => FocusTraversalOrder(
-              order: NumericFocusOrder(order.toDouble()),
-              child: FocusTraversalGroup(
-                policy: ReadingOrderTraversalPolicy(),
-                child: child,
-              ),
-            );
-
-        return FocusTraversalGroup(
-          policy: OrderedTraversalPolicy(),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(flex: 322, child: group(symbols, 2)),
-              SizedBox(width: style.horizontalPadding),
-              Expanded(flex: 256, child: group(numbers, 1)),
-              SizedBox(width: style.horizontalPadding),
-              group(submit, 3),
-            ],
-          ),
+        // The keyboard is a single tab stop: the arrow keys move across all
+        // keys by geometry (no per-section traversal groups), so the sections
+        // are purely visual and semantic here.
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              flex: 322,
+              child: column([variablesGroup, functionsGroup]),
+            ),
+            SizedBox(width: style.horizontalPadding),
+            Expanded(flex: 256, child: numbersGroup),
+            SizedBox(width: style.horizontalPadding),
+            submitGroup,
+          ],
         );
       },
     );

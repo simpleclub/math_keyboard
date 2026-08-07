@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 
@@ -29,8 +30,14 @@ void main() {
     // The whole keyboard is one group wrapping the sections.
     expect(find.bySemanticsLabel('Math keyboard'), findsOneWidget);
     expect(find.bySemanticsLabel('Variables'), findsOneWidget);
-    expect(find.bySemanticsLabel('Functions'), findsOneWidget);
+    expect(find.bySemanticsLabel('Formula'), findsOneWidget);
     expect(find.bySemanticsLabel('Numbers'), findsOneWidget);
+
+    // Each section is a landmark region, so a screen reader can jump to it.
+    expect(tester.getSemantics(find.bySemanticsLabel('Numbers')).role,
+        SemanticsRole.region);
+    expect(tester.getSemantics(find.bySemanticsLabel('Formula')).role,
+        SemanticsRole.region);
     // Submit is its own group (both the group node and the button carry the
     // label), so it is a sibling of the other three.
     expect(find.bySemanticsLabel('Submit'), findsWidgets);
@@ -71,12 +78,12 @@ void main() {
     // The numbers page shows first, alongside the variables.
     expect(find.bySemanticsLabel('Variables'), findsOneWidget);
     expect(find.bySemanticsLabel('Numbers'), findsOneWidget);
-    expect(find.bySemanticsLabel('Functions'), findsNothing);
+    expect(find.bySemanticsLabel('Formula'), findsNothing);
 
     // Switching to the functions page renames the page group.
     controller.togglePage();
     await tester.pump();
-    expect(find.bySemanticsLabel('Functions'), findsOneWidget);
+    expect(find.bySemanticsLabel('Formula'), findsOneWidget);
     expect(find.bySemanticsLabel('Numbers'), findsNothing);
 
     handle.dispose();

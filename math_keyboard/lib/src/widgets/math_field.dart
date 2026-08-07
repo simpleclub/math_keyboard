@@ -165,6 +165,10 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   final _keyboardFocusScopeNode = FocusScopeNode(
     debugLabel: 'math_keyboard_keys',
   );
+
+  /// Suppresses the focus-driven keyboard reopen once, so escape can close the
+  /// keyboard while returning focus to the field.
+  var _suppressReopen = false;
   late var _controller = widget.controller ?? MathFieldEditingController();
 
   List<String> get _variables => [
@@ -306,9 +310,16 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   /// When [open] is true, the keyboard should be opened and vice versa.
   void _handleFocusChanged(BuildContext context, {required bool open}) {
     if (open) {
+      // Escape returns focus to the field but must leave the keyboard closed,
+      // so honor a one-shot suppression instead of reopening.
+      if (_suppressReopen) {
+        _suppressReopen = false;
+        setState(() {});
+        return;
+      }
       // Guard against re-opening while already shown: focus can return to the
-      // field from a key (e.g. via escape), and re-inserting the overlay would
-      // restart the slide and drop the key focus.
+      // field from a key (e.g. via shift+tab), and re-inserting the overlay
+      // would restart the slide and drop the key focus.
       if (!_isKeyboardShown) {
         _openKeyboard(context);
         _keyboardSlideController.forward(from: 0);
@@ -358,17 +369,44 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     });
   }
 
-  /// Hands focus from the field to the first key so keyboard and switch-access
-  /// users can traverse the keys.
+  /// Hands focus from the field onto the keys so keyboard and switch-access
+  /// users can move onto the on-screen keyboard (the keyboard is then one tab
+  /// stop; the arrow keys move between keys).
   void _enterKeyboard() {
     _keyboardFocusScopeNode.requestFocus();
     // Move off the bare scope onto the first focusable key.
     _keyboardFocusScopeNode.nextFocus();
   }
 
-  /// Returns focus to the field, e.g. when escape is pressed on a key, so the
-  /// user can resume typing.
+  /// Opens the keyboard in response to a tap or an accessibility activation of
+  /// the field.
+  void _handleTap() {
+    if (!_focusNode.hasFocus) {
+      _focusNode.requestFocus();
+    } else if (!_isKeyboardShown) {
+      // The field can be focused while the keyboard is closed (e.g. after
+      // escape); reopen it.
+      _handleFocusChanged(context, open: true);
+    }
+  }
+
+  /// Returns focus to the field, e.g. on shift+tab from a key.
   void _returnFocusToField() {
+    _focusNode.requestFocus();
+  }
+
+  /// Leaves the keyboard for the control after the field, so the keyboard is a
+  /// single tab stop and never traps focus (WCAG 2.1.2).
+  void _exitKeyboardForward() {
+    _closeKeyboard();
+    _focusNode.nextFocus();
+  }
+
+  /// Dismisses the keyboard and returns focus to the field without reopening,
+  /// used for the escape key.
+  void _closeViaEscape() {
+    _suppressReopen = true;
+    _closeKeyboard();
     _focusNode.requestFocus();
   }
 
@@ -417,6 +455,8 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
                 widget.semantics ?? MathKeyboardTheme.semanticsOf(this.context),
             focusScopeNode: _keyboardFocusScopeNode,
             onExitToField: _returnFocusToField,
+            onExitToNext: _exitKeyboardForward,
+            onClose: _closeViaEscape,
           ),
         );
       },
@@ -595,15 +635,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
               _handleFocusChanged(context, open: primary),
           onKeyEvent: _handleKey,
           child: GestureDetector(
-            onTap: () {
-              if (!_focusNode.hasFocus) {
-                _focusNode.requestFocus();
-              } else if (!_isKeyboardShown) {
-                // Sometimes the field can be focused but the keyboard is not shown.
-                // For example if it was closed with [_closeKeyboard].
-                _handleFocusChanged(context, open: true);
-              }
-            },
+            onTap: _handleTap,
             child: AnimatedBuilder(
               animation: _controller,
               builder: (context, child) {
@@ -612,6 +644,10 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
                   scrollController: _scrollController,
                   cursorOpacity: _cursorOpacity,
                   hasFocus: _focusNode.hasFocus,
+                  // Route the accessibility activation (screen-reader
+                  // double-tap) through the same open logic as a pointer tap,
+                  // so the keyboard can be opened without a pointer.
+                  onTap: _handleTap,
                   semantics: widget.semantics ??
                       MathKeyboardTheme.semanticsOf(context),
                   decoration: widget.decoration
@@ -637,10 +673,15 @@ class _FieldPreview extends StatelessWidget {
     required this.decoration,
     required this.scrollController,
     required this.semantics,
+    required this.onTap,
   }) : super(key: key);
 
   /// The controller for the math field.
   final MathFieldEditingController controller;
+
+  /// Called when the field is activated (tap or accessibility action), so the
+  /// keyboard opens without needing a pointer.
+  final VoidCallback onTap;
 
   /// The screen-reader strings of the math field.
   final MathKeyboardSemantics semantics;
@@ -772,16 +813,16 @@ class _FieldPreview extends StatelessWidget {
     // rendering is a typeset image, so its raw semantics are excluded in favor
     // of the plain-text value provided here.
     // Announced as a (non-obscured) text field so screen readers read it as an
-    // input and give their native, localized caret narration. Editing actions
-    // are intentionally not declared here: input comes from the custom math
-    // keyboard, and tap-to-open is provided by the ancestor gesture detector,
-    // not from `onSetText`/`onSetSelection`. This is an approximation — worth a
-    // VoiceOver + TalkBack pass to confirm double-tap opens the keyboard and no
-    // editing affordance is promised that the field can't fulfill.
+    // input and give their native, localized caret narration. The [onTap]
+    // action lets a screen-reader activation (e.g. VoiceOver double-tap) open
+    // the keyboard, since the ancestor gesture detector's tap is not on this
+    // node. Editing actions are intentionally not declared: input comes from
+    // the custom math keyboard, not from `onSetText`/`onSetSelection`.
     return Semantics(
       textField: true,
       label: _semanticsLabel,
       value: controller.readableExpression(semantics),
+      onTap: onTap,
       child: ExcludeSemantics(child: field),
     );
   }

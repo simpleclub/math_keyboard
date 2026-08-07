@@ -78,10 +78,9 @@ void main() {
     await tester.pump();
 
     expect(aKeyIsFocused(), isFalse, reason: 'escape returns focus to field');
-    expect(find.byType(MathKeyboard), findsOneWidget,
-        reason: 'keyboard stays open after returning to the field');
 
-    // Physical typing works again now that the field owns focus.
+    // Physical typing works again now that the field owns focus (the keyboard
+    // is dismissed, but the field still accepts hardware input).
     await tester.sendKeyEvent(LogicalKeyboardKey.digit7);
     await tester.pump();
     expect(value(controller), '7');
@@ -90,11 +89,66 @@ void main() {
   });
 
   testWidgets(
-      'landscape traversal walks the number panel before the function '
-      'panel', (tester) async {
-    // The default test window (800x600) is landscape, which shows the
-    // side-by-side layout; make it explicit and wide.
+      'the keyboard is one tab stop: arrows move between keys, tab exits',
+      (tester) async {
     tester.view.physicalSize = const Size(800, 400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final controller = MathFieldEditingController();
+    final trailingFocus = FocusNode();
+    addTearDown(controller.dispose);
+    addTearDown(trailingFocus.dispose);
+
+    // A control after the field, so tabbing out of the keyboard has somewhere
+    // to land (proving focus is not trapped, WCAG 2.1.2).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: [
+              MathField(autofocus: true, controller: controller),
+              Focus(focusNode: trailingFocus, child: const Text('after')),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    String? focusedLabel() => FocusManager.instance.primaryFocus?.context
+        ?.findAncestorWidgetOfExactType<KeyboardButton>()
+        ?.semanticsLabel;
+
+    // Tab from the field moves onto the keys.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    await tester.pump();
+    expect(focusedLabel(), isNotNull, reason: 'tab enters the keyboard');
+
+    // Arrow keys move between keys (right from 7 -> 8).
+    // First land on a known key with the left edge of the number row.
+    // (Entry lands on the first key; move right and assert it changed.)
+    final entered = focusedLabel();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(focusedLabel(), isNot(entered),
+        reason: 'arrow keys move between keys within the keyboard');
+
+    // Tab exits the keyboard to the control after the field (no trap).
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(focusedLabel(), isNull, reason: 'tab leaves the keys');
+    expect(trailingFocus.hasFocus, isTrue,
+        reason: 'tab moves to the next control after the field, not trapped');
+
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('escape closes the keyboard', (tester) async {
+    tester.view.physicalSize = const Size(400, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
@@ -110,32 +164,19 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(MathKeyboard), findsOneWidget);
 
-    String? focusedLabel() => FocusManager.instance.primaryFocus?.context
-        ?.findAncestorWidgetOfExactType<KeyboardButton>()
-        ?.semanticsLabel;
-
-    const digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-
-    // Enter the keyboard, then tab across it, recording the order of keys until
-    // the square-root function key is reached.
+    // Move onto the keys, then press escape.
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
     await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
-    final beforeFirstFunction = <String>[];
-    for (var i = 0; i < 25; i++) {
-      final label = focusedLabel();
-      if (label == 'square root') break;
-      if (label != null) beforeFirstFunction.add(label);
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.pump();
-    }
-
-    // Focus enters the number panel first, so every digit is reached before the
-    // first function key, proving the two panels are not interleaved row by row.
-    expect(beforeFirstFunction.where(digits.contains).toSet(), digits,
-        reason: 'the whole number pad is traversed before the functions');
+    expect(find.byType(MathKeyboard), findsNothing,
+        reason: 'escape dismisses the keyboard');
 
     await tester.pumpWidget(const SizedBox());
   });

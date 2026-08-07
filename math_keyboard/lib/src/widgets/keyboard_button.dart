@@ -210,7 +210,8 @@ class _KeyboardButtonState extends State<KeyboardButton> {
 
     if (widget.largeContent == null) return button;
     return LargeContentViewer(
-      customOverlayChild: widget.largeContent,
+      // Center the magnified label within the viewer overlay.
+      customOverlayChild: Center(child: widget.largeContent),
       enabledFromTextScaleFactor: widget.largeContentThreshold,
       child: button,
     );
