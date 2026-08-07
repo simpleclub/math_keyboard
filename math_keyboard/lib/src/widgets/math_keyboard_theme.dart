@@ -229,30 +229,26 @@ class MathKeyboardStyle {
     foregroundColor: Color(0xFFFFFFFF),
     focusBorderColor: Color(0xFF8ABAFE),
     focusBorderWidth: 2,
-    // Operator, parenthesis, navigation, and variable keys use the neutral
-    // filled-button tokens: idle = filledButton/neutral/bg/color, hover and
-    // pressed = its _hover / _press.
+    // Operator, parenthesis, navigation, and variable keys: darker at rest,
+    // lighter on hover/press.
     neutralKey: MathKeyboardKeyStyle(
       color: Color(0xFF2A353C),
       hoverColor: Color(0xFF414B51),
       pressedColor: Color(0xFF414B51),
     ),
-    // Digit and typeset-function keys sit on the secondary surface:
-    // idle = secondary/base, hover and pressed = secondary/strong.
+    // Digit and typeset-function keys: lighter at rest, darker on hover/press.
     functionKey: MathKeyboardKeyStyle(
       color: Color(0xFF414B51),
       hoverColor: Color(0xFF2A353C),
       pressedColor: Color(0xFF2A353C),
     ),
-    // Delete and page-toggle keys use secondary/weak at idle and
-    // secondary/base on hover and pressed.
+    // Delete and page-toggle keys: the lightest surface at rest.
     utilityKey: MathKeyboardKeyStyle(
       color: Color(0xFF798085),
       hoverColor: Color(0xFF414B51),
       pressedColor: Color(0xFF414B51),
     ),
-    // Submit uses the primary tokens: idle = primary/strong,
-    // hover and pressed = primary/stronger.
+    // Submit key: the accent color.
     primaryKey: MathKeyboardKeyStyle(
       color: Color(0xFF0164EC),
       hoverColor: Color(0xFF004BB3),
