@@ -7,11 +7,12 @@ import 'package:math_keyboard/src/foundation/math_keyboard_semantics.dart';
 /// Each tier groups keys that share a visual role so that a [MathKeyboardStyle]
 /// can color them consistently regardless of the concrete key.
 enum MathKeyboardKeyTier {
-  /// Default keys: digits, variables, parentheses, and cursor navigation.
+  /// Operators, the decimal separator, parentheses, cursor navigation, and
+  /// variable keys.
   neutral,
 
-  /// Typeset function keys such as fractions, roots, and trigonometric
-  /// functions.
+  /// Digits and typeset function keys such as fractions, roots, and
+  /// trigonometric functions.
   function,
 
   /// Utility keys that change the keyboard mode or delete input, such as the
