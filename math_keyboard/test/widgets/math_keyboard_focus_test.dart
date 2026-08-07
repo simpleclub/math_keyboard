@@ -89,7 +89,7 @@ void main() {
   });
 
   testWidgets(
-      'the keyboard is one tab stop: arrows move between keys, tab exits',
+      'tab traverses the keys as buttons and exits at the end (no trap)',
       (tester) async {
     tester.view.physicalSize = const Size(800, 400);
     tester.view.devicePixelRatio = 1;
@@ -121,28 +121,36 @@ void main() {
         ?.findAncestorWidgetOfExactType<KeyboardButton>()
         ?.semanticsLabel;
 
-    // Tab from the field moves onto the keys.
+    // Tab from the field moves onto the first key.
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
     await tester.pump();
-    expect(focusedLabel(), isNotNull, reason: 'tab enters the keyboard');
+    final first = focusedLabel();
+    expect(first, isNotNull, reason: 'tab enters the keyboard');
 
-    // Arrow keys move between keys (right from 7 -> 8).
-    // First land on a known key with the left edge of the number row.
-    // (Entry lands on the first key; move right and assert it changed.)
-    final entered = focusedLabel();
+    // Another tab moves to a different key (traversal, not exit).
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(focusedLabel(), isNotNull,
+        reason: 'tab moves key to key, still inside the keyboard');
+    expect(focusedLabel(), isNot(first), reason: 'it moved to another key');
+
+    // Arrow keys also move between keys.
+    final beforeArrow = focusedLabel();
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
-    expect(focusedLabel(), isNot(entered),
-        reason: 'arrow keys move between keys within the keyboard');
+    expect(focusedLabel(), isNot(beforeArrow),
+        reason: 'arrow keys move between keys');
 
-    // Tab exits the keyboard to the control after the field (no trap).
-    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-    await tester.pump();
+    // Tabbing to the end eventually leaves the keyboard for the next control —
+    // it must not wrap back into the keys.
+    for (var i = 0; i < 40 && !trailingFocus.hasFocus; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+    }
     await tester.pump(const Duration(milliseconds: 300));
-    expect(focusedLabel(), isNull, reason: 'tab leaves the keys');
     expect(trailingFocus.hasFocus, isTrue,
-        reason: 'tab moves to the next control after the field, not trapped');
+        reason: 'tab past the last key exits to the next control, not trapped');
 
     await tester.pumpWidget(const SizedBox());
   });

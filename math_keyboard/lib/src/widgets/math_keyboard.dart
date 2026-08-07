@@ -88,15 +88,16 @@ class MathKeyboard extends StatelessWidget {
   ///
   /// The math field hands focus to this scope so a keyboard or switch-access
   /// user can move onto the keys (the field keeps ownership otherwise, which is
-  /// why physical typing still works). The keyboard is a single tab stop: the
-  /// arrow keys move between keys while tab leaves the keyboard entirely.
+  /// why physical typing still works). The keys are ordinary buttons: tab moves
+  /// between them, and the arrow keys additionally move across the grid.
   final FocusScopeNode? focusScopeNode;
 
-  /// Called to move focus back to the field, e.g. on shift+tab from a key.
+  /// Called when tab moves past the first key (shift+tab), to return to the
+  /// field instead of trapping focus inside the keys.
   final VoidCallback? onExitToField;
 
-  /// Called to move focus to the control after the field, e.g. on tab from a
-  /// key, so the keyboard behaves as one tab stop and never traps focus.
+  /// Called when tab moves past the last key, to leave for the control after
+  /// the field instead of wrapping back to the first key (WCAG 2.1.2).
   final VoidCallback? onExitToNext;
 
   /// Called to dismiss the keyboard, e.g. on escape from a key.
@@ -130,7 +131,8 @@ class MathKeyboard extends StatelessWidget {
     // In landscape the expression keyboard shows the functions and numbers side
     // by side with a full-height submit key, instead of paging. The number-only
     // keyboard keeps its compact paged layout.
-    final isLandscape = type != MathKeyboardType.numberOnly &&
+    final isLandscape =
+        type != MathKeyboardType.numberOnly &&
         MediaQuery.orientationOf(context) == Orientation.landscape;
 
     final curvedSlideAnimation = CurvedAnimation(
@@ -161,8 +163,9 @@ class MathKeyboard extends StatelessWidget {
                   top: false,
                   child: _KeyboardBody(
                     insetsState: insetsState,
-                    slideAnimation:
-                        slideAnimation == null ? null : curvedSlideAnimation,
+                    slideAnimation: slideAnimation == null
+                        ? null
+                        : curvedSlideAnimation,
                     // Note: the subtree is intentionally NOT wrapped in a
                     // `MediaQuery` with `TextScaler.noScaling`. The
                     // large-content-viewer keys read the ambient text scale to
@@ -179,30 +182,39 @@ class MathKeyboard extends StatelessWidget {
                       label: semantics.keyboardGroupLabel,
                       child: FocusScope(
                         node: focusScopeNode,
-                        child: _wrapExitTraversal(
+                        child: _wrapTabBoundary(
                           CallbackShortcuts(
                             bindings: {
                               if (onClose != null)
                                 const SingleActivator(
-                                    LogicalKeyboardKey.escape): onClose!,
+                                  LogicalKeyboardKey.escape,
+                                ): onClose!,
                             },
-                            // Arrow keys move focus across the whole key grid;
-                            // tab (handled below) leaves the keyboard entirely,
-                            // so the keyboard is a single tab stop.
+                            // Tab traverses the keys as ordinary buttons (and
+                            // out to the next control at the ends); the arrow
+                            // keys are a bonus for 2-D movement across the grid.
                             child: Shortcuts(
                               shortcuts: const {
-                                SingleActivator(LogicalKeyboardKey.arrowLeft):
-                                    DirectionalFocusIntent(
-                                        TraversalDirection.left),
-                                SingleActivator(LogicalKeyboardKey.arrowRight):
-                                    DirectionalFocusIntent(
-                                        TraversalDirection.right),
-                                SingleActivator(LogicalKeyboardKey.arrowUp):
-                                    DirectionalFocusIntent(
-                                        TraversalDirection.up),
-                                SingleActivator(LogicalKeyboardKey.arrowDown):
-                                    DirectionalFocusIntent(
-                                        TraversalDirection.down),
+                                SingleActivator(
+                                  LogicalKeyboardKey.arrowLeft,
+                                ): DirectionalFocusIntent(
+                                  TraversalDirection.left,
+                                ),
+                                SingleActivator(
+                                  LogicalKeyboardKey.arrowRight,
+                                ): DirectionalFocusIntent(
+                                  TraversalDirection.right,
+                                ),
+                                SingleActivator(
+                                  LogicalKeyboardKey.arrowUp,
+                                ): DirectionalFocusIntent(
+                                  TraversalDirection.up,
+                                ),
+                                SingleActivator(
+                                  LogicalKeyboardKey.arrowDown,
+                                ): DirectionalFocusIntent(
+                                  TraversalDirection.down,
+                                ),
                               },
                               child: FocusTraversalGroup(
                                 policy: ReadingOrderTraversalPolicy(),
@@ -237,31 +249,50 @@ class MathKeyboard extends StatelessWidget {
     );
   }
 
-  /// Wraps [child] so tab and shift+tab leave the keyboard instead of moving
-  /// between keys, keeping it a single tab stop (the arrow keys do the movement
-  /// within). Tab exits to the control after the field; shift+tab returns to
-  /// the field.
-  Widget _wrapExitTraversal(Widget child) {
-    // Without a field to hand focus back to (e.g. a standalone keyboard), keep
-    // the default tab traversal instead of swallowing it.
+  /// Lets tab traverse the keys as buttons, but hands focus out of the keyboard
+  /// at the ends instead of wrapping (which would trap focus inside the keys).
+  Widget _wrapTabBoundary(Widget child) {
     if (onExitToField == null && onExitToNext == null) return child;
     return Actions(
       actions: <Type, Action<Intent>>{
         NextFocusIntent: CallbackAction<NextFocusIntent>(
           onInvoke: (_) {
-            onExitToNext?.call();
+            if (_focusedIsAtEdge(last: true)) {
+              onExitToNext?.call();
+            } else {
+              FocusManager.instance.primaryFocus?.nextFocus();
+            }
             return null;
           },
         ),
         PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(
           onInvoke: (_) {
-            onExitToField?.call();
+            if (_focusedIsAtEdge(last: false)) {
+              onExitToField?.call();
+            } else {
+              FocusManager.instance.primaryFocus?.previousFocus();
+            }
             return null;
           },
         ),
       },
       child: child,
     );
+  }
+
+  /// Whether the focused key is the first (`last: false`) or last
+  /// (`last: true`) key in the keyboard's traversal order.
+  bool _focusedIsAtEdge({required bool last}) {
+    final scope = focusScopeNode;
+    final focused = FocusManager.instance.primaryFocus;
+    if (scope == null || focused == null) return false;
+    final descendants = scope.traversalDescendants.toList();
+    if (descendants.isEmpty) return false;
+    final ordered = ReadingOrderTraversalPolicy().sortDescendants(
+      descendants,
+      focused,
+    );
+    return focused == (last ? ordered.last : ordered.first);
   }
 
   /// The portrait layout: a centered column of the variables row and the paged
@@ -329,7 +360,8 @@ class MathKeyboard extends StatelessWidget {
     required double keyHeight,
   }) {
     return Padding(
-      padding: padding +
+      padding:
+          padding +
           style.padding +
           EdgeInsets.symmetric(horizontal: style.horizontalPadding),
       child: Center(
@@ -481,11 +513,12 @@ class _Variables extends StatelessWidget {
           // right edge — an affordance telling the user the row scrolls. (This
           // generalizes the design's phone-specific 55px to any keyboard width.)
           final slots = variables.length <= 5 ? 5.0 : 5.5;
-          final keyWidth = ((constraints.maxWidth -
-                      leftPadding -
-                      style.rowSpacing * (slots - 1)) /
-                  slots)
-              .clamp(keyHeight, double.infinity);
+          final keyWidth =
+              ((constraints.maxWidth -
+                          leftPadding -
+                          style.rowSpacing * (slots - 1)) /
+                      slots)
+                  .clamp(keyHeight, double.infinity);
           return AnimatedBuilder(
             animation: controller,
             builder: (context, child) {
@@ -505,8 +538,9 @@ class _Variables extends StatelessWidget {
                         padding: style.keyPadding,
                         focusColor: style.focusBorderColor,
                         focusWidth: style.focusBorderWidth,
-                        semanticsLabel:
-                            semantics.variableLabel(variables[index]),
+                        semanticsLabel: semantics.variableLabel(
+                          variables[index],
+                        ),
                         onFocusChange: (focused) {
                           if (!focused) return;
                           // Keep the focused variable visible under keyboard and
@@ -626,9 +660,11 @@ class _Buttons extends StatelessWidget {
                       // its label.
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        for (var index = 0;
-                            index < layout[rowIndex].length;
-                            index++) ...[
+                        for (
+                          var index = 0;
+                          index < layout[rowIndex].length;
+                          index++
+                        ) ...[
                           if (index > 0) SizedBox(width: style.rowSpacing),
                           _Keys.button(
                             context,
@@ -676,73 +712,73 @@ abstract final class _Keys {
   }) {
     return switch (config) {
       final BasicKeyboardButtonConfig config => _BasicButton(
-          flex: config.flex,
-          label: config.label,
-          onTap: config.args != null
-              ? () => controller.addFunction(config.value, config.args!)
-              : () => controller.addLeaf(config.value),
-          asTex: config.asTex,
-          // Digits and typeset functions share the secondary surface; operators,
-          // the decimal separator, and parentheses use the neutral surface.
-          tier: config.asTex || _isDigit(config.label)
-              ? MathKeyboardKeyTier.function
-              : MathKeyboardKeyTier.neutral,
-          style: style,
-          semantics: semantics,
-          fontSize: fontSize,
-        ),
+        flex: config.flex,
+        label: config.label,
+        onTap: config.args != null
+            ? () => controller.addFunction(config.value, config.args!)
+            : () => controller.addLeaf(config.value),
+        asTex: config.asTex,
+        // Digits and typeset functions share the secondary surface; operators,
+        // the decimal separator, and parentheses use the neutral surface.
+        tier: config.asTex || _isDigit(config.label)
+            ? MathKeyboardKeyTier.function
+            : MathKeyboardKeyTier.neutral,
+        style: style,
+        semantics: semantics,
+        fontSize: fontSize,
+      ),
       final DeleteButtonConfig config => _NavigationButton(
-          flex: config.flex,
-          icon: Icons.backspace,
-          semanticsLabel: semantics.deleteLabel,
-          tier: MathKeyboardKeyTier.utility,
-          style: style,
-          fontSize: fontSize,
-          onTap: () => controller.goBack(deleteMode: true),
-        ),
+        flex: config.flex,
+        icon: Icons.backspace,
+        semanticsLabel: semantics.deleteLabel,
+        tier: MathKeyboardKeyTier.utility,
+        style: style,
+        fontSize: fontSize,
+        onTap: () => controller.goBack(deleteMode: true),
+      ),
       final PageButtonConfig config => _BasicButton(
-          flex: config.flex,
-          icon: controller.secondPage ? null : CustomKeyIcons.key_symbols,
-          label: controller.secondPage ? '123' : null,
-          onTap: controller.togglePage,
-          semanticsLabel: controller.secondPage
-              ? semantics.showNumbersKeyboardLabel
-              : semantics.showFunctionsKeyboardLabel,
-          tier: MathKeyboardKeyTier.utility,
-          style: style,
-          semantics: semantics,
-          fontSize: fontSize,
-        ),
+        flex: config.flex,
+        icon: controller.secondPage ? null : CustomKeyIcons.key_symbols,
+        label: controller.secondPage ? '123' : null,
+        onTap: controller.togglePage,
+        semanticsLabel: controller.secondPage
+            ? semantics.showNumbersKeyboardLabel
+            : semantics.showFunctionsKeyboardLabel,
+        tier: MathKeyboardKeyTier.utility,
+        style: style,
+        semantics: semantics,
+        fontSize: fontSize,
+      ),
       final PreviousButtonConfig config => _NavigationButton(
-          flex: config.flex,
-          icon: Icons.chevron_left_rounded,
-          semanticsLabel: semantics.moveCursorLeftLabel,
-          semanticsValue: controller.describeCursorContext(semantics),
-          tier: MathKeyboardKeyTier.neutral,
-          style: style,
-          fontSize: fontSize,
-          onTap: controller.goBack,
-        ),
+        flex: config.flex,
+        icon: Icons.chevron_left_rounded,
+        semanticsLabel: semantics.moveCursorLeftLabel,
+        semanticsValue: controller.describeCursorContext(semantics),
+        tier: MathKeyboardKeyTier.neutral,
+        style: style,
+        fontSize: fontSize,
+        onTap: controller.goBack,
+      ),
       final NextButtonConfig config => _NavigationButton(
-          flex: config.flex,
-          icon: Icons.chevron_right_rounded,
-          semanticsLabel: semantics.moveCursorRightLabel,
-          semanticsValue: controller.describeCursorContext(semantics),
-          tier: MathKeyboardKeyTier.neutral,
-          style: style,
-          fontSize: fontSize,
-          onTap: controller.goNext,
-        ),
+        flex: config.flex,
+        icon: Icons.chevron_right_rounded,
+        semanticsLabel: semantics.moveCursorRightLabel,
+        semanticsValue: controller.describeCursorContext(semantics),
+        tier: MathKeyboardKeyTier.neutral,
+        style: style,
+        fontSize: fontSize,
+        onTap: controller.goNext,
+      ),
       final SubmitButtonConfig config => _BasicButton(
-          flex: config.flex,
-          icon: Icons.keyboard_return,
-          semanticsLabel: semantics.submitLabel,
-          tier: MathKeyboardKeyTier.primary,
-          style: style,
-          semantics: semantics,
-          fontSize: fontSize,
-          onTap: onSubmit,
-        ),
+        flex: config.flex,
+        icon: Icons.keyboard_return,
+        semanticsLabel: semantics.submitLabel,
+        tier: MathKeyboardKeyTier.primary,
+        style: style,
+        semantics: semantics,
+        fontSize: fontSize,
+        onTap: onSubmit,
+      ),
       _ => const SizedBox.shrink(),
     };
   }
@@ -819,12 +855,12 @@ class _LandscapeButtons extends StatelessWidget {
         // can jump straight to variables, functions, numbers, or submit via its
         // landmark/rotor navigation.
         Widget semanticGroup(String label, Widget child) => Semantics(
-              role: SemanticsRole.region,
-              container: true,
-              explicitChildNodes: true,
-              label: label,
-              child: child,
-            );
+          role: SemanticsRole.region,
+          container: true,
+          explicitChildNodes: true,
+          label: label,
+          child: child,
+        );
 
         final variablesGroup = semanticGroup(
           semantics.variablesGroupLabel,
@@ -918,8 +954,8 @@ class _BasicButton extends StatelessWidget {
     this.onTap,
     this.asTex = false,
     this.semanticsLabel,
-  })  : assert(label != null || icon != null),
-        super(key: key);
+  }) : assert(label != null || icon != null),
+       super(key: key);
 
   /// The flexible flex value.
   final int? flex;
@@ -979,7 +1015,8 @@ class _BasicButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedSemanticsLabel = semanticsLabel ??
+    final resolvedSemanticsLabel =
+        semanticsLabel ??
         (asTex
             ? semantics.functionLabel(label!)
             : (label == '.' ? decimalSeparator(context) : label));
