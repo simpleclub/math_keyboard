@@ -217,7 +217,11 @@ class MathKeyboard extends StatelessWidget {
                                 ),
                               },
                               child: FocusTraversalGroup(
-                                policy: ReadingOrderTraversalPolicy(),
+                                // Sections carry an explicit traversal order
+                                // (numbers, then formula, then submit) via
+                                // FocusTraversalOrder; keys without one fall
+                                // back to reading order within their section.
+                                policy: OrderedTraversalPolicy(),
                                 child: isLandscape
                                     ? _buildLandscape(
                                         context,
@@ -288,7 +292,7 @@ class MathKeyboard extends StatelessWidget {
     if (scope == null || focused == null) return false;
     final descendants = scope.traversalDescendants.toList();
     if (descendants.isEmpty) return false;
-    final ordered = ReadingOrderTraversalPolicy().sortDescendants(
+    final ordered = OrderedTraversalPolicy().sortDescendants(
       descendants,
       focused,
     );
@@ -918,20 +922,32 @@ class _LandscapeButtons extends StatelessWidget {
           ),
         );
 
-        // The keyboard is a single tab stop: the arrow keys move across all
-        // keys by geometry (no per-section traversal groups), so the sections
-        // are purely visual and semantic here.
+        // Tab visits the number pad first, then the formula section (variables
+        // then functions), then submit — following how you build an
+        // expression rather than the left-to-right screen layout, which would
+        // otherwise zig-zag across the two side-by-side columns. Keys within a
+        // section fall back to reading order. Arrow keys still move across all
+        // keys by geometry.
+        Widget orderedSection(double order, Widget child) =>
+            FocusTraversalOrder(
+              order: NumericFocusOrder(order),
+              child: child,
+            );
+
         return Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(
               flex: 322,
-              child: column([variablesGroup, functionsGroup]),
+              child: orderedSection(
+                2,
+                column([variablesGroup, functionsGroup]),
+              ),
             ),
             SizedBox(width: style.horizontalPadding),
-            Expanded(flex: 256, child: numbersGroup),
+            Expanded(flex: 256, child: orderedSection(1, numbersGroup)),
             SizedBox(width: style.horizontalPadding),
-            submitGroup,
+            orderedSection(3, submitGroup),
           ],
         );
       },
