@@ -75,7 +75,7 @@ class MathKeyboardKeyStyle {
 
 /// Describes the visual appearance of a [MathKeyboard].
 ///
-/// The [fallback] matches the simpleclub design and is used whenever no
+/// The [fallback] is the built-in default theme, used whenever no
 /// [MathKeyboardTheme] is present. Wrap a [MathKeyboard] (or a subtree
 /// containing [MathField]s) in a [MathKeyboardTheme] to customize the
 /// appearance, for example to inject a design system's tokens.
@@ -201,11 +201,10 @@ class MathKeyboardStyle {
   /// popup, relative to the on-key label. Defaults to `2.5`.
   final double largeContentLabelScale;
 
-  /// The default style, matching the simpleclub design.
+  /// The built-in default style, used when no [MathKeyboardTheme] overrides it.
   ///
-  /// Hover and pressed colors for the function and utility tiers are derived
-  /// from their idle colors; the neutral hover/press and the primary
-  /// pressed colors come directly from the design tokens.
+  /// It is a dark theme; override it via a [MathKeyboardTheme] to match a
+  /// different design.
   static const MathKeyboardStyle fallback = MathKeyboardStyle(
     backgroundColor: Color(0xFF1E2931),
     borderRadius: BorderRadius.all(Radius.circular(24)),
@@ -394,12 +393,15 @@ class MathKeyboardTheme extends InheritedWidget {
   /// Constructs a [MathKeyboardTheme].
   const MathKeyboardTheme({
     Key? key,
-    required this.style,
+    this.style = MathKeyboardStyle.fallback,
     this.semantics = MathKeyboardSemantics.fallback,
     required Widget child,
   }) : super(key: key, child: child);
 
   /// The style applied to descendant math keyboards.
+  ///
+  /// Defaults to [MathKeyboardStyle.fallback], so a theme that only overrides
+  /// [semantics] (for localization) need not supply a full style.
   final MathKeyboardStyle style;
 
   /// The screen-reader strings applied to descendant math keyboards.
