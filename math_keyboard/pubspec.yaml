@@ -2,12 +2,14 @@ name: math_keyboard
 description: >-2
   Math expression editing using an on-screen software keyboard or physical keyboard input in a
   typeset input field in Flutter.
-version: 0.3.3
+version: 0.4.0
 homepage: https://github.com/simpleclub/math_keyboard/tree/main/math_keyboard
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
-  flutter: '>=3.22.2'
+  # SemanticsRole.region (used for the keyboard's section landmarks) requires
+  # Flutter 3.35.1 / Dart 3.9.
+  sdk: '>=3.9.0 <4.0.0'
+  flutter: '>=3.35.1'
 
 dependencies:
   flutter:
