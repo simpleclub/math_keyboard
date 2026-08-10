@@ -1,3 +1,8 @@
+// `containsSemantics` is deprecated after Flutter 3.40 in favour of
+// `isSemantics`, which does not exist on this package's Flutter floor (3.35.1).
+// Keep using `containsSemantics` (a subset matcher, unlike `matchesSemantics`)
+// across the supported range and silence the deprecation notice.
+// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
