@@ -116,19 +116,19 @@ const _subtractButton = BasicKeyboardButtonConfig(
 final functionKeyboard = [
   [
     const BasicKeyboardButtonConfig(
-      label: r'\frac{x}{y}',
+      label: r'\frac{\Box}{\Box}',
       value: r'\frac',
       args: [TeXArg.braces, TeXArg.braces],
       asTex: true,
     ),
     const BasicKeyboardButtonConfig(
-      label: r'x^2',
+      label: r'\Box^2',
       value: '^2',
       args: [TeXArg.braces],
       asTex: true,
     ),
     const BasicKeyboardButtonConfig(
-      label: r'x^{y}',
+      label: r'\Box^{\Box}',
       value: '^',
       args: [TeXArg.braces],
       asTex: true,
@@ -154,14 +154,14 @@ final functionKeyboard = [
   ],
   [
     const BasicKeyboardButtonConfig(
-      label: r'\sqrt{x}',
+      label: r'\sqrt{\Box}',
       value: r'\sqrt',
       args: [TeXArg.braces],
       asTex: true,
       keyboardCharacters: ['r'],
     ),
     const BasicKeyboardButtonConfig(
-      label: r'\sqrt[y]{x}',
+      label: r'\sqrt[\Box]{\Box}',
       value: r'\sqrt',
       args: [TeXArg.brackets, TeXArg.braces],
       asTex: true,
@@ -180,13 +180,13 @@ final functionKeyboard = [
   ],
   [
     const BasicKeyboardButtonConfig(
-      label: r'\log_{y}(x)',
+      label: r'\log_{\Box}(\Box)',
       value: r'\log_',
       asTex: true,
       args: [TeXArg.braces, TeXArg.parentheses],
     ),
     const BasicKeyboardButtonConfig(
-      label: r'\ln(x)',
+      label: r'\ln(\Box)',
       value: r'\ln(',
       asTex: true,
       keyboardCharacters: ['l'],
