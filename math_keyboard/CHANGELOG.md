@@ -5,9 +5,12 @@
 * Add first-class accessibility:
   * Localizable screen-reader strings via `MathKeyboardSemantics`
     (carried on `MathKeyboardTheme` and per-field).
-  * WAI-ARIA composite keyboard navigation: the keyboard is a single tab stop,
-    the arrow keys move between keys, tab leaves without trapping focus, and
-    escape dismisses it.
+  * WAI-ARIA composite keyboard navigation: tab moves between the keys as
+    ordinary buttons and leaves the keyboard at the ends without trapping
+    focus, the arrow keys additionally move across the grid, and escape
+    dismisses it.
+  * Responsive landscape layout showing the functions and numbers side by side
+    with a dedicated submit key.
   * Section landmark regions (variables, formula, numbers, submit) so screen
     readers can jump between them.
   * The math field opens the keyboard from an accessibility activation.
