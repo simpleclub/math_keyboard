@@ -251,6 +251,24 @@ void main() {
 
       handle.dispose();
     });
+
+    testWidgets('operator keys speak their token, not the raw glyph', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+      await pumpKeyboard(tester, controller: controller);
+
+      // ×, ÷, +, and − announce spoken words resolved from their inserted
+      // tokens (\cdot, \frac, +, -) rather than the glyphs painted on the keys.
+      expect(find.bySemanticsLabel('times'), findsOneWidget);
+      expect(find.bySemanticsLabel('divided by'), findsOneWidget);
+      expect(find.bySemanticsLabel('plus'), findsOneWidget);
+      expect(find.bySemanticsLabel('minus'), findsOneWidget);
+
+      handle.dispose();
+    });
   });
 
   group('math field semantics', () {
@@ -276,6 +294,36 @@ void main() {
       expect(
         tester.getSemantics(find.bySemanticsLabel('Math field')),
         containsSemantics(isTextField: true, value: '7 plus 8'),
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('exposes the decoration error text to screen readers', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MathField(
+              controller: controller,
+              opensKeyboard: false,
+              decoration: const InputDecoration(errorText: 'Required'),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // The decorator subtree (which renders the error) is excluded from
+      // semantics, so the error must reach the field's own node as a hint.
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('Math field')),
+        containsSemantics(isTextField: true, hint: 'Required'),
       );
 
       handle.dispose();

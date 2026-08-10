@@ -832,6 +832,10 @@ class _FieldPreview extends StatelessWidget {
       textField: true,
       label: _semanticsLabel,
       value: controller.readableExpression(semantics),
+      // The decorator subtree (which renders the validation error) is excluded,
+      // so a `MathFormField` error would otherwise be silent to screen readers.
+      // Surface it on this node instead.
+      hint: decoration.errorText,
       onTap: onTap,
       child: ExcludeSemantics(child: field),
     );

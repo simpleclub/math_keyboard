@@ -714,6 +714,7 @@ abstract final class _Keys {
       final BasicKeyboardButtonConfig config => _BasicButton(
         flex: config.flex,
         label: config.label,
+        value: config.value,
         onTap: config.args != null
             ? () => controller.addFunction(config.value, config.args!)
             : () => controller.addLeaf(config.value),
@@ -979,6 +980,7 @@ class _BasicButton extends StatelessWidget {
     required this.semantics,
     required this.fontSize,
     this.label,
+    this.value,
     this.icon,
     this.onTap,
     this.asTex = false,
@@ -1011,6 +1013,11 @@ class _BasicButton extends StatelessWidget {
 
   /// The label for this button.
   final String? label;
+
+  /// The TeX token this button inserts, used to resolve the spoken semantics
+  /// label of plain-text keys (e.g. `\cdot` → "times") instead of announcing
+  /// the raw glyph.
+  final String? value;
 
   /// Icon for this button.
   final IconData? icon;
@@ -1052,11 +1059,18 @@ class _BasicButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedSemanticsLabel =
-        semanticsLabel ??
-        (asTex
-            ? semantics.functionLabel(label!)
-            : (label == '.' ? decimalSeparator(context) : label));
+    final String? resolvedSemanticsLabel;
+    if (semanticsLabel != null) {
+      resolvedSemanticsLabel = semanticsLabel;
+    } else if (asTex) {
+      resolvedSemanticsLabel = semantics.functionLabel(label!);
+    } else if (label == '.') {
+      resolvedSemanticsLabel = decimalSeparator(context);
+    } else {
+      // Speak the inserted token (e.g. "times" for ×, "minus" for −) rather
+      // than the raw glyph, so the announcement is reliable and localizable.
+      resolvedSemanticsLabel = semantics.tokenLabel(value ?? label!);
+    }
 
     return Expanded(
       flex: flex ?? 2,

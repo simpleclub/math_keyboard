@@ -230,6 +230,8 @@ class MathKeyboardSemantics {
   static const Map<String, String> _defaultTokenMappings = {
     r'\cdot': 'times',
     r'\div': 'divided by',
+    // The division key inserts a fraction, so its inserted token is `\frac`.
+    r'\frac': 'divided by',
     r'\pi': 'pi',
     '+': 'plus',
     '-': 'minus',
