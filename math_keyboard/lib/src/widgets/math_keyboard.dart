@@ -44,11 +44,7 @@ class MathKeyboard extends StatelessWidget {
     this.onExitToField,
     this.onExitToNext,
     this.onClose,
-    this.padding = const EdgeInsets.only(
-      bottom: 4,
-      left: 4,
-      right: 4,
-    ),
+    this.padding = const EdgeInsets.only(bottom: 4, left: 4, right: 4),
   }) : super(key: key);
 
   /// The controller for editing the math field.
@@ -951,10 +947,8 @@ class _LandscapeButtons extends StatelessWidget {
         // The variables and submit sections have no per-key order of their own,
         // so pin them to a single order each (between and after the numbered
         // ranges above). Arrow keys still move across all keys by geometry.
-        Widget ordered(double order, Widget child) => FocusTraversalOrder(
-          order: NumericFocusOrder(order),
-          child: child,
-        );
+        Widget ordered(double order, Widget child) =>
+            FocusTraversalOrder(order: NumericFocusOrder(order), child: child);
 
         return Row(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -1143,11 +1137,7 @@ class _NavigationButton extends StatelessWidget {
         focusWidth: style.focusBorderWidth,
         semanticsLabel: semanticsLabel,
         semanticsValue: semanticsValue,
-        child: Icon(
-          icon,
-          color: style.foregroundColor,
-          size: fontSize,
-        ),
+        child: Icon(icon, color: style.foregroundColor, size: fontSize),
       ),
     );
   }

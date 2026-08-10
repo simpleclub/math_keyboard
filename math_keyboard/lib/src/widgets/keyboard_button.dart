@@ -130,33 +130,31 @@ class _KeyboardButtonState extends State<KeyboardButton> {
       ),
       child: Padding(
         padding: widget.padding,
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: widget.child,
-        ),
+        child: FittedBox(fit: BoxFit.scaleDown, child: widget.child),
       ),
     );
 
     result = RawGestureDetector(
       behavior: HitTestBehavior.opaque,
       gestures: <Type, GestureRecognizerFactory>{
-        _AlwaysWinningGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-            _AlwaysWinningGestureRecognizer>(
-          () => _AlwaysWinningGestureRecognizer(),
-          (_AlwaysWinningGestureRecognizer instance) {
-            instance
-              ..onTap = widget.onTap
-              ..onTapDown = (_) {
-                setState(() => _pressed = true);
-              }
-              ..onTapUp = (_) {
-                setState(() => _pressed = false);
-              }
-              ..onTapCancel = () {
-                setState(() => _pressed = false);
-              };
-          },
-        ),
+        _AlwaysWinningGestureRecognizer:
+            GestureRecognizerFactoryWithHandlers<
+              _AlwaysWinningGestureRecognizer
+            >(() => _AlwaysWinningGestureRecognizer(), (
+              _AlwaysWinningGestureRecognizer instance,
+            ) {
+              instance
+                ..onTap = widget.onTap
+                ..onTapDown = (_) {
+                  setState(() => _pressed = true);
+                }
+                ..onTapUp = (_) {
+                  setState(() => _pressed = false);
+                }
+                ..onTapCancel = () {
+                  setState(() => _pressed = false);
+                };
+            }),
       },
       child: result,
     );

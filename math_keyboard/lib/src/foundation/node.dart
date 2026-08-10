@@ -118,12 +118,15 @@ class TeXFunction extends TeX {
   /// case, the [TeXNode.parent] is set in the constructor body. If [argNodes]
   /// is passed empty (default), empty [TeXNode]s will be inserted for each
   /// arg.
-  TeXFunction(String expression, this.parent, this.args,
-      [List<TeXNode>? argNodes])
-      : assert(args.isNotEmpty, 'A function needs at least one argument.'),
-        assert(argNodes == null || argNodes.length == args.length),
-        argNodes = argNodes ?? List.empty(growable: true),
-        super(expression) {
+  TeXFunction(
+    String expression,
+    this.parent,
+    this.args, [
+    List<TeXNode>? argNodes,
+  ]) : assert(args.isNotEmpty, 'A function needs at least one argument.'),
+       assert(argNodes == null || argNodes.length == args.length),
+       argNodes = argNodes ?? List.empty(growable: true),
+       super(expression) {
     if (this.argNodes.isEmpty) {
       for (var i = 0; i < args.length; i++) {
         this.argNodes.add(TeXNode(this));
@@ -220,7 +223,8 @@ class Cursor extends TeX {
 /// Extension to convert a [Color] to a hex string.
 extension HexColor on Color {
   /// Converts a [Color] to a hex string to be used in TeX.
-  String toHex() => '#'
+  String toHex() =>
+      '#'
       '${_floatToInt8(r).toRadixString(16).padLeft(2, '0')}'
       '${_floatToInt8(g).toRadixString(16).padLeft(2, '0')}'
       '${_floatToInt8(b).toRadixString(16).padLeft(2, '0')}';

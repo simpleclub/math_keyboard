@@ -349,29 +349,29 @@ class MathKeyboardStyle {
 
   @override
   int get hashCode => Object.hashAll([
-        backgroundColor,
-        borderRadius,
-        Object.hashAll(boxShadow),
-        padding,
-        horizontalPadding,
-        rowSpacing,
-        keyBorderRadius,
-        keyPadding,
-        keyHeight,
-        baseFontSize,
-        maxTextScaleFactor,
-        foregroundColor,
-        focusBorderColor,
-        focusBorderWidth,
-        fontFamily,
-        neutralKey,
-        functionKey,
-        utilityKey,
-        primaryKey,
-        largeContentViewerEnabled,
-        largeContentViewerThreshold,
-        largeContentLabelScale,
-      ]);
+    backgroundColor,
+    borderRadius,
+    Object.hashAll(boxShadow),
+    padding,
+    horizontalPadding,
+    rowSpacing,
+    keyBorderRadius,
+    keyPadding,
+    keyHeight,
+    baseFontSize,
+    maxTextScaleFactor,
+    foregroundColor,
+    focusBorderColor,
+    focusBorderWidth,
+    fontFamily,
+    neutralKey,
+    functionKey,
+    utilityKey,
+    primaryKey,
+    largeContentViewerEnabled,
+    largeContentViewerThreshold,
+    largeContentLabelScale,
+  ]);
 }
 
 /// Provides a [MathKeyboardStyle] and [MathKeyboardSemantics] to the
@@ -410,16 +410,16 @@ class MathKeyboardTheme extends InheritedWidget {
   /// Returns the [MathKeyboardStyle] from the nearest [MathKeyboardTheme], or
   /// [MathKeyboardStyle.fallback] if there is none.
   static MathKeyboardStyle styleOf(BuildContext context) {
-    final theme =
-        context.dependOnInheritedWidgetOfExactType<MathKeyboardTheme>();
+    final theme = context
+        .dependOnInheritedWidgetOfExactType<MathKeyboardTheme>();
     return theme?.style ?? MathKeyboardStyle.fallback;
   }
 
   /// Returns the [MathKeyboardSemantics] from the nearest [MathKeyboardTheme],
   /// or [MathKeyboardSemantics.fallback] if there is none.
   static MathKeyboardSemantics semanticsOf(BuildContext context) {
-    final theme =
-        context.dependOnInheritedWidgetOfExactType<MathKeyboardTheme>();
+    final theme = context
+        .dependOnInheritedWidgetOfExactType<MathKeyboardTheme>();
     return theme?.semantics ?? MathKeyboardSemantics.fallback;
   }
 

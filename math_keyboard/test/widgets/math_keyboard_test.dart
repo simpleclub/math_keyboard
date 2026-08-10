@@ -120,8 +120,9 @@ void main() {
   });
 
   group('MathKeyboard pages and types', () {
-    testWidgets('page toggle switches to the function page and back',
-        (tester) async {
+    testWidgets('page toggle switches to the function page and back', (
+      tester,
+    ) async {
       final controller = MathFieldEditingController();
       addTearDown(controller.dispose);
       await pumpKeyboard(tester, controller: controller);
@@ -149,8 +150,9 @@ void main() {
       expect(find.byIcon(CustomKeyIcons.key_symbols), findsOneWidget);
     });
 
-    testWidgets('numberOnly keyboard omits the page toggle but types digits',
-        (tester) async {
+    testWidgets('numberOnly keyboard omits the page toggle but types digits', (
+      tester,
+    ) async {
       final controller = MathFieldEditingController();
       addTearDown(controller.dispose);
       await pumpKeyboard(
@@ -167,8 +169,9 @@ void main() {
       expect(value(controller), '9');
     });
 
-    testWidgets('expression keyboard renders the navigation icons',
-        (tester) async {
+    testWidgets('expression keyboard renders the navigation icons', (
+      tester,
+    ) async {
       final controller = MathFieldEditingController();
       addTearDown(controller.dispose);
       await pumpKeyboard(tester, controller: controller);
@@ -181,8 +184,9 @@ void main() {
   });
 
   group('MathKeyboard variables', () {
-    testWidgets('tapping a variable inserts it into the expression',
-        (tester) async {
+    testWidgets('tapping a variable inserts it into the expression', (
+      tester,
+    ) async {
       final controller = MathFieldEditingController();
       addTearDown(controller.dispose);
       await pumpKeyboard(tester, controller: controller, variables: ['y']);

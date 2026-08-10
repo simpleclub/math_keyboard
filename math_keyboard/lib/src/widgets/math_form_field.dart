@@ -37,35 +37,36 @@ class MathFormField extends FormField<String> {
     MathKeyboardStyle? style,
     MathKeyboardSemantics? semantics,
   }) : super(
-          key: key,
-          initialValue:
-              controller != null ? controller.currentEditingValue() : '',
-          validator: validator,
-          autovalidateMode: autovalidateMode,
-          builder: (FormFieldState<String> field) {
-            final state = field as _MathFormFieldState;
+         key: key,
+         initialValue: controller != null
+             ? controller.currentEditingValue()
+             : '',
+         validator: validator,
+         autovalidateMode: autovalidateMode,
+         builder: (FormFieldState<String> field) {
+           final state = field as _MathFormFieldState;
 
-            void onChangedHandler(String value) {
-              field.didChange(value);
-              if (onChanged != null) {
-                onChanged(value);
-              }
-            }
+           void onChangedHandler(String value) {
+             field.didChange(value);
+             if (onChanged != null) {
+               onChanged(value);
+             }
+           }
 
-            return MathField(
-              controller: state._controller,
-              focusNode: focusNode,
-              decoration: decoration.copyWith(errorText: field.errorText),
-              keyboardType: keyboardType,
-              variables: variables,
-              autofocus: autofocus,
-              onChanged: onChangedHandler,
-              onSubmitted: onFieldSubmitted,
-              style: style,
-              semantics: semantics,
-            );
-          },
-        );
+           return MathField(
+             controller: state._controller,
+             focusNode: focusNode,
+             decoration: decoration.copyWith(errorText: field.errorText),
+             keyboardType: keyboardType,
+             variables: variables,
+             autofocus: autofocus,
+             onChanged: onChangedHandler,
+             onSubmitted: onFieldSubmitted,
+             style: style,
+             semantics: semantics,
+           );
+         },
+       );
 
   /// Controls the math input being edited.
   ///

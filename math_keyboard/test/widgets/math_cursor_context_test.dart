@@ -12,8 +12,10 @@ void main() {
         ..addLeaf('7')
         ..addLeaf('8');
 
-      expect(controller.describeCursorContext(MathKeyboardSemantics.fallback),
-          'end of expression');
+      expect(
+        controller.describeCursorContext(MathKeyboardSemantics.fallback),
+        'end of expression',
+      );
     });
 
     test('reports the start of the expression at the leading boundary', () {
@@ -23,8 +25,10 @@ void main() {
         ..goBack()
         ..goBack();
 
-      expect(controller.describeCursorContext(MathKeyboardSemantics.fallback),
-          'start of expression');
+      expect(
+        controller.describeCursorContext(MathKeyboardSemantics.fallback),
+        'start of expression',
+      );
     });
 
     test('reports the token after the cursor once it moves left', () {
@@ -33,8 +37,10 @@ void main() {
         ..addLeaf('8')
         ..goBack();
 
-      expect(controller.describeCursorContext(MathKeyboardSemantics.fallback),
-          'before 8');
+      expect(
+        controller.describeCursorContext(MathKeyboardSemantics.fallback),
+        'before 8',
+      );
     });
 
     test('speaks operators as words', () {
@@ -43,16 +49,20 @@ void main() {
         ..addLeaf('+')
         ..goBack();
 
-      expect(controller.describeCursorContext(MathKeyboardSemantics.fallback),
-          'before plus');
+      expect(
+        controller.describeCursorContext(MathKeyboardSemantics.fallback),
+        'before plus',
+      );
     });
 
     test('describes an empty function argument structurally', () {
       final controller = MathFieldEditingController()
         ..addFunction(r'\sqrt', [TeXArg.braces]);
 
-      expect(controller.describeCursorContext(MathKeyboardSemantics.fallback),
-          'under the square root, empty');
+      expect(
+        controller.describeCursorContext(MathKeyboardSemantics.fallback),
+        'under the square root, empty',
+      );
     });
 
     test('describes the numerator of a fraction', () {
@@ -60,8 +70,10 @@ void main() {
         ..addFunction(r'\frac', [TeXArg.braces, TeXArg.braces]);
 
       // A fresh fraction places the cursor in the (empty) numerator.
-      expect(controller.describeCursorContext(MathKeyboardSemantics.fallback),
-          'numerator, empty');
+      expect(
+        controller.describeCursorContext(MathKeyboardSemantics.fallback),
+        'numerator, empty',
+      );
     });
   });
 }

@@ -39,8 +39,7 @@ void main() {
     expect(find.byType(MathKeyboard), findsOneWidget);
   }
 
-  testWidgets(
-      'tab moves focus from the field into the keys, keyboard stays '
+  testWidgets('tab moves focus from the field into the keys, keyboard stays '
       'open', (tester) async {
     final controller = MathFieldEditingController();
     addTearDown(controller.dispose);
@@ -55,14 +54,18 @@ void main() {
     await tester.pump();
 
     expect(aKeyIsFocused(), isTrue, reason: 'tab hands focus to a key');
-    expect(find.byType(MathKeyboard), findsOneWidget,
-        reason: 'keyboard stays open while a key is focused');
+    expect(
+      find.byType(MathKeyboard),
+      findsOneWidget,
+      reason: 'keyboard stays open while a key is focused',
+    );
 
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('escape returns focus to the field and typing resumes',
-      (tester) async {
+  testWidgets('escape returns focus to the field and typing resumes', (
+    tester,
+  ) async {
     final controller = MathFieldEditingController();
     addTearDown(controller.dispose);
 
@@ -89,71 +92,81 @@ void main() {
   });
 
   testWidgets(
-      'tab traverses the keys as buttons and exits at the end (no trap)',
-      (tester) async {
-    tester.view.physicalSize = const Size(800, 400);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
+    'tab traverses the keys as buttons and exits at the end (no trap)',
+    (tester) async {
+      tester.view.physicalSize = const Size(800, 400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
 
-    final controller = MathFieldEditingController();
-    final trailingFocus = FocusNode();
-    addTearDown(controller.dispose);
-    addTearDown(trailingFocus.dispose);
+      final controller = MathFieldEditingController();
+      final trailingFocus = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(trailingFocus.dispose);
 
-    // A control after the field, so tabbing out of the keyboard has somewhere
-    // to land (proving focus is not trapped, WCAG 2.1.2).
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Column(
-            children: [
-              MathField(autofocus: true, controller: controller),
-              Focus(focusNode: trailingFocus, child: const Text('after')),
-            ],
+      // A control after the field, so tabbing out of the keyboard has somewhere
+      // to land (proving focus is not trapped, WCAG 2.1.2).
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: [
+                MathField(autofocus: true, controller: controller),
+                Focus(focusNode: trailingFocus, child: const Text('after')),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
-    String? focusedLabel() => FocusManager.instance.primaryFocus?.context
-        ?.findAncestorWidgetOfExactType<KeyboardButton>()
-        ?.semanticsLabel;
+      String? focusedLabel() => FocusManager.instance.primaryFocus?.context
+          ?.findAncestorWidgetOfExactType<KeyboardButton>()
+          ?.semanticsLabel;
 
-    // Tab from the field moves onto the first key.
-    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-    await tester.pump();
-    await tester.pump();
-    final first = focusedLabel();
-    expect(first, isNotNull, reason: 'tab enters the keyboard');
-
-    // Another tab moves to a different key (traversal, not exit).
-    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-    await tester.pump();
-    expect(focusedLabel(), isNotNull,
-        reason: 'tab moves key to key, still inside the keyboard');
-    expect(focusedLabel(), isNot(first), reason: 'it moved to another key');
-
-    // Arrow keys also move between keys.
-    final beforeArrow = focusedLabel();
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    await tester.pump();
-    expect(focusedLabel(), isNot(beforeArrow),
-        reason: 'arrow keys move between keys');
-
-    // Tabbing to the end eventually leaves the keyboard for the next control —
-    // it must not wrap back into the keys.
-    for (var i = 0; i < 40 && !trailingFocus.hasFocus; i++) {
+      // Tab from the field moves onto the first key.
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
-    }
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(trailingFocus.hasFocus, isTrue,
-        reason: 'tab past the last key exits to the next control, not trapped');
+      await tester.pump();
+      final first = focusedLabel();
+      expect(first, isNotNull, reason: 'tab enters the keyboard');
 
-    await tester.pumpWidget(const SizedBox());
-  });
+      // Another tab moves to a different key (traversal, not exit).
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      expect(
+        focusedLabel(),
+        isNotNull,
+        reason: 'tab moves key to key, still inside the keyboard',
+      );
+      expect(focusedLabel(), isNot(first), reason: 'it moved to another key');
+
+      // Arrow keys also move between keys.
+      final beforeArrow = focusedLabel();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+      expect(
+        focusedLabel(),
+        isNot(beforeArrow),
+        reason: 'arrow keys move between keys',
+      );
+
+      // Tabbing to the end eventually leaves the keyboard for the next control —
+      // it must not wrap back into the keys.
+      for (var i = 0; i < 40 && !trailingFocus.hasFocus; i++) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pump();
+      }
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(
+        trailingFocus.hasFocus,
+        isTrue,
+        reason: 'tab past the last key exits to the next control, not trapped',
+      );
+
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
 
   testWidgets('escape closes the keyboard', (tester) async {
     tester.view.physicalSize = const Size(400, 800);
@@ -183,8 +196,11 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.byType(MathKeyboard), findsNothing,
-        reason: 'escape dismisses the keyboard');
+    expect(
+      find.byType(MathKeyboard),
+      findsNothing,
+      reason: 'escape dismisses the keyboard',
+    );
 
     await tester.pumpWidget(const SizedBox());
   });

@@ -172,11 +172,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   var _suppressReopen = false;
   late var _controller = widget.controller ?? MathFieldEditingController();
 
-  List<String> get _variables => [
-    r'\pi',
-    'e',
-    ...widget.variables,
-  ];
+  List<String> get _variables => [r'\pi', 'e', ...widget.variables];
 
   bool get _isKeyboardShown =>
       _overlayEntry != null &&
