@@ -312,7 +312,7 @@ class MathKeyboard extends StatelessWidget {
       padding: padding + style.padding,
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 5e2),
+          constraints: const BoxConstraints(maxWidth: 500),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -370,7 +370,7 @@ class MathKeyboard extends StatelessWidget {
           EdgeInsets.symmetric(horizontal: style.horizontalPadding),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 8e2),
+          constraints: const BoxConstraints(maxWidth: 800),
           child: _LandscapeButtons(
             controller: controller,
             variables: variables,
