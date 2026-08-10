@@ -368,7 +368,9 @@ class MathKeyboardSemantics {
     startOfContainer,
     endOfContainer,
     Object.hashAll(functionMappings),
-    Object.hashAll(
+    // `tokenMappings` is compared with `mapEquals` (order-independent), so its
+    // hash must be order-independent too to keep the ==/hashCode contract.
+    Object.hashAllUnordered(
       tokenMappings.entries.map((e) => Object.hash(e.key, e.value)),
     ),
   ]);

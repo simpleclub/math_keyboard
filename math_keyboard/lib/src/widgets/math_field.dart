@@ -312,6 +312,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       // so honor a one-shot suppression instead of reopening.
       if (_suppressReopen) {
         _suppressReopen = false;
+        // The field keeps focus (the keyboard just closed), so the caret must
+        // keep blinking to show the field is still active.
+        _cursorBlinkController.repeat();
         setState(() {});
         return;
       }

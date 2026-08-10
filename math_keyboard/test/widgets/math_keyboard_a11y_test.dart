@@ -534,4 +534,26 @@ void main() {
       expect(decoration.color, const Color(0xFF123456));
     });
   });
+
+  group('value-type contracts', () {
+    test('MathKeyboardSemantics equality and hash ignore token map order', () {
+      const a = MathKeyboardSemantics.fallback;
+      final reordered = a.copyWith(
+        tokenMappings: {
+          for (final entry in a.tokenMappings.entries.toList().reversed)
+            entry.key: entry.value,
+        },
+      );
+
+      expect(reordered, a);
+      expect(reordered.hashCode, a.hashCode);
+    });
+
+    test('MathKeyboardStyle rejects a maxTextScaleFactor below 1', () {
+      expect(
+        () => MathKeyboardStyle.fallback.copyWith(maxTextScaleFactor: 0.8),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+  });
 }

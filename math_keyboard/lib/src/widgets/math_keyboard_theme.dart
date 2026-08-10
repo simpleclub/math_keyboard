@@ -106,7 +106,11 @@ class MathKeyboardStyle {
     this.largeContentViewerEnabled = true,
     this.largeContentViewerThreshold = 1.6,
     this.largeContentLabelScale = 2.5,
-  });
+  }) : assert(
+         maxTextScaleFactor >= 1,
+         'maxTextScaleFactor must be >= 1; the ambient text scale is clamped to '
+         'this upper bound and clamp() throws when the bound is below 1.',
+       );
 
   /// The background color of the keyboard surface.
   final Color backgroundColor;

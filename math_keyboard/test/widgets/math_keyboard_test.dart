@@ -169,6 +169,25 @@ void main() {
       expect(value(controller), '9');
     });
 
+    testWidgets('numberOnly keyboard survives a togglePage to the missing '
+        'second page', (tester) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      await pumpKeyboard(
+        tester,
+        controller: controller,
+        type: MathKeyboardType.numberOnly,
+      );
+
+      // A number-only keyboard has no second page; toggling it (a public API)
+      // must not crash on a null `page2`.
+      controller.togglePage();
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.widgetWithText(KeyboardButton, '9'), findsOneWidget);
+    });
+
     testWidgets('expression keyboard renders the navigation icons', (
       tester,
     ) async {

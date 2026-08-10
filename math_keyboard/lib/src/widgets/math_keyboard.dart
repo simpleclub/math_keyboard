@@ -632,7 +632,11 @@ class _Buttons extends StatelessWidget {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
-        final layout = controller.secondPage ? page2! : page1 ?? numberKeyboard;
+        // `togglePage()` is public and flips `secondPage` for any keyboard
+        // type, but a number-only keyboard has no second page, so fall back
+        // instead of force-unwrapping a null `page2`.
+        final layout =
+            (controller.secondPage ? page2 : page1) ?? numberKeyboard;
         // The visible page is a landmark region, named for whichever page
         // (numbers or functions) is currently showing, so a screen reader can
         // jump to it.
