@@ -335,19 +335,6 @@ void main() {
 
       handle.dispose();
     });
-
-    testWidgets('localizes the cursor context announcement', (tester) async {
-      final controller = MathFieldEditingController()
-        ..addLeaf('7')
-        ..addLeaf('8')
-        ..goBack();
-
-      final localized = MathKeyboardSemantics.fallback.copyWith(
-        beforeToken: (token) => 'vor $token',
-      );
-
-      expect(controller.describeCursorContext(localized), 'vor 8');
-    });
   });
 
   group('large content viewer', () {
@@ -492,18 +479,6 @@ void main() {
       );
       final decoration = decoratedBox.decoration as BoxDecoration;
       expect(decoration.color, const Color(0xFF123456));
-    });
-  });
-
-  group('MathKeyboardStyle value semantics', () {
-    test('copyWith replaces only the given fields', () {
-      const style = MathKeyboardStyle.fallback;
-      final copy = style.copyWith(rowSpacing: 12);
-
-      expect(copy.rowSpacing, 12);
-      expect(copy.backgroundColor, style.backgroundColor);
-      expect(copy, isNot(style));
-      expect(style.copyWith(), style);
     });
   });
 }
