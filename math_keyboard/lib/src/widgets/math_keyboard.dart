@@ -741,6 +741,9 @@ abstract final class _Keys {
         onTap: () => controller.goBack(deleteMode: true),
       ),
       final PageButtonConfig config => _BasicButton(
+        // A mode switch, not content: drop the long-press magnifier under a
+        // screen reader. Sighted users keep it.
+        enableLargeContentViewer: !MediaQuery.accessibleNavigationOf(context),
         flex: config.flex,
         icon: controller.secondPage ? null : CustomKeyIcons.key_symbols,
         label: controller.secondPage ? '123' : null,
@@ -986,8 +989,16 @@ class _BasicButton extends StatelessWidget {
     this.onTap,
     this.asTex = false,
     this.semanticsLabel,
+    this.enableLargeContentViewer = true,
   }) : assert(label != null || icon != null),
        super(key: key);
+
+  /// Whether this key gets a long-press large-content magnifier.
+  ///
+  /// Disabled for the page-toggle key while a screen reader is active: it is a
+  /// mode switch rather than content, and the magnifier popup adds no value
+  /// there.
+  final bool enableLargeContentViewer;
 
   /// The flexible flex value.
   final int? flex;
@@ -1066,7 +1077,10 @@ class _BasicButton extends StatelessWidget {
         // Icon-only keys (submit, page toggle) do not get a magnified popup;
         // text and typeset keys show an enlarged label on long-press when the
         // viewer is enabled.
-        largeContent: style.largeContentViewerEnabled && label != null
+        largeContent:
+            enableLargeContentViewer &&
+                style.largeContentViewerEnabled &&
+                label != null
             ? _label(context, fontSize * style.largeContentLabelScale)
             : null,
         largeContentThreshold: style.largeContentViewerThreshold,

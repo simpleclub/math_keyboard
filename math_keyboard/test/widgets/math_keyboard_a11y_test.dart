@@ -20,6 +20,7 @@ void main() {
     MathKeyboardStyle? style,
     MathKeyboardStyle? themeStyle,
     List<String> variables = const [],
+    bool accessibleNavigation = false,
     // Default to a portrait window so the paged layout is exercised; landscape
     // tests pass a wide size to trigger the side-by-side layout.
     Size viewSize = const Size(400, 800),
@@ -40,8 +41,12 @@ void main() {
         home: Scaffold(
           body: Builder(
             builder: (context) => MediaQuery(
-              // Preserve the real viewport metrics; only override the scaler.
-              data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+              // Preserve the real viewport metrics; only override the scaler
+              // and the screen-reader flag.
+              data: MediaQuery.of(context).copyWith(
+                textScaler: textScaler,
+                accessibleNavigation: accessibleNavigation,
+              ),
               child: keyboard,
             ),
           ),
@@ -86,11 +91,13 @@ void main() {
 
     // Resize is opt-in (maxTextScaleFactor > 1); the default keyboard is fixed
     // and relies on the large-content-viewer instead.
-    final growthStyle =
-        MathKeyboardStyle.fallback.copyWith(maxTextScaleFactor: 2);
+    final growthStyle = MathKeyboardStyle.fallback.copyWith(
+      maxTextScaleFactor: 2,
+    );
 
-    testWidgets('labels scale with the ambient text scaler when opted in',
-        (tester) async {
+    testWidgets('labels scale with the ambient text scaler when opted in', (
+      tester,
+    ) async {
       final controller = MathFieldEditingController();
       addTearDown(controller.dispose);
 
@@ -109,14 +116,16 @@ void main() {
       expect(scaledSize, baseSize * 2);
     });
 
-    testWidgets('keys grow with the clamped text scale when opted in',
-        (tester) async {
+    testWidgets('keys grow with the clamped text scale when opted in', (
+      tester,
+    ) async {
       final controller = MathFieldEditingController();
       addTearDown(controller.dispose);
 
       await pumpKeyboard(tester, controller: controller, style: growthStyle);
-      final baseHeight =
-          tester.getSize(find.widgetWithText(KeyboardButton, '7')).height;
+      final baseHeight = tester
+          .getSize(find.widgetWithText(KeyboardButton, '7'))
+          .height;
 
       await pumpKeyboard(
         tester,
@@ -124,14 +133,17 @@ void main() {
         style: growthStyle,
         textScaler: const TextScaler.linear(2),
       );
-      final scaledHeight =
-          tester.getSize(find.widgetWithText(KeyboardButton, '7')).height;
+      final scaledHeight = tester
+          .getSize(find.widgetWithText(KeyboardButton, '7'))
+          .height;
 
       // The key is its nominal height at 1x and grows with the scale, bounded
       // by maxTextScaleFactor.
       expect(baseHeight, growthStyle.keyHeight);
       expect(
-          scaledHeight, growthStyle.keyHeight * growthStyle.maxTextScaleFactor);
+        scaledHeight,
+        growthStyle.keyHeight * growthStyle.maxTextScaleFactor,
+      );
     });
 
     testWidgets('key height is strictly fixed by default', (tester) async {
@@ -152,8 +164,9 @@ void main() {
       );
     });
 
-    testWidgets('scaling is clamped to the style maxTextScaleFactor',
-        (tester) async {
+    testWidgets('scaling is clamped to the style maxTextScaleFactor', (
+      tester,
+    ) async {
       final controller = MathFieldEditingController();
       addTearDown(controller.dispose);
 
@@ -189,8 +202,9 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('a digit key is a single button node, not read twice',
-        (tester) async {
+    testWidgets('a digit key is a single button node, not read twice', (
+      tester,
+    ) async {
       final controller = MathFieldEditingController();
       addTearDown(controller.dispose);
       final handle = tester.ensureSemantics();
@@ -235,8 +249,9 @@ void main() {
   });
 
   group('math field semantics', () {
-    testWidgets('the math field is a text field exposing its value',
-        (tester) async {
+    testWidgets('the math field is a text field exposing its value', (
+      tester,
+    ) async {
       final controller = MathFieldEditingController()
         ..addLeaf('7')
         ..addLeaf('+')
@@ -263,8 +278,9 @@ void main() {
   });
 
   group('navigation key values', () {
-    testWidgets('cursor navigation keys expose the cursor context as value',
-        (tester) async {
+    testWidgets('cursor navigation keys expose the cursor context as value', (
+      tester,
+    ) async {
       final controller = MathFieldEditingController()..addLeaf('7');
       addTearDown(controller.dispose);
       final handle = tester.ensureSemantics();
@@ -326,16 +342,18 @@ void main() {
         ..addLeaf('8')
         ..goBack();
 
-      final localized = MathKeyboardSemantics.fallback
-          .copyWith(beforeToken: (token) => 'vor $token');
+      final localized = MathKeyboardSemantics.fallback.copyWith(
+        beforeToken: (token) => 'vor $token',
+      );
 
       expect(controller.describeCursorContext(localized), 'vor 8');
     });
   });
 
   group('large content viewer', () {
-    testWidgets('content keys are wrapped for long-press magnification',
-        (tester) async {
+    testWidgets('content keys are wrapped for long-press magnification', (
+      tester,
+    ) async {
       final controller = MathFieldEditingController();
       addTearDown(controller.dispose);
       await pumpKeyboard(tester, controller: controller);
@@ -362,20 +380,50 @@ void main() {
     testWidgets('can be disabled through the style', (tester) async {
       final controller = MathFieldEditingController();
       addTearDown(controller.dispose);
-      final style =
-          MathKeyboardStyle.fallback.copyWith(largeContentViewerEnabled: false);
+      final style = MathKeyboardStyle.fallback.copyWith(
+        largeContentViewerEnabled: false,
+      );
 
       await pumpKeyboard(tester, controller: controller, style: style);
 
       expect(find.byType(LargeContentViewer), findsNothing);
+    });
+
+    testWidgets('the page toggle keeps its magnifier only without a screen '
+        'reader', (tester) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+
+      Finder toggleMagnifier() => find.descendant(
+        of: find.widgetWithText(KeyboardButton, '123'),
+        matching: find.byType(LargeContentViewer),
+      );
+
+      // Sighted: the "123" toggle keeps the long-press magnifier.
+      await pumpKeyboard(tester, controller: controller);
+      controller.togglePage();
+      await tester.pump();
+      expect(toggleMagnifier(), findsOneWidget);
+
+      // Screen reader: the toggle drops the magnifier.
+      await pumpKeyboard(
+        tester,
+        controller: controller,
+        accessibleNavigation: true,
+      );
+      expect(controller.secondPage, isTrue);
+      expect(toggleMagnifier(), findsNothing);
+
+      await tester.pumpWidget(const SizedBox());
     });
   });
 
   group('landscape layout', () {
     const landscapeSize = Size(800, 400);
 
-    testWidgets('shows functions and numbers together with no page toggle',
-        (tester) async {
+    testWidgets('shows functions and numbers together with no page toggle', (
+      tester,
+    ) async {
       final controller = MathFieldEditingController();
       addTearDown(controller.dispose);
       final handle = tester.ensureSemantics();
@@ -424,8 +472,9 @@ void main() {
         hoverColor: Color(0xFF123456),
         pressedColor: Color(0xFF123456),
       );
-      final themeStyle =
-          MathKeyboardStyle.fallback.copyWith(functionKey: customFunction);
+      final themeStyle = MathKeyboardStyle.fallback.copyWith(
+        functionKey: customFunction,
+      );
 
       await pumpKeyboard(
         tester,
