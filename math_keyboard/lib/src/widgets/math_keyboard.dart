@@ -82,6 +82,9 @@ class MathKeyboard extends StatelessWidget {
 
   /// The focus scope that owns the keys.
   ///
+  /// Optional; `MathField` provides this automatically. Only needed when
+  /// embedding [MathKeyboard] directly.
+  ///
   /// The math field hands focus to this scope so a keyboard or switch-access
   /// user can move onto the keys (the field keeps ownership otherwise, which is
   /// why physical typing still works). The keys are ordinary buttons: tab moves
@@ -90,13 +93,19 @@ class MathKeyboard extends StatelessWidget {
 
   /// Called when tab moves past the first key (shift+tab), to return to the
   /// field instead of trapping focus inside the keys.
+  ///
+  /// Optional; wired automatically by `MathField`.
   final VoidCallback? onExitToField;
 
   /// Called when tab moves past the last key, to leave for the control after
   /// the field instead of wrapping back to the first key (WCAG 2.1.2).
+  ///
+  /// Optional; wired automatically by `MathField`.
   final VoidCallback? onExitToNext;
 
   /// Called to dismiss the keyboard, e.g. on escape from a key.
+  ///
+  /// Optional; wired automatically by `MathField`.
   final VoidCallback? onClose;
 
   /// Function that is called when the enter / submit button is tapped.
