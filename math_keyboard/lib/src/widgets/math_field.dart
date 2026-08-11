@@ -174,9 +174,18 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
 
   List<String> get _variables => [r'\pi', 'e', ...widget.variables];
 
-  bool get _isKeyboardShown =>
-      _overlayEntry != null &&
-      _keyboardSlideController.status != AnimationStatus.dismissed;
+  /// Whether the keyboard overlay is currently inserted in the tree.
+  ///
+  /// Stays true throughout the slide-out until the animation is fully dismissed
+  /// (when the status listener removes the overlay).
+  bool get _keyboardMounted => _overlayEntry != null;
+
+  /// Whether the keyboard is opening or fully open (as opposed to closed or
+  /// sliding out).
+  bool get _keyboardOpen =>
+      _keyboardMounted &&
+      (_keyboardSlideController.status == AnimationStatus.forward ||
+          _keyboardSlideController.status == AnimationStatus.completed);
 
   @override
   void initState() {
@@ -318,12 +327,16 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
         setState(() {});
         return;
       }
-      // Guard against re-opening while already shown: focus can return to the
-      // field from a key (e.g. via shift+tab), and re-inserting the overlay
-      // would restart the slide and drop the key focus.
-      if (!_isKeyboardShown) {
+      // Insert the overlay only if it is not already mounted (re-inserting
+      // would drop key focus), and drive the slide forward only if it is not
+      // already opening/open. Using `forward()` without `from: 0` resumes an
+      // in-progress slide-out, so refocusing mid-close reopens smoothly instead
+      // of leaving no keyboard.
+      if (!_keyboardMounted) {
         _openKeyboard(context);
-        _keyboardSlideController.forward(from: 0);
+      }
+      if (!_keyboardOpen) {
+        _keyboardSlideController.forward();
       }
       _cursorBlinkController.repeat();
       _showFieldOnScreen();
@@ -389,7 +402,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   void _handleTap() {
     if (!_focusNode.hasFocus) {
       _focusNode.requestFocus();
-    } else if (!_isKeyboardShown) {
+    } else if (!_keyboardOpen) {
       // The field can be focused while the keyboard is closed (e.g. after
       // escape); reopen it.
       _handleFocusChanged(context, open: true);
@@ -514,14 +527,14 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     // whose keys are not in the tree).
     if (keyEvent.logicalKey == LogicalKeyboardKey.tab &&
         !HardwareKeyboard.instance.isShiftPressed &&
-        _isKeyboardShown) {
+        _keyboardOpen) {
       _enterKeyboard();
       return KeyEventResult.handled;
     }
 
     // Escape dismisses the keyboard while the field holds focus. (When a key
     // holds focus, the keyboard's own escape shortcut handles it instead.)
-    if (keyEvent.logicalKey == LogicalKeyboardKey.escape && _isKeyboardShown) {
+    if (keyEvent.logicalKey == LogicalKeyboardKey.escape && _keyboardOpen) {
       _dismissKeyboard();
       return KeyEventResult.handled;
     }
@@ -646,7 +659,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: !_isKeyboardShown,
+      canPop: !_keyboardMounted,
       onPopInvokedWithResult: (didPop, result) async {
         if (!didPop) {
           _closeKeyboard();

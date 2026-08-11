@@ -274,4 +274,49 @@ void main() {
 
     await tester.pumpWidget(const SizedBox());
   });
+
+  testWidgets('refocusing while the keyboard is sliding out reopens it', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final controller = MathFieldEditingController();
+    final focusNode = FocusNode();
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MathField(
+            autofocus: true,
+            controller: controller,
+            focusNode: focusNode,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300)); // finish slide-in
+    expect(find.byType(MathKeyboard), findsOneWidget);
+
+    // Blur to start the slide-out, then refocus partway through it.
+    focusNode.unfocus();
+    await tester.pump(); // deliver blur + schedule the deferred close
+    await tester.pump(); // run the close → start the reverse
+    await tester.pump(const Duration(milliseconds: 100)); // mid slide-out
+    focusNode.requestFocus();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400)); // finish slide-in
+
+    expect(
+      find.byType(MathKeyboard),
+      findsOneWidget,
+      reason: 'refocusing mid-close must resume opening, not leave no keyboard',
+    );
+
+    await tester.pumpWidget(const SizedBox());
+  });
 }
