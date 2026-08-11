@@ -233,4 +233,45 @@ void main() {
 
     await tester.pumpWidget(const SizedBox());
   });
+
+  testWidgets('tab traverses out normally when the keyboard is not open', (
+    tester,
+  ) async {
+    final controller = MathFieldEditingController();
+    final after = FocusNode();
+    addTearDown(controller.dispose);
+    addTearDown(after.dispose);
+
+    // opensKeyboard:false keeps the keyboard closed while the field is focused —
+    // the state where Tab used to be swallowed and crash on the unmounted scope.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: [
+              MathField(
+                autofocus: true,
+                controller: controller,
+                opensKeyboard: false,
+              ),
+              Focus(focusNode: after, child: const Text('after')),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+
+    expect(tester.takeException(), isNull, reason: 'Tab must not crash');
+    expect(
+      after.hasFocus,
+      isTrue,
+      reason: 'Tab moves to the next control instead of being swallowed',
+    );
+
+    await tester.pumpWidget(const SizedBox());
+  });
 }

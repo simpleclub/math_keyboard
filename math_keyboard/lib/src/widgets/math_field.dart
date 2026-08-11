@@ -375,6 +375,10 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   /// users move onto the on-screen keyboard; from there tab traverses the keys
   /// as ordinary buttons (and eventually out to the next control).
   void _enterKeyboard() {
+    // The scope only has a context while the keyboard overlay is mounted;
+    // guard against acting on it otherwise (nextFocus would deref a null
+    // context).
+    if (_keyboardFocusScopeNode.context == null) return;
     _keyboardFocusScopeNode.requestFocus();
     // Move off the bare scope onto the first focusable key.
     _keyboardFocusScopeNode.nextFocus();
@@ -504,9 +508,13 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     }
 
     // Tab moves focus from the field into the keys (shift+tab keeps the normal
-    // reverse traversal that leaves the field).
+    // reverse traversal that leaves the field). Only when the keyboard is
+    // actually shown — otherwise leave Tab to the default traversal so it moves
+    // to the next control instead of being swallowed (or entering a keyboard
+    // whose keys are not in the tree).
     if (keyEvent.logicalKey == LogicalKeyboardKey.tab &&
-        !HardwareKeyboard.instance.isShiftPressed) {
+        !HardwareKeyboard.instance.isShiftPressed &&
+        _isKeyboardShown) {
       _enterKeyboard();
       return KeyEventResult.handled;
     }
