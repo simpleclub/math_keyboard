@@ -597,5 +597,25 @@ void main() {
             'not, leaving the ring and variables auto-scroll dead',
       );
     });
+
+    testWidgets('a focused key exposes focusable/focused in semantics', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+      await pumpKeyboard(tester, controller: controller);
+
+      // Focus the first key in reading order (the "7").
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('7')),
+        containsSemantics(isButton: true, isFocusable: true, isFocused: true),
+      );
+
+      handle.dispose();
+    });
   });
 }

@@ -183,6 +183,12 @@ class _KeyboardButtonState extends State<KeyboardButton> {
       label: widget.semanticsLabel,
       value: widget.semanticsValue,
       onTap: widget.onTap,
+      // Declare the focus state explicitly. The subtree is excluded below, so
+      // the inner Focus node's focusable/focused flags don't reach the tree;
+      // surface them here from the tracked [_focused] state instead (which
+      // reflects real focus, including under touch / switch access).
+      focusable: true,
+      focused: _focused,
       // Collapse the key to a single node so the screen reader announces
       // "<label>, button" once, instead of also reading the inner label widget.
       excludeSemantics: true,
