@@ -189,7 +189,11 @@ class _KeyboardButtonState extends State<KeyboardButton> {
       child: FocusableActionDetector(
         autofocus: widget.autofocus,
         mouseCursor: SystemMouseCursors.click,
-        onShowFocusHighlight: (value) {
+        // Use real focus, not the highlight-gated callback: `onShowFocusHighlight`
+        // never fires in touch highlight mode (mobile, Android Switch Access),
+        // which would leave the focus ring undrawn and the variables row's
+        // auto-scroll (forwarded via `onFocusChange`) dead under switch access.
+        onFocusChange: (value) {
           setState(() => _focused = value);
           widget.onFocusChange?.call(value);
         },

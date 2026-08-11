@@ -556,4 +556,46 @@ void main() {
       );
     });
   });
+
+  group('focus reporting', () {
+    testWidgets('a key reports focus even in touch highlight mode', (
+      tester,
+    ) async {
+      // Switch Access / mobile keep the highlight mode in touch, where
+      // `onShowFocusHighlight` never fires; the key must still report focus.
+      final previous = FocusManager.instance.highlightStrategy;
+      FocusManager.instance.highlightStrategy =
+          FocusHighlightStrategy.alwaysTouch;
+      addTearDown(() => FocusManager.instance.highlightStrategy = previous);
+
+      const style = MathKeyboardStyle.fallback;
+      var focused = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: KeyboardButton(
+              autofocus: true,
+              keyStyle: style.neutralKey,
+              borderRadius: style.keyBorderRadius,
+              padding: style.keyPadding,
+              focusColor: style.focusBorderColor,
+              focusWidth: style.focusBorderWidth,
+              onFocusChange: (value) => focused = value,
+              child: const Text('7'),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        focused,
+        isTrue,
+        reason:
+            'onFocusChange fires in touch mode; onShowFocusHighlight would '
+            'not, leaving the ring and variables auto-scroll dead',
+      );
+    });
+  });
 }
