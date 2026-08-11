@@ -91,6 +91,35 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
+  testWidgets('escape dismisses the keyboard while the field holds focus', (
+    tester,
+  ) async {
+    final controller = MathFieldEditingController();
+    addTearDown(controller.dispose);
+
+    await pumpFocusedField(tester, controller);
+    // The field (not a key) holds focus here — escape must still dismiss.
+    expect(aKeyIsFocused(), isFalse, reason: 'field owns focus');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(
+      find.byType(MathKeyboard),
+      findsNothing,
+      reason: 'escape from the field dismisses the keyboard',
+    );
+
+    // The field keeps focus (nothing swallowed the suppression flag), so
+    // physical input still works.
+    await tester.sendKeyEvent(LogicalKeyboardKey.digit7);
+    await tester.pump();
+    expect(value(controller), '7');
+
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets(
     'tab traverses the keys as buttons and exits at the end (no trap)',
     (tester) async {

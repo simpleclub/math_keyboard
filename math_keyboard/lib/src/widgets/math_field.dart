@@ -404,12 +404,19 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     _focusNode.nextFocus();
   }
 
-  /// Dismisses the keyboard and returns focus to the field without reopening,
-  /// used for the escape key.
-  void _closeViaEscape() {
-    _suppressReopen = true;
+  /// Dismisses the keyboard, used by the escape key both from a focused key and
+  /// from the field itself.
+  ///
+  /// If focus is on a key (not the field), it is returned to the field, and
+  /// that return must not reopen the keyboard. If the field already holds focus
+  /// (escape pressed on the field), closing is enough — setting the suppression
+  /// flag there would leave it stuck and swallow the next legitimate reopen.
+  void _dismissKeyboard() {
+    if (!_focusNode.hasFocus) {
+      _suppressReopen = true;
+      _focusNode.requestFocus();
+    }
     _closeKeyboard();
-    _focusNode.requestFocus();
   }
 
   bool _showFieldOnScreenScheduled = false;
@@ -458,7 +465,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
             focusScopeNode: _keyboardFocusScopeNode,
             onExitToField: _returnFocusToField,
             onExitToNext: _exitKeyboardForward,
-            onClose: _closeViaEscape,
+            onClose: _dismissKeyboard,
           ),
         );
       },
@@ -501,6 +508,13 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     if (keyEvent.logicalKey == LogicalKeyboardKey.tab &&
         !HardwareKeyboard.instance.isShiftPressed) {
       _enterKeyboard();
+      return KeyEventResult.handled;
+    }
+
+    // Escape dismisses the keyboard while the field holds focus. (When a key
+    // holds focus, the keyboard's own escape shortcut handles it instead.)
+    if (keyEvent.logicalKey == LogicalKeyboardKey.escape && _isKeyboardShown) {
+      _dismissKeyboard();
       return KeyEventResult.handled;
     }
 
