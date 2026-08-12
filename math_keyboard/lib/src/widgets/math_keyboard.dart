@@ -30,6 +30,15 @@ enum MathKeyboardType {
 }
 
 /// Widget displaying the math keyboard.
+///
+/// Typically driven by a [MathField], which wires the focus integration
+/// automatically. When embedding [MathKeyboard] directly, note that its keys
+/// live in a [FocusScope] that *contains* tab traversal: focus only leaves the
+/// keys through [onExitToField]/[onExitToNext], and those only fire when a
+/// [focusScopeNode] is also supplied (the edge check needs the scope). So a
+/// bare [MathKeyboard] with no focus wiring keeps tab focus among its keys; to
+/// let focus leave (WCAG 2.1.2), pass [focusScopeNode] together with
+/// [onExitToField] and [onExitToNext] — the way [MathField] does.
 class MathKeyboard extends StatelessWidget {
   /// Constructs a [MathKeyboard].
   const MathKeyboard({
@@ -47,7 +56,14 @@ class MathKeyboard extends StatelessWidget {
     this.onExitToNext,
     this.onClose,
     this.padding = const EdgeInsets.only(bottom: 4, left: 4, right: 4),
-  }) : super(key: key);
+  }) : assert(
+         focusScopeNode != null ||
+             (onExitToField == null && onExitToNext == null),
+         'Provide focusScopeNode when supplying onExitToField/onExitToNext — '
+         'the edge check needs the scope to know which key is last, so the '
+         'callbacks never fire without it.',
+       ),
+       super(key: key);
 
   /// The controller for editing the math field.
   ///
