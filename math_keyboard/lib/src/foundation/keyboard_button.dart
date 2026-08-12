@@ -29,7 +29,6 @@ class BasicKeyboardButtonConfig extends KeyboardButtonConfig {
     required this.value,
     this.args,
     this.asTex = false,
-    this.highlighted = false,
     List<String> keyboardCharacters = const [],
     int? flex,
   }) : super(flex: flex, keyboardCharacters: keyboardCharacters);
@@ -45,9 +44,6 @@ class BasicKeyboardButtonConfig extends KeyboardButtonConfig {
 
   /// Whether to display the label as TeX or as plain text.
   final bool asTex;
-
-  /// The highlight level of this button.
-  final bool highlighted;
 }
 
 /// Class representing a button configuration of the Delete Button.
@@ -96,14 +92,12 @@ const _decimalButton = BasicKeyboardButtonConfig(
   label: '.',
   value: '.',
   keyboardCharacters: ['.', ','],
-  highlighted: true,
 );
 
 const _subtractButton = BasicKeyboardButtonConfig(
   label: '−',
   value: '-',
   keyboardCharacters: ['-'],
-  highlighted: true,
 );
 
 /// Keyboard showing extended functionality.
@@ -202,13 +196,11 @@ final functionKeyboard = [
     const BasicKeyboardButtonConfig(
       label: '(',
       value: '(',
-      highlighted: true,
       keyboardCharacters: ['('],
     ),
     const BasicKeyboardButtonConfig(
       label: ')',
       value: ')',
-      highlighted: true,
       keyboardCharacters: [')'],
     ),
     PreviousButtonConfig(),
@@ -227,14 +219,12 @@ final standardKeyboard = [
       label: '×',
       value: r'\cdot',
       keyboardCharacters: ['*'],
-      highlighted: true,
     ),
     const BasicKeyboardButtonConfig(
       label: '÷',
       value: r'\frac',
       keyboardCharacters: ['/'],
       args: [TeXArg.braces, TeXArg.braces],
-      highlighted: true,
     ),
   ],
   [
@@ -245,7 +235,6 @@ final standardKeyboard = [
       label: '+',
       value: '+',
       keyboardCharacters: ['+'],
-      highlighted: true,
     ),
     _subtractButton,
   ],
