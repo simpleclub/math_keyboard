@@ -163,11 +163,21 @@ class MathKeyboardSemantics {
 
   /// Returns a spoken description for a single leaf [tex] token, such as a
   /// digit, operator, or variable.
+  ///
+  /// Falls back to stripping the TeX control characters when no mapping matches,
+  /// so a screen reader never reads out a raw control sequence like `\cos`.
   String tokenLabel(String tex) {
     final mapped = tokenMappings[tex];
     if (mapped != null) return mapped;
-    // Variables are stored wrapped in braces, e.g. "{x}".
-    return tex.replaceAll(RegExp(r'[{}]'), '');
+    // Function-like leaves (the trig keys insert e.g. `\cos(`) are spoken as
+    // words rather than leaking their raw TeX.
+    for (final (fragment, spoken) in functionMappings) {
+      if (tex.contains(fragment)) return spoken;
+    }
+    // Strip any remaining TeX control characters (backslash, braces, brackets,
+    // caret) so a lone backslash is never read out. Variables are stored
+    // wrapped in braces, e.g. `{x}`.
+    return tex.replaceAll(RegExp(r'[\\{}\[\]^]'), '').trim();
   }
 
   /// The default, English strings.

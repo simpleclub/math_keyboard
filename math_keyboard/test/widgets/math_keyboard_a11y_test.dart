@@ -26,6 +26,7 @@ void main() {
     MathKeyboardStyle? themeStyle,
     List<String> variables = const [],
     bool accessibleNavigation = false,
+    MathKeyboardType type = MathKeyboardType.expression,
     // Default to a portrait window so the paged layout is exercised; landscape
     // tests pass a wide size to trigger the side-by-side layout.
     Size viewSize = const Size(400, 800),
@@ -35,6 +36,7 @@ void main() {
     addTearDown(tester.view.reset);
     Widget keyboard = MathKeyboard(
       controller: controller,
+      type: type,
       style: style,
       variables: variables,
     );
@@ -293,7 +295,11 @@ void main() {
 
       expect(
         tester.getSemantics(find.bySemanticsLabel('Math field')),
-        containsSemantics(isTextField: true, value: '7 plus 8'),
+        containsSemantics(
+          isTextField: true,
+          isReadOnly: true,
+          value: '7 plus 8',
+        ),
       );
 
       handle.dispose();
@@ -324,6 +330,36 @@ void main() {
       expect(
         tester.getSemantics(find.bySemanticsLabel('Math field')),
         containsSemantics(isTextField: true, hint: 'Required'),
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('a trig function reads as a word, not raw TeX', (tester) async {
+      // The cos key inserts the leaf `\cos(`, which must be spoken as "cosine"
+      // rather than leaking the backslash control sequence to a screen reader.
+      final controller = MathFieldEditingController()
+        ..addLeaf(r'\cos(')
+        ..addLeaf('3')
+        ..addLeaf(')');
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MathField(controller: controller, opensKeyboard: false),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('Math field')),
+        containsSemantics(
+          isTextField: true,
+          value: 'cosine 3 close parenthesis',
+        ),
       );
 
       handle.dispose();
@@ -614,6 +650,34 @@ void main() {
         tester.getSemantics(find.bySemanticsLabel('7')),
         containsSemantics(isButton: true, isFocusable: true, isFocused: true),
       );
+
+      handle.dispose();
+    });
+  });
+
+  group('number-only keyboard', () {
+    testWidgets('a stray page toggle keeps the numbers layout and label', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+      await pumpKeyboard(
+        tester,
+        controller: controller,
+        type: MathKeyboardType.numberOnly,
+      );
+
+      // `togglePage()` is public and flips `secondPage` even though a
+      // number-only keyboard has no second page. The build must not crash and
+      // must keep the numbers page — layout and its region label in agreement.
+      controller.togglePage();
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.bySemanticsLabel('Numbers'), findsOneWidget);
+      expect(find.bySemanticsLabel('Formula'), findsNothing);
+      expect(find.bySemanticsLabel('7'), findsOneWidget);
 
       handle.dispose();
     });

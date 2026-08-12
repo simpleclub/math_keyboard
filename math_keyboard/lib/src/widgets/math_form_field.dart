@@ -36,6 +36,7 @@ class MathFormField extends FormField<String> {
     FormFieldValidator<String>? validator,
     MathKeyboardStyle? style,
     MathKeyboardSemantics? semantics,
+    String? semanticsValue,
   }) : super(
          key: key,
          initialValue: controller != null
@@ -64,6 +65,7 @@ class MathFormField extends FormField<String> {
              onSubmitted: onFieldSubmitted,
              style: style,
              semantics: semantics,
+             semanticsValue: semanticsValue,
            );
          },
        );

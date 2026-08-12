@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
@@ -123,8 +125,11 @@ class MathKeyboard extends StatelessWidget {
     final style = this.style ?? MathKeyboardTheme.styleOf(context);
     final semantics = this.semantics ?? MathKeyboardTheme.semanticsOf(context);
     final scaler = MediaQuery.textScalerOf(context);
+    // The constructor asserts `maxTextScaleFactor >= 1`, but asserts are
+    // stripped in release builds, so guard the upper bound: a runtime-computed
+    // value below 1 would otherwise make `clamp` throw (lower > upper).
     final textScale = (scaler.scale(style.baseFontSize) / style.baseFontSize)
-        .clamp(1.0, style.maxTextScaleFactor);
+        .clamp(1.0, math.max(1.0, style.maxTextScaleFactor));
     final fontSize = style.baseFontSize * textScale;
     // Keys default to a fixed size (maxTextScaleFactor == 1): large-text
     // accessibility is provided by the large-content-viewer (long-press a key
@@ -642,10 +647,11 @@ class _Buttons extends StatelessWidget {
       animation: controller,
       builder: (context, child) {
         // `togglePage()` is public and flips `secondPage` for any keyboard
-        // type, but a number-only keyboard has no second page, so fall back
-        // instead of force-unwrapping a null `page2`.
-        final layout =
-            (controller.secondPage ? page2 : page1) ?? numberKeyboard;
+        // type, but a number-only keyboard has no second page. Treat a stray
+        // toggle as staying on page 1 so the layout and its region label never
+        // disagree (and never force-unwrap a null `page2`).
+        final showSecondPage = controller.secondPage && page2 != null;
+        final layout = (showSecondPage ? page2! : page1) ?? numberKeyboard;
         // The visible page is a landmark region, named for whichever page
         // (numbers or functions) is currently showing, so a screen reader can
         // jump to it.
@@ -653,7 +659,7 @@ class _Buttons extends StatelessWidget {
           role: SemanticsRole.region,
           container: true,
           explicitChildNodes: true,
-          label: controller.secondPage
+          label: showSecondPage
               ? semantics.functionsGroupLabel
               : semantics.numbersGroupLabel,
           child: Column(

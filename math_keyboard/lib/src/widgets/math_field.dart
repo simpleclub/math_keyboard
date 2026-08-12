@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -31,6 +32,7 @@ class MathField extends StatefulWidget {
     this.opensKeyboard = true,
     this.style,
     this.semantics,
+    this.semanticsValue,
   });
 
   /// The controller for the math field.
@@ -131,6 +133,15 @@ class MathField extends StatefulWidget {
   /// If `null`, the semantics are resolved from the nearest [MathKeyboardTheme],
   /// or [MathKeyboardSemantics.fallback] if there is none.
   final MathKeyboardSemantics? semantics;
+
+  /// The spoken value the screen reader announces for the field's content.
+  ///
+  /// When provided, this overrides the built-in linearization of the expression
+  /// — letting a consumer supply a richer rendering from a dedicated TeX-to-
+  /// speech engine. When `null` (the default), the field falls back to its own
+  /// [MathFieldEditingController.readableExpression], so the package needs no
+  /// extra dependency to remain accessible on its own.
+  final String? semanticsValue;
 
   @override
   _MathFieldState createState() => _MathFieldState();
@@ -293,6 +304,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     // cursor is all the way to the right.
     if (_controller.root.cursorAtTheEnd()) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
+        // The scroll view may not be attached yet (e.g. the field just
+        // rebuilt); skip rather than dereferencing a detached controller.
+        if (!_scrollController.hasClients) return;
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 100),
@@ -694,6 +708,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
                   semantics:
                       widget.semantics ??
                       MathKeyboardTheme.semanticsOf(context),
+                  semanticsValue: widget.semanticsValue,
                   decoration: widget.decoration.applyDefaults(
                     Theme.of(context).inputDecorationTheme,
                   ),
@@ -718,6 +733,7 @@ class _FieldPreview extends StatelessWidget {
     required this.decoration,
     required this.scrollController,
     required this.semantics,
+    required this.semanticsValue,
     required this.onTap,
   }) : super(key: key);
 
@@ -730,6 +746,10 @@ class _FieldPreview extends StatelessWidget {
 
   /// The screen-reader strings of the math field.
   final MathKeyboardSemantics semantics;
+
+  /// An externally supplied spoken value that overrides the built-in
+  /// linearization, or `null` to fall back to [readableExpression].
+  final String? semanticsValue;
 
   /// The scroll controller handling the horizontal positioning inside of the
   /// preview viewport.
@@ -866,16 +886,34 @@ class _FieldPreview extends StatelessWidget {
     // the keyboard, since the ancestor gesture detector's tap is not on this
     // node. Editing actions are intentionally not declared: input comes from
     // the custom math keyboard, not from `onSetText`/`onSetSelection`.
+    // Prefer an externally supplied spoken value (e.g. from a dedicated
+    // TeX-to-speech engine); fall back to the built-in linearization otherwise.
+    final readableExpression =
+        semanticsValue ?? controller.readableExpression(semantics);
     return Semantics(
       textField: true,
-      label: _semanticsLabel,
-      value: controller.readableExpression(semantics),
+      // The field is not editable via the OS keyboard (input comes from the
+      // custom math keyboard); marking it read-only is accurate.
+      readOnly: true,
+      // Native screen readers read the `value` of a text field node, but
+      // Flutter web does not surface the value of a synthetic (non-EditableText)
+      // text field — it only ever reads the accessible *name*. So on web fold
+      // the expression into the name (which is the channel that demonstrably
+      // works — the hint is read the same way), mirroring the placeholder →
+      // value behaviour: the hint when empty, the expression once there is one.
+      label: kIsWeb && readableExpression.isNotEmpty
+          ? readableExpression
+          : _semanticsLabel,
+      value: kIsWeb ? null : readableExpression,
       // The decorator subtree (which renders the validation error) is excluded,
       // so a `MathFormField` error would otherwise be silent to screen readers.
       // Surface it on this node instead.
       hint: decoration.errorText,
       onTap: onTap,
-      child: ExcludeSemantics(child: field),
+      // Drop the descendants' raw semantics (typeset glyphs + the decorator's
+      // own label/hint/error nodes) in favour of the curated node above.
+      excludeSemantics: true,
+      child: field,
     );
   }
 
