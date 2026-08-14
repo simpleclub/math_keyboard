@@ -35,76 +35,96 @@ class TeXParser {
     /// o+digit+(l) -> operator + precedence + (left-associativity)
     /// u -> other
     final integer = digit().plus().flatten();
-    final number = ((integer | char('.').and()) &
-            (char('.') & integer).pick(1).optional() &
-            (char('E') & pattern('+-').optional() & integer).optional())
-        .flatten()
-        .map(num.parse);
+    final number =
+        ((integer | char('.').and()) &
+                (char('.') & integer).pick(1).optional() &
+                (char('E') & pattern('+-').optional() & integer).optional())
+            .flatten()
+            .map(num.parse);
 
     final pi = (string('{') & string(r'\pi') & string('}')).map((a) => math.pi);
     final e = (string('{') & string('e') & string('}')).map((a) => math.e);
-    final variable =
-        (string('{') & letter().plus().flatten() & string('}')).pick(1);
+    final variable = (string('{') & letter().plus().flatten() & string('}'))
+        .pick(1);
 
     final basic = (number | pi | e | variable).map((v) => [v, 'b']);
 
-    final sqrt =
-        (string(r'\sqrt') & char('{').and()).map((v) => [r'\sqrt', 'f']);
+    final sqrt = (string(r'\sqrt') & char('{').and()).map(
+      (v) => [r'\sqrt', 'f'],
+    );
     final nrt = (string(r'\sqrt') & char('[').and()).map((v) => [r'\nrt', 'f']);
-    final simpleFunction = ((string(r'\sin^{-1}') |
-                string(r'\cos^{-1}') |
-                string(r'\tan^{-1}') |
-                string(r'\sin') |
-                string(r'\cos') |
-                string(r'\tan') |
-                string(r'\ln')) &
-            string('(').and())
-        .pick(0)
-        .map((v) => [v, 'f']);
-    final otherFunction =
-        (string(r'\frac') | string(r'\log')).map((v) => [v, 'f']);
+    final simpleFunction =
+        ((string(r'\sin^{-1}') |
+                    string(r'\cos^{-1}') |
+                    string(r'\tan^{-1}') |
+                    string(r'\sin') |
+                    string(r'\cos') |
+                    string(r'\tan') |
+                    string(r'\ln')) &
+                string('(').and())
+            .pick(0)
+            .map((v) => [v, 'f']);
+    final otherFunction = (string(r'\frac') | string(r'\log')).map(
+      (v) => [v, 'f'],
+    );
     final function = simpleFunction | otherFunction | sqrt | nrt;
 
-    final lp = (string('(') | char('{') | string(r'\left|') | char('['))
-        .map((v) => [v, 'l']);
+    final lp = (string('(') | char('{') | string(r'\left|') | char('[')).map(
+      (v) => [v, 'l'],
+    );
 
-    final rp = (string(')') | char('}') | string(r'\right|') | char(']'))
-        .map((v) => [v, 'r']);
+    final rp = (string(')') | char('}') | string(r'\right|') | char(']')).map(
+      (v) => [v, 'r'],
+    );
 
-    final plus = char('+').map((v) => [
-          v,
-          ['o', 2, 'l'],
-        ]);
+    final plus = char('+').map(
+      (v) => [
+        v,
+        ['o', 2, 'l'],
+      ],
+    );
 
-    final minus = char('-').map((v) => [
-          v,
-          ['o', 2, 'l'],
-        ]);
+    final minus = char('-').map(
+      (v) => [
+        v,
+        ['o', 2, 'l'],
+      ],
+    );
 
-    final times = (string(r'\times') | string(r'\cdot')).map((v) => [
-          v,
-          ['o', 3, 'l'],
-        ]);
+    final times = (string(r'\times') | string(r'\cdot')).map(
+      (v) => [
+        v,
+        ['o', 3, 'l'],
+      ],
+    );
 
-    final divide = string(r'\div').map((v) => [
-          v,
-          ['o', 3, 'l'],
-        ]);
+    final divide = string(r'\div').map(
+      (v) => [
+        v,
+        ['o', 3, 'l'],
+      ],
+    );
 
-    final expo = char('^').map((v) => [
-          v,
-          ['o', 4, 'r'],
-        ]);
+    final expo = char('^').map(
+      (v) => [
+        v,
+        ['o', 4, 'r'],
+      ],
+    );
 
-    final factorial = char('!').map((v) => [
-          v,
-          ['o', 5, 'l'],
-        ]);
+    final factorial = char('!').map(
+      (v) => [
+        v,
+        ['o', 5, 'l'],
+      ],
+    );
 
-    final percent = string(r'\%').map((v) => [
-          v,
-          ['o', 5, 'l'],
-        ]);
+    final percent = string(r'\%').map(
+      (v) => [
+        v,
+        ['o', 5, 'l'],
+      ],
+    );
 
     final operator = plus | minus | times | divide | expo | factorial | percent;
 
@@ -114,8 +134,9 @@ class TeXParser {
 
     final other = (subNumber | underline).map((v) => [v, 'u']);
 
-    final tokenize =
-        (basic | function | lp | rp | operator | other).star().end();
+    final tokenize = (basic | function | lp | rp | operator | other)
+        .star()
+        .end();
 
     final tex = inputString.replaceAll(' ', '');
     _stream = tokenize.parse(tex).value;

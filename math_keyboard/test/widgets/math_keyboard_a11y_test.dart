@@ -1,0 +1,685 @@
+// `containsSemantics` is deprecated after Flutter 3.40 in favour of
+// `isSemantics`, which does not exist on this package's Flutter floor (3.35.1).
+// Keep using `containsSemantics` (a subset matcher, unlike `matchesSemantics`)
+// across the supported range and silence the deprecation notice.
+// ignore_for_file: deprecated_member_use
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:large_content_viewer/large_content_viewer.dart';
+import 'package:math_keyboard/math_keyboard.dart';
+import 'package:math_keyboard/src/custom_key_icons/custom_key_icons.dart';
+import 'package:math_keyboard/src/widgets/keyboard_button.dart';
+
+/// Tests for the accessibility and styling additions of the redesigned
+/// [MathKeyboard]: keyboard activation, text scaling, semantics, and the
+/// [MathKeyboardTheme] override.
+void main() {
+  String value(MathFieldEditingController controller) =>
+      controller.currentEditingValue(placeholderWhenEmpty: false);
+
+  Future<void> pumpKeyboard(
+    WidgetTester tester, {
+    required MathFieldEditingController controller,
+    TextScaler textScaler = TextScaler.noScaling,
+    MathKeyboardStyle? style,
+    MathKeyboardStyle? themeStyle,
+    List<String> variables = const [],
+    bool accessibleNavigation = false,
+    MathKeyboardType type = MathKeyboardType.expression,
+    // Default to a portrait window so the paged layout is exercised; landscape
+    // tests pass a wide size to trigger the side-by-side layout.
+    Size viewSize = const Size(400, 800),
+  }) async {
+    tester.view.physicalSize = viewSize;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    Widget keyboard = MathKeyboard(
+      controller: controller,
+      type: type,
+      style: style,
+      variables: variables,
+    );
+    if (themeStyle != null) {
+      keyboard = MathKeyboardTheme(style: themeStyle, child: keyboard);
+    }
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => MediaQuery(
+              // Preserve the real viewport metrics; only override the scaler
+              // and the screen-reader flag.
+              data: MediaQuery.of(context).copyWith(
+                textScaler: textScaler,
+                accessibleNavigation: accessibleNavigation,
+              ),
+              child: keyboard,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  group('keyboard activation', () {
+    testWidgets('a focused key activates with the Enter key', (tester) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      await pumpKeyboard(tester, controller: controller);
+
+      // Move focus to the first key in reading order, then activate it.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+
+      expect(value(controller), '7');
+    });
+
+    testWidgets('a focused key activates with the Space key', (tester) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      await pumpKeyboard(tester, controller: controller);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await tester.pump();
+
+      expect(value(controller), '7');
+    });
+  });
+
+  group('text scaling', () {
+    double labelFontSize(WidgetTester tester, String label) {
+      return tester.widget<Text>(find.text(label)).style!.fontSize!;
+    }
+
+    // Resize is opt-in (maxTextScaleFactor > 1); the default keyboard is fixed
+    // and relies on the large-content-viewer instead.
+    final growthStyle = MathKeyboardStyle.fallback.copyWith(
+      maxTextScaleFactor: 2,
+    );
+
+    testWidgets('labels scale with the ambient text scaler when opted in', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+
+      await pumpKeyboard(tester, controller: controller, style: growthStyle);
+      final baseSize = labelFontSize(tester, '7');
+
+      await pumpKeyboard(
+        tester,
+        controller: controller,
+        style: growthStyle,
+        textScaler: const TextScaler.linear(2),
+      );
+      final scaledSize = labelFontSize(tester, '7');
+
+      expect(scaledSize, greaterThan(baseSize));
+      expect(scaledSize, baseSize * 2);
+    });
+
+    testWidgets('keys grow with the clamped text scale when opted in', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+
+      await pumpKeyboard(tester, controller: controller, style: growthStyle);
+      final baseHeight = tester
+          .getSize(find.widgetWithText(KeyboardButton, '7'))
+          .height;
+
+      await pumpKeyboard(
+        tester,
+        controller: controller,
+        style: growthStyle,
+        textScaler: const TextScaler.linear(2),
+      );
+      final scaledHeight = tester
+          .getSize(find.widgetWithText(KeyboardButton, '7'))
+          .height;
+
+      // The key is its nominal height at 1x and grows with the scale, bounded
+      // by maxTextScaleFactor.
+      expect(baseHeight, growthStyle.keyHeight);
+      expect(
+        scaledHeight,
+        growthStyle.keyHeight * growthStyle.maxTextScaleFactor,
+      );
+    });
+
+    testWidgets('key height is strictly fixed by default', (tester) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      const style = MathKeyboardStyle.fallback;
+
+      await pumpKeyboard(
+        tester,
+        controller: controller,
+        style: style,
+        textScaler: const TextScaler.linear(2),
+      );
+
+      expect(
+        tester.getSize(find.widgetWithText(KeyboardButton, '7')).height,
+        style.keyHeight,
+      );
+    });
+
+    testWidgets('scaling is clamped to the style maxTextScaleFactor', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+
+      await pumpKeyboard(
+        tester,
+        controller: controller,
+        style: growthStyle,
+        // Far beyond the clamp.
+        textScaler: const TextScaler.linear(5),
+      );
+
+      final size = labelFontSize(tester, '7');
+      expect(size, growthStyle.baseFontSize * growthStyle.maxTextScaleFactor);
+    });
+  });
+
+  group('semantics', () {
+    testWidgets('keys expose button semantics with labels', (tester) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+      await pumpKeyboard(tester, controller: controller);
+
+      expect(
+        tester.getSemantics(find.byIcon(Icons.keyboard_return)),
+        containsSemantics(isButton: true, label: 'Submit'),
+      );
+      expect(
+        tester.getSemantics(find.byIcon(Icons.backspace)),
+        containsSemantics(isButton: true, label: 'Delete'),
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('a digit key is a single button node, not read twice', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+      await pumpKeyboard(tester, controller: controller);
+
+      // Exactly one semantics node carries the digit label (the inner Text is
+      // excluded), so the screen reader announces it once.
+      expect(find.bySemanticsLabel('7'), findsOneWidget);
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('7')),
+        containsSemantics(isButton: true, label: '7'),
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('a variable key exposes a labelled button', (tester) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+      await pumpKeyboard(tester, controller: controller, variables: ['x']);
+
+      expect(find.bySemanticsLabel('Variable x'), findsOneWidget);
+
+      handle.dispose();
+    });
+
+    testWidgets('a typeset function key reads a spoken label', (tester) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+      await pumpKeyboard(tester, controller: controller);
+
+      await tester.tap(find.byIcon(CustomKeyIcons.key_symbols));
+      await tester.pump();
+
+      expect(find.bySemanticsLabel('sine'), findsOneWidget);
+      expect(find.bySemanticsLabel('square root'), findsOneWidget);
+
+      handle.dispose();
+    });
+
+    testWidgets('operator keys speak their token, not the raw glyph', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+      await pumpKeyboard(tester, controller: controller);
+
+      // ×, ÷, +, and − announce spoken words resolved from their inserted
+      // tokens (\cdot, \frac, +, -) rather than the glyphs painted on the keys.
+      expect(find.bySemanticsLabel('times'), findsOneWidget);
+      expect(find.bySemanticsLabel('divided by'), findsOneWidget);
+      expect(find.bySemanticsLabel('plus'), findsOneWidget);
+      expect(find.bySemanticsLabel('minus'), findsOneWidget);
+
+      handle.dispose();
+    });
+  });
+
+  group('math field semantics', () {
+    testWidgets('the math field is a text field exposing its value', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController()
+        ..addLeaf('7')
+        ..addLeaf('+')
+        ..addLeaf('8');
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MathField(controller: controller, opensKeyboard: false),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('Math field')),
+        containsSemantics(
+          isTextField: true,
+          isReadOnly: true,
+          value: '7 plus 8',
+        ),
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('exposes the decoration error text to screen readers', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MathField(
+              controller: controller,
+              opensKeyboard: false,
+              decoration: const InputDecoration(errorText: 'Required'),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // The decorator subtree (which renders the error) is excluded from
+      // semantics, so the error must reach the field's own node as a hint.
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('Math field')),
+        containsSemantics(isTextField: true, hint: 'Required'),
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('a trig function reads as a word, not raw TeX', (tester) async {
+      // The cos key inserts the leaf `\cos(`, which must be spoken as "cosine"
+      // rather than leaking the backslash control sequence to a screen reader.
+      final controller = MathFieldEditingController()
+        ..addLeaf(r'\cos(')
+        ..addLeaf('3')
+        ..addLeaf(')');
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MathField(controller: controller, opensKeyboard: false),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('Math field')),
+        containsSemantics(
+          isTextField: true,
+          value: 'cosine 3 close parenthesis',
+        ),
+      );
+
+      handle.dispose();
+    });
+  });
+
+  group('navigation key values', () {
+    testWidgets('cursor navigation keys expose the cursor context as value', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController()..addLeaf('7');
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+      await pumpKeyboard(tester, controller: controller);
+
+      expect(
+        tester.getSemantics(find.byIcon(Icons.chevron_left_rounded)),
+        containsSemantics(
+          isButton: true,
+          label: 'Move cursor left',
+          value: 'end of expression',
+        ),
+      );
+
+      handle.dispose();
+    });
+  });
+
+  group('MathKeyboardSemantics override', () {
+    testWidgets('localizes key labels through the theme', (tester) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+
+      const german = MathKeyboardSemantics.fallback;
+      final localized = german.copyWith(
+        deleteLabel: 'Löschen',
+        submitLabel: 'Bestätigen',
+        variableLabel: (name) => 'Variable $name',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MathKeyboardTheme(
+              style: MathKeyboardStyle.fallback,
+              semantics: localized,
+              child: MathKeyboard(controller: controller),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSemantics(find.byIcon(Icons.backspace)),
+        containsSemantics(isButton: true, label: 'Löschen'),
+      );
+      expect(
+        tester.getSemantics(find.byIcon(Icons.keyboard_return)),
+        containsSemantics(isButton: true, label: 'Bestätigen'),
+      );
+
+      handle.dispose();
+    });
+  });
+
+  group('large content viewer', () {
+    testWidgets('content keys are wrapped for long-press magnification', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      await pumpKeyboard(tester, controller: controller);
+
+      // A digit key can be magnified on long-press.
+      expect(
+        find.descendant(
+          of: find.widgetWithText(KeyboardButton, '7'),
+          matching: find.byType(LargeContentViewer),
+        ),
+        findsOneWidget,
+      );
+
+      // The submit (icon) key is not wrapped.
+      expect(
+        find.ancestor(
+          of: find.byIcon(Icons.keyboard_return),
+          matching: find.byType(LargeContentViewer),
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('can be disabled through the style', (tester) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final style = MathKeyboardStyle.fallback.copyWith(
+        largeContentViewerEnabled: false,
+      );
+
+      await pumpKeyboard(tester, controller: controller, style: style);
+
+      expect(find.byType(LargeContentViewer), findsNothing);
+    });
+
+    testWidgets('the page toggle keeps its magnifier only without a screen '
+        'reader', (tester) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+
+      Finder toggleMagnifier() => find.descendant(
+        of: find.widgetWithText(KeyboardButton, '123'),
+        matching: find.byType(LargeContentViewer),
+      );
+
+      // Sighted: the "123" toggle keeps the long-press magnifier.
+      await pumpKeyboard(tester, controller: controller);
+      controller.togglePage();
+      await tester.pump();
+      expect(toggleMagnifier(), findsOneWidget);
+
+      // Screen reader: the toggle drops the magnifier.
+      await pumpKeyboard(
+        tester,
+        controller: controller,
+        accessibleNavigation: true,
+      );
+      expect(controller.secondPage, isTrue);
+      expect(toggleMagnifier(), findsNothing);
+
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
+  group('landscape layout', () {
+    const landscapeSize = Size(800, 400);
+
+    testWidgets('shows functions and numbers together with no page toggle', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+
+      await pumpKeyboard(
+        tester,
+        controller: controller,
+        viewSize: landscapeSize,
+      );
+
+      // No page toggle: both pages are visible at once.
+      expect(find.byIcon(CustomKeyIcons.key_symbols), findsNothing);
+      // A dedicated full-height submit key is shown.
+      expect(find.byIcon(Icons.keyboard_return), findsOneWidget);
+      // A number key and a function key are visible simultaneously.
+      expect(find.widgetWithText(KeyboardButton, '7'), findsOneWidget);
+      expect(find.bySemanticsLabel('sine'), findsOneWidget);
+
+      handle.dispose();
+    });
+
+    testWidgets('typing a digit works in landscape', (tester) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+
+      await pumpKeyboard(
+        tester,
+        controller: controller,
+        viewSize: landscapeSize,
+      );
+
+      await tester.tap(find.widgetWithText(KeyboardButton, '7'));
+      await tester.pump();
+
+      expect(value(controller), '7');
+    });
+  });
+
+  group('MathKeyboardTheme', () {
+    testWidgets('overrides the key background color', (tester) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      // Digits use the function/secondary tier.
+      const customFunction = MathKeyboardKeyStyle(
+        color: Color(0xFF123456),
+        hoverColor: Color(0xFF123456),
+        pressedColor: Color(0xFF123456),
+      );
+      final themeStyle = MathKeyboardStyle.fallback.copyWith(
+        functionKey: customFunction,
+      );
+
+      await pumpKeyboard(
+        tester,
+        controller: controller,
+        themeStyle: themeStyle,
+      );
+
+      final decoratedBox = tester.widget<DecoratedBox>(
+        find
+            .descendant(
+              of: find.widgetWithText(KeyboardButton, '7'),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
+      );
+      final decoration = decoratedBox.decoration as BoxDecoration;
+      expect(decoration.color, const Color(0xFF123456));
+    });
+  });
+
+  group('value-type contracts', () {
+    test('MathKeyboardSemantics equality and hash ignore token map order', () {
+      const a = MathKeyboardSemantics.fallback;
+      final reordered = a.copyWith(
+        tokenMappings: {
+          for (final entry in a.tokenMappings.entries.toList().reversed)
+            entry.key: entry.value,
+        },
+      );
+
+      expect(reordered, a);
+      expect(reordered.hashCode, a.hashCode);
+    });
+
+    test('MathKeyboardStyle rejects a maxTextScaleFactor below 1', () {
+      expect(
+        () => MathKeyboardStyle.fallback.copyWith(maxTextScaleFactor: 0.8),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+  });
+
+  group('focus reporting', () {
+    testWidgets('a key reports focus even in touch highlight mode', (
+      tester,
+    ) async {
+      // Switch Access / mobile keep the highlight mode in touch, where
+      // `onShowFocusHighlight` never fires; the key must still report focus.
+      final previous = FocusManager.instance.highlightStrategy;
+      FocusManager.instance.highlightStrategy =
+          FocusHighlightStrategy.alwaysTouch;
+      addTearDown(() => FocusManager.instance.highlightStrategy = previous);
+
+      const style = MathKeyboardStyle.fallback;
+      var focused = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: KeyboardButton(
+              autofocus: true,
+              keyStyle: style.neutralKey,
+              borderRadius: style.keyBorderRadius,
+              padding: style.keyPadding,
+              focusColor: style.focusBorderColor,
+              focusWidth: style.focusBorderWidth,
+              onFocusChange: (value) => focused = value,
+              child: const Text('7'),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        focused,
+        isTrue,
+        reason:
+            'onFocusChange fires in touch mode; onShowFocusHighlight would '
+            'not, leaving the ring and variables auto-scroll dead',
+      );
+    });
+
+    testWidgets('a focused key exposes focusable/focused in semantics', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+      await pumpKeyboard(tester, controller: controller);
+
+      // Focus the first key in reading order (the "7").
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('7')),
+        containsSemantics(isButton: true, isFocusable: true, isFocused: true),
+      );
+
+      handle.dispose();
+    });
+  });
+
+  group('number-only keyboard', () {
+    testWidgets('a stray page toggle keeps the numbers layout and label', (
+      tester,
+    ) async {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
+      await pumpKeyboard(
+        tester,
+        controller: controller,
+        type: MathKeyboardType.numberOnly,
+      );
+
+      // `togglePage()` is public and flips `secondPage` even though a
+      // number-only keyboard has no second page. The build must not crash and
+      // must keep the numbers page — layout and its region label in agreement.
+      controller.togglePage();
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.bySemanticsLabel('Numbers'), findsOneWidget);
+      expect(find.bySemanticsLabel('Formula'), findsNothing);
+      expect(find.bySemanticsLabel('7'), findsOneWidget);
+
+      handle.dispose();
+    });
+  });
+}

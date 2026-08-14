@@ -47,10 +47,8 @@ import 'package:math_keyboard/math_keyboard.dart';
 /// functions at the moment.
 class MathKeyboardViewInsets extends StatefulWidget {
   /// Creates a [MathKeyboardViewInsets] widget around the [child] widget.
-  const MathKeyboardViewInsets({
-    Key? key,
-    required this.child,
-  }) : super(key: key);
+  const MathKeyboardViewInsets({Key? key, required this.child})
+    : super(key: key);
 
   /// The child widget tree that the math keyboard view insets should report to.
   ///
@@ -152,8 +150,9 @@ class MathKeyboardViewInsetsQuery extends InheritedWidget {
       return result;
     }
     throw FlutterError(
-        'MathKeyboardViewInsetsQuery.of() called with a context that does not '
-        'contain a MathKeyboardViewInsetsQuery.');
+      'MathKeyboardViewInsetsQuery.of() called with a context that does not '
+      'contain a MathKeyboardViewInsetsQuery.',
+    );
   }
 
   /// Returns whether any math keyboard is showing in the given [context] by

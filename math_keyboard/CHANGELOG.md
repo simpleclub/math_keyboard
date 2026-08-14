@@ -1,3 +1,23 @@
+## 0.4.0
+
+* Redesign the on-screen keyboard with a configurable theme
+  (`MathKeyboardStyle` / `MathKeyboardTheme`); the default appearance changes.
+* Add first-class accessibility:
+  * Localizable screen-reader strings via `MathKeyboardSemantics`
+    (carried on `MathKeyboardTheme` and per-field).
+  * WAI-ARIA composite keyboard navigation: tab moves between the keys as
+    ordinary buttons and leaves the keyboard at the ends without trapping
+    focus, the arrow keys additionally move across the grid, and escape
+    dismisses it.
+  * Responsive landscape layout showing the functions and numbers side by side
+    with a dedicated submit key.
+  * Section landmark regions (variables, formula, numbers, submit) so screen
+    readers can jump between them.
+  * The math field opens the keyboard from an accessibility activation.
+* Add `large_content_viewer` dependency for long-press magnification of keys at
+  large text sizes.
+* Requires Flutter 3.35.1 / Dart 3.9.
+
 ## 0.3.3
 
 * Update `intl`

@@ -16,6 +16,10 @@ no plugins, no web views.
 * Editing via physical keyboard input (with shortcuts for functions and constants)
 * Support for both number and expression mode
 * Advanced operators and trigonometric functions (e.g. `sqrt`, `ln`, `sin`, etc.)
+* Configurable appearance via a `MathKeyboardTheme` / `MathKeyboardStyle` (colors, shape, spacing, fonts)
+* Responsive landscape layout showing the functions and numbers side by side with a dedicated submit key
+* Accessibility: labelled section landmarks, full keyboard navigation of the keys (tab and arrow keys, without trapping focus), and localizable screen-reader strings (`MathKeyboardSemantics`)
+* Large-text support: long-press a key to magnify it at large system text sizes (via the [`large_content_viewer`][large_content_viewer] package)
 * View insets support (on-screen keyboard overlay pushes up e.g. the `body` in `Scaffold`)
 * Full focus tree integration: works with regular text fields, manual `FocusNode`s, tabbing, etc.
 * Autofocus support
@@ -129,7 +133,7 @@ class FooState extends State<FooStatefulWidget> {
       controller: _controller,
       decoration: InputDecoration(
         suffix: MouseRegion(
-          cursor: MaterialStateMouseCursor.clickable,
+          cursor: WidgetStateMouseCursor.clickable,
           child: GestureDetector(
             onTap: _onTapClear,
             child: const Icon(
@@ -209,6 +213,7 @@ final texString = texNode.buildTexString();
 [pub shield]: https://img.shields.io/pub/v/math_keyboard.svg
 [pub]: https://pub.dev/packages/math_keyboard
 [installing guide]: https://pub.dev/packages/math_keyboard/install
+[large_content_viewer]: https://pub.dev/packages/large_content_viewer
 [InputDecoration]: https://api.flutter.dev/flutter/material/InputDecoration-class.html
 [MathField]: https://pub.dev/documentation/math_keyboard/latest/math_keyboard/MathField-class.html
 [MathFieldEditingController]: https://pub.dev/documentation/math_keyboard/latest/math_keyboard/MathFieldEditingController-class.html

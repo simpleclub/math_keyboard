@@ -4,10 +4,7 @@ import 'package:math_keyboard/src/foundation/node.dart';
 /// Class representing a button configuration.
 abstract class KeyboardButtonConfig {
   /// Constructs a [KeyboardButtonConfig].
-  const KeyboardButtonConfig({
-    this.flex,
-    this.keyboardCharacters = const [],
-  });
+  const KeyboardButtonConfig({this.flex, this.keyboardCharacters = const []});
 
   /// Optional flex.
   final int? flex;
@@ -32,13 +29,9 @@ class BasicKeyboardButtonConfig extends KeyboardButtonConfig {
     required this.value,
     this.args,
     this.asTex = false,
-    this.highlighted = false,
     List<String> keyboardCharacters = const [],
     int? flex,
-  }) : super(
-          flex: flex,
-          keyboardCharacters: keyboardCharacters,
-        );
+  }) : super(flex: flex, keyboardCharacters: keyboardCharacters);
 
   /// The label of the button.
   final String label;
@@ -51,9 +44,6 @@ class BasicKeyboardButtonConfig extends KeyboardButtonConfig {
 
   /// Whether to display the label as TeX or as plain text.
   final bool asTex;
-
-  /// The highlight level of this button.
-  final bool highlighted;
 }
 
 /// Class representing a button configuration of the Delete Button.
@@ -102,14 +92,12 @@ const _decimalButton = BasicKeyboardButtonConfig(
   label: '.',
   value: '.',
   keyboardCharacters: ['.', ','],
-  highlighted: true,
 );
 
 const _subtractButton = BasicKeyboardButtonConfig(
   label: '−',
   value: '-',
   keyboardCharacters: ['-'],
-  highlighted: true,
 );
 
 /// Keyboard showing extended functionality.
@@ -208,13 +196,11 @@ final functionKeyboard = [
     const BasicKeyboardButtonConfig(
       label: '(',
       value: '(',
-      highlighted: true,
       keyboardCharacters: ['('],
     ),
     const BasicKeyboardButtonConfig(
       label: ')',
       value: ')',
-      highlighted: true,
       keyboardCharacters: [')'],
     ),
     PreviousButtonConfig(),
@@ -233,14 +219,12 @@ final standardKeyboard = [
       label: '×',
       value: r'\cdot',
       keyboardCharacters: ['*'],
-      highlighted: true,
     ),
     const BasicKeyboardButtonConfig(
       label: '÷',
       value: r'\frac',
       keyboardCharacters: ['/'],
       args: [TeXArg.braces, TeXArg.braces],
-      highlighted: true,
     ),
   ],
   [
@@ -251,7 +235,6 @@ final standardKeyboard = [
       label: '+',
       value: '+',
       keyboardCharacters: ['+'],
-      highlighted: true,
     ),
     _subtractButton,
   ],
@@ -271,26 +254,42 @@ final standardKeyboard = [
   ],
 ];
 
+/// The typeset function rows shown on the left ("Symbols") section of the
+/// landscape keyboard.
+///
+/// These are the function rows of [functionKeyboard] without its final row
+/// (page toggle, parentheses, and cursor navigation), which the landscape
+/// layout places in the numbers section or omits.
+final landscapeFunctionKeyboard = [
+  functionKeyboard[0],
+  functionKeyboard[1],
+  functionKeyboard[2],
+];
+
+/// The rows shown in the right ("Numbers") section of the landscape keyboard.
+///
+/// The first three rows mirror [standardKeyboard]; the last row replaces the
+/// page toggle and submit key (the landscape layout shows a dedicated
+/// full-height submit key) with the parentheses and cursor navigation keys.
+final landscapeNumberKeyboard = [
+  standardKeyboard[0],
+  standardKeyboard[1],
+  standardKeyboard[2],
+  [
+    _digitButtons[0],
+    // The opening and closing parentheses from the function page.
+    functionKeyboard[3][1],
+    functionKeyboard[3][2],
+    PreviousButtonConfig(),
+    NextButtonConfig(),
+  ],
+];
+
 /// Keyboard getting shown for number input only.
 final numberKeyboard = [
-  [
-    _digitButtons[7],
-    _digitButtons[8],
-    _digitButtons[9],
-    _subtractButton,
-  ],
-  [
-    _digitButtons[4],
-    _digitButtons[5],
-    _digitButtons[6],
-    _decimalButton,
-  ],
-  [
-    _digitButtons[1],
-    _digitButtons[2],
-    _digitButtons[3],
-    DeleteButtonConfig(),
-  ],
+  [_digitButtons[7], _digitButtons[8], _digitButtons[9], _subtractButton],
+  [_digitButtons[4], _digitButtons[5], _digitButtons[6], _decimalButton],
+  [_digitButtons[1], _digitButtons[2], _digitButtons[3], DeleteButtonConfig()],
   [
     PreviousButtonConfig(),
     _digitButtons[0],

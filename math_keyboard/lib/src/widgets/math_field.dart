@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -5,9 +6,11 @@ import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:math_expressions/math_expressions.dart';
 import 'package:math_keyboard/src/foundation/keyboard_button.dart';
 import 'package:math_keyboard/src/foundation/math2tex.dart';
+import 'package:math_keyboard/src/foundation/math_keyboard_semantics.dart';
 import 'package:math_keyboard/src/foundation/node.dart';
 import 'package:math_keyboard/src/widgets/decimal_separator.dart';
 import 'package:math_keyboard/src/widgets/math_keyboard.dart';
+import 'package:math_keyboard/src/widgets/math_keyboard_theme.dart';
 import 'package:math_keyboard/src/widgets/view_insets.dart';
 
 /// Widget that is like a [TextField] for math expressions.
@@ -27,6 +30,9 @@ class MathField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.opensKeyboard = true,
+    this.style,
+    this.semantics,
+    this.semanticsValue,
   });
 
   /// The controller for the math field.
@@ -116,6 +122,27 @@ class MathField extends StatefulWidget {
   /// Defaults to `true`.
   final bool opensKeyboard;
 
+  /// The visual styling of the on-screen math keyboard.
+  ///
+  /// If `null`, the style is resolved from the nearest [MathKeyboardTheme], or
+  /// [MathKeyboardStyle.fallback] if there is none.
+  final MathKeyboardStyle? style;
+
+  /// The screen-reader strings of the math field and its on-screen keyboard.
+  ///
+  /// If `null`, the semantics are resolved from the nearest [MathKeyboardTheme],
+  /// or [MathKeyboardSemantics.fallback] if there is none.
+  final MathKeyboardSemantics? semantics;
+
+  /// The spoken value the screen reader announces for the field's content.
+  ///
+  /// When provided, this overrides the built-in linearization of the expression
+  /// — letting a consumer supply a richer rendering from a dedicated TeX-to-
+  /// speech engine. When `null` (the default), the field falls back to its own
+  /// [MathFieldEditingController.readableExpression], so the package needs no
+  /// extra dependency to remain accessible on its own.
+  final String? semanticsValue;
+
   @override
   _MathFieldState createState() => _MathFieldState();
 }
@@ -137,22 +164,39 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   late var _cursorOpacity = 0.0;
 
   OverlayEntry? _overlayEntry;
-  late var _focusNode = widget.focusNode ??
+  late var _focusNode =
+      widget.focusNode ??
       FocusNode(
         debugLabel: 'math_keyboard_$hashCode',
         descendantsAreFocusable: false,
       );
+
+  /// Owns the on-screen keys so focus can move between the field and the
+  /// keyboard without the keyboard closing (its visibility tracks whether
+  /// *either* this scope or [_focusNode] holds focus).
+  final _keyboardFocusScopeNode = FocusScopeNode(
+    debugLabel: 'math_keyboard_keys',
+  );
+
+  /// Suppresses the focus-driven keyboard reopen once, so escape can close the
+  /// keyboard while returning focus to the field.
+  var _suppressReopen = false;
   late var _controller = widget.controller ?? MathFieldEditingController();
 
-  List<String> get _variables => [
-        r'\pi',
-        'e',
-        ...widget.variables,
-      ];
+  List<String> get _variables => [r'\pi', 'e', ...widget.variables];
 
-  bool get _isKeyboardShown =>
-      _overlayEntry != null &&
-      _keyboardSlideController.status != AnimationStatus.dismissed;
+  /// Whether the keyboard overlay is currently inserted in the tree.
+  ///
+  /// Stays true throughout the slide-out until the animation is fully dismissed
+  /// (when the status listener removes the overlay).
+  bool get _keyboardMounted => _overlayEntry != null;
+
+  /// Whether the keyboard is opening or fully open (as opposed to closed or
+  /// sliding out).
+  bool get _keyboardOpen =>
+      _keyboardMounted &&
+      (_keyboardSlideController.status == AnimationStatus.forward ||
+          _keyboardSlideController.status == AnimationStatus.completed);
 
   @override
   void initState() {
@@ -168,6 +212,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     });
     _cursorBlinkController.addListener(_handleBlinkUpdate);
     _controller.addListener(_handleControllerUpdate);
+    _keyboardFocusScopeNode.addListener(_handleKeyboardFocusChanged);
   }
 
   @override
@@ -228,6 +273,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       _focusNode.dispose();
     }
 
+    _keyboardFocusScopeNode.removeListener(_handleKeyboardFocusChanged);
+    _keyboardFocusScopeNode.dispose();
+
     super.dispose();
   }
 
@@ -256,6 +304,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     // cursor is all the way to the right.
     if (_controller.root.cursorAtTheEnd()) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
+        // The scroll view may not be attached yet (e.g. the field just
+        // rebuilt); skip rather than dereferencing a detached controller.
+        if (!_scrollController.hasClients) return;
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 100),
@@ -279,20 +330,124 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   ///
   /// When [open] is true, the keyboard should be opened and vice versa.
   void _handleFocusChanged(BuildContext context, {required bool open}) {
-    if (!open) {
-      _keyboardSlideController.reverse();
-      _cursorBlinkController.value = 1 / 2;
-    } else {
-      _openKeyboard(context);
-      _keyboardSlideController.forward(from: 0);
+    if (open) {
+      // Escape returns focus to the field but must leave the keyboard closed,
+      // so honor a one-shot suppression instead of reopening.
+      if (_suppressReopen) {
+        _suppressReopen = false;
+        // The field keeps focus (the keyboard just closed), so the caret must
+        // keep blinking to show the field is still active.
+        _cursorBlinkController.repeat();
+        setState(() {});
+        return;
+      }
+      // Insert the overlay only if it is not already mounted (re-inserting
+      // would drop key focus), and drive the slide forward only if it is not
+      // already opening/open. Using `forward()` without `from: 0` resumes an
+      // in-progress slide-out, so refocusing mid-close reopens smoothly instead
+      // of leaving no keyboard.
+      if (!_keyboardMounted) {
+        _openKeyboard(context);
+      }
+      if (!_keyboardOpen) {
+        _keyboardSlideController.forward();
+      }
       _cursorBlinkController.repeat();
-
       _showFieldOnScreen();
+    } else {
+      _cursorBlinkController.value = 1 / 2;
+      _maybeCloseKeyboard();
     }
 
     setState(() {
       // Mark as dirty in order to respond to the focus node update.
     });
+  }
+
+  void _handleKeyboardFocusChanged() {
+    if (!mounted) return;
+    // A key losing focus might mean focus is leaving the whole keyboard; the
+    // deferred check decides whether to actually close.
+    if (!_keyboardFocusScopeNode.hasFocus) {
+      _maybeCloseKeyboard();
+    }
+    setState(() {
+      // The field's own focus outline depends on where focus currently sits.
+    });
+  }
+
+  /// Closes the keyboard, but only once focus has settled outside both the
+  /// field and the keys.
+  ///
+  /// Focus moving from the field to a key (or back) blurs one node in the same
+  /// frame the other gains focus, so the decision is deferred to the next frame
+  /// to read the settled state.
+  void _maybeCloseKeyboard() {
+    // With a screen reader active, focus routinely leaves the field as the user
+    // explores the keys through the accessibility cursor, and the keys sit in a
+    // separate overlay at the end of the semantics tree. Closing on blur would
+    // make the keyboard vanish before it can be reached, so keep it open and let
+    // submit or the back gesture dismiss it instead.
+    if (MediaQuery.maybeOf(context)?.accessibleNavigation ?? false) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((Duration _) {
+      if (!mounted) return;
+      if (_focusNode.hasFocus || _keyboardFocusScopeNode.hasFocus) return;
+      _closeKeyboard();
+    });
+  }
+
+  /// Hands focus from the field onto the first key so keyboard and switch-access
+  /// users move onto the on-screen keyboard; from there tab traverses the keys
+  /// as ordinary buttons (and eventually out to the next control).
+  void _enterKeyboard() {
+    // The scope only has a context while the keyboard overlay is mounted;
+    // guard against acting on it otherwise (nextFocus would deref a null
+    // context).
+    if (_keyboardFocusScopeNode.context == null) return;
+    _keyboardFocusScopeNode.requestFocus();
+    // Move off the bare scope onto the first focusable key.
+    _keyboardFocusScopeNode.nextFocus();
+  }
+
+  /// Opens the keyboard in response to a tap or an accessibility activation of
+  /// the field.
+  void _handleTap() {
+    if (!_focusNode.hasFocus) {
+      _focusNode.requestFocus();
+    } else if (!_keyboardOpen) {
+      // The field can be focused while the keyboard is closed (e.g. after
+      // escape); reopen it.
+      _handleFocusChanged(context, open: true);
+    }
+  }
+
+  /// Returns focus to the field when tab moves past the first key (shift+tab).
+  void _returnFocusToField() {
+    _focusNode.requestFocus();
+  }
+
+  /// Leaves the keyboard for the control after the field when tab moves past
+  /// the last key, so focus is never trapped inside the keys (WCAG 2.1.2).
+  void _exitKeyboardForward() {
+    _closeKeyboard();
+    _focusNode.nextFocus();
+  }
+
+  /// Dismisses the keyboard, used by the escape key both from a focused key and
+  /// from the field itself.
+  ///
+  /// If focus is on a key (not the field), it is returned to the field, and
+  /// that return must not reopen the keyboard. If the field already holds focus
+  /// (escape pressed on the field), closing is enough — setting the suppression
+  /// flag there would leave it stuck and swallow the next legitimate reopen.
+  void _dismissKeyboard() {
+    if (!_focusNode.hasFocus) {
+      _suppressReopen = true;
+      _focusNode.requestFocus();
+    }
+    _closeKeyboard();
   }
 
   bool _showFieldOnScreenScheduled = false;
@@ -308,9 +463,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       if (!mounted) return;
 
       context.findRenderObject()!.showOnScreen(
-            duration: const Duration(milliseconds: 100),
-            curve: Curves.fastOutSlowIn,
-          );
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.fastOutSlowIn,
+      );
     });
   }
 
@@ -330,10 +485,18 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
             type: widget.keyboardType,
             variables: _variables,
             onSubmit: _submit,
-            // Note that we need to pass the insets state like this because the
-            // overlay context does not have the ancestor state.
+            // Note that we need to pass the insets state, style, and semantics
+            // like this because the overlay context does not have the ancestor
+            // state.
             insetsState: MathKeyboardViewInsetsState.of(this.context),
             slideAnimation: _keyboardSlideController,
+            style: widget.style ?? MathKeyboardTheme.styleOf(this.context),
+            semantics:
+                widget.semantics ?? MathKeyboardTheme.semanticsOf(this.context),
+            focusScopeNode: _keyboardFocusScopeNode,
+            onExitToField: _returnFocusToField,
+            onExitToNext: _exitKeyboardForward,
+            onClose: _dismissKeyboard,
           ),
         );
       },
@@ -353,6 +516,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
 
   void _submit() {
     _focusNode.unfocus();
+    // Dismiss explicitly: under a screen reader the focus-driven close is
+    // suppressed, so submitting must close the keyboard itself.
+    _closeKeyboard();
     widget.onSubmitted?.call(
       _controller.currentEditingValue(placeholderWhenEmpty: false),
     );
@@ -368,17 +534,37 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       return KeyEventResult.ignored;
     }
 
-    final configs = <List<KeyboardButtonConfig>>[
-      if (widget.keyboardType ==
-          MathKeyboardType.expression) ...<List<KeyboardButtonConfig>>[
-        ...standardKeyboard,
-        ...functionKeyboard,
-      ] else if (widget.keyboardType == MathKeyboardType.numberOnly) ...[
-        ...numberKeyboard,
-      ],
-    ].fold<List<KeyboardButtonConfig>>([], (previousValue, element) {
-      return previousValue..addAll(element);
-    });
+    // Tab moves focus from the field into the keys (shift+tab keeps the normal
+    // reverse traversal that leaves the field). Only when the keyboard is
+    // actually shown — otherwise leave Tab to the default traversal so it moves
+    // to the next control instead of being swallowed (or entering a keyboard
+    // whose keys are not in the tree).
+    if (keyEvent.logicalKey == LogicalKeyboardKey.tab &&
+        !HardwareKeyboard.instance.isShiftPressed &&
+        _keyboardOpen) {
+      _enterKeyboard();
+      return KeyEventResult.handled;
+    }
+
+    // Escape dismisses the keyboard while the field holds focus. (When a key
+    // holds focus, the keyboard's own escape shortcut handles it instead.)
+    if (keyEvent.logicalKey == LogicalKeyboardKey.escape && _keyboardOpen) {
+      _dismissKeyboard();
+      return KeyEventResult.handled;
+    }
+
+    final configs =
+        <List<KeyboardButtonConfig>>[
+          if (widget.keyboardType ==
+              MathKeyboardType.expression) ...<List<KeyboardButtonConfig>>[
+            ...standardKeyboard,
+            ...functionKeyboard,
+          ] else if (widget.keyboardType == MathKeyboardType.numberOnly) ...[
+            ...numberKeyboard,
+          ],
+        ].fold<List<KeyboardButtonConfig>>([], (previousValue, element) {
+          return previousValue..addAll(element);
+        });
 
     final characterResult = _handleCharacter(keyEvent.character, configs);
     if (characterResult != null) {
@@ -397,7 +583,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   /// Returns `null` if not handled (indecisive) and a [KeyEventResult] if we
   /// can conclude about the complete key handling from the action taken.
   KeyEventResult? _handleCharacter(
-      String? character, List<KeyboardButtonConfig> configs) {
+    String? character,
+    List<KeyboardButtonConfig> configs,
+  ) {
     if (character == null) return null;
     final lowerCaseCharacter = character.toLowerCase();
 
@@ -406,8 +594,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       if (config is! BasicKeyboardButtonConfig) continue;
       if (config.keyboardCharacters.isEmpty) continue;
 
-      if (config.keyboardCharacters
-          .any((element) => element.toLowerCase() == lowerCaseCharacter)) {
+      if (config.keyboardCharacters.any(
+        (element) => element.toLowerCase() == lowerCaseCharacter,
+      )) {
         final basicConfig = config;
         if (basicConfig.args != null) {
           _controller.addFunction(basicConfig.value, basicConfig.args!);
@@ -450,7 +639,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   /// Returns `null` if not handled (indecisive) and a [KeyEventResult] if we
   /// can conclude about the complete key handling from the action taken.
   KeyEventResult? _handleLogicalKey(
-      LogicalKeyboardKey logicalKey, List<KeyboardButtonConfig> configs) {
+    LogicalKeyboardKey logicalKey,
+    List<KeyboardButtonConfig> configs,
+  ) {
     // Check logical, fixed keyboard bindings (like backspace and arrow keys).
     if (logicalKey == LogicalKeyboardKey.backspace &&
         configs.any((element) => element is DeleteButtonConfig)) {
@@ -482,7 +673,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: !_isKeyboardShown,
+      canPop: !_keyboardMounted,
       onPopInvokedWithResult: (didPop, result) async {
         if (!didPop) {
           _closeKeyboard();
@@ -501,15 +692,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
               _handleFocusChanged(context, open: primary),
           onKeyEvent: _handleKey,
           child: GestureDetector(
-            onTap: () {
-              if (!_focusNode.hasFocus) {
-                _focusNode.requestFocus();
-              } else if (!_isKeyboardShown) {
-                // Sometimes the field can be focused but the keyboard is not shown.
-                // For example if it was closed with [_closeKeyboard].
-                _handleFocusChanged(context, open: true);
-              }
-            },
+            onTap: _handleTap,
             child: AnimatedBuilder(
               animation: _controller,
               builder: (context, child) {
@@ -518,8 +701,17 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
                   scrollController: _scrollController,
                   cursorOpacity: _cursorOpacity,
                   hasFocus: _focusNode.hasFocus,
-                  decoration: widget.decoration
-                      .applyDefaults(Theme.of(context).inputDecorationTheme),
+                  // Route the accessibility activation (screen-reader
+                  // double-tap) through the same open logic as a pointer tap,
+                  // so the keyboard can be opened without a pointer.
+                  onTap: _handleTap,
+                  semantics:
+                      widget.semantics ??
+                      MathKeyboardTheme.semanticsOf(context),
+                  semanticsValue: widget.semanticsValue,
+                  decoration: widget.decoration.applyDefaults(
+                    Theme.of(context).inputDecorationTheme,
+                  ),
                 );
               },
             ),
@@ -540,10 +732,24 @@ class _FieldPreview extends StatelessWidget {
     required this.hasFocus,
     required this.decoration,
     required this.scrollController,
+    required this.semantics,
+    required this.semanticsValue,
+    required this.onTap,
   }) : super(key: key);
 
   /// The controller for the math field.
   final MathFieldEditingController controller;
+
+  /// Called when the field is activated (tap or accessibility action), so the
+  /// keyboard opens without needing a pointer.
+  final VoidCallback onTap;
+
+  /// The screen-reader strings of the math field.
+  final MathKeyboardSemantics semantics;
+
+  /// An externally supplied spoken value that overrides the built-in
+  /// linearization, or `null` to fall back to [readableExpression].
+  final String? semanticsValue;
 
   /// The scroll controller handling the horizontal positioning inside of the
   /// preview viewport.
@@ -566,7 +772,9 @@ class _FieldPreview extends StatelessWidget {
 
     if (decoration.fillColor != null) {
       return Color.alphaBlend(
-          decoration.fillColor!, themeData.colorScheme.surface);
+        decoration.fillColor!,
+        themeData.colorScheme.surface,
+      );
     }
 
     // dark theme: 10% white (enabled), 5% white (disabled)
@@ -592,9 +800,10 @@ class _FieldPreview extends StatelessWidget {
   TextStyle _getHintStyle(ThemeData themeData) {
     return themeData.textTheme.titleMedium!
         .copyWith(
-            color: decoration.enabled
-                ? themeData.hintColor
-                : themeData.disabledColor)
+          color: decoration.enabled
+              ? themeData.hintColor
+              : themeData.disabledColor,
+        )
         .merge(decoration.hintStyle);
   }
 
@@ -621,7 +830,7 @@ class _FieldPreview extends StatelessWidget {
           '{${decimalSeparator(context)}}',
         );
 
-    return ConstrainedBox(
+    final Widget field = ConstrainedBox(
       constraints: const BoxConstraints(
         minWidth: double.infinity,
         minHeight: 48,
@@ -659,13 +868,58 @@ class _FieldPreview extends StatelessWidget {
                 Text(
                   decoration.hintText ?? '',
                   style: _getHintStyle(Theme.of(context)),
-                )
+                ),
             ],
           ),
         ),
       ),
     );
+
+    // Expose the field as a proper editable text field so the screen reader
+    // treats it like one (reading its value and the platform's own, localized
+    // caret announcements such as "insertion point at end"). The inner
+    // rendering is a typeset image, so its raw semantics are excluded in favor
+    // of the plain-text value provided here.
+    // Announced as a (non-obscured) text field so screen readers read it as an
+    // input and give their native, localized caret narration. The [onTap]
+    // action lets a screen-reader activation (e.g. VoiceOver double-tap) open
+    // the keyboard, since the ancestor gesture detector's tap is not on this
+    // node. Editing actions are intentionally not declared: input comes from
+    // the custom math keyboard, not from `onSetText`/`onSetSelection`.
+    // Prefer an externally supplied spoken value (e.g. from a dedicated
+    // TeX-to-speech engine); fall back to the built-in linearization otherwise.
+    final readableExpression =
+        semanticsValue ?? controller.readableExpression(semantics);
+    return Semantics(
+      textField: true,
+      // The field is not editable via the OS keyboard (input comes from the
+      // custom math keyboard); marking it read-only is accurate.
+      readOnly: true,
+      // Native screen readers read the `value` of a text field node, but
+      // Flutter web does not surface the value of a synthetic (non-EditableText)
+      // text field — it only ever reads the accessible *name*. So on web fold
+      // the expression into the name (which is the channel that demonstrably
+      // works — the hint is read the same way), mirroring the placeholder →
+      // value behaviour: the hint when empty, the expression once there is one.
+      label: kIsWeb && readableExpression.isNotEmpty
+          ? readableExpression
+          : _semanticsLabel,
+      value: kIsWeb ? null : readableExpression,
+      // The decorator subtree (which renders the validation error) is excluded,
+      // so a `MathFormField` error would otherwise be silent to screen readers.
+      // Surface it on this node instead.
+      hint: decoration.errorText,
+      onTap: onTap,
+      // Drop the descendants' raw semantics (typeset glyphs + the decorator's
+      // own label/hint/error nodes) in favour of the curated node above.
+      excludeSemantics: true,
+      child: field,
+    );
   }
+
+  /// The accessibility label describing the field itself.
+  String get _semanticsLabel =>
+      decoration.labelText ?? decoration.hintText ?? semantics.mathFieldLabel;
 }
 
 /// A controller for an editable math field.
@@ -717,8 +971,9 @@ class MathFieldEditingController extends ChangeNotifier {
 
   /// Navigate to the previous node.
   void goBack({bool deleteMode = false}) {
-    final state =
-        deleteMode ? currentNode.remove() : currentNode.shiftCursorLeft();
+    final state = deleteMode
+        ? currentNode.remove()
+        : currentNode.shiftCursorLeft();
     switch (state) {
       // CASE 1: Courser was moved 1 position to the left in the current node.
       case NavigationState.success:
@@ -806,6 +1061,108 @@ class MathFieldEditingController extends ChangeNotifier {
     }
   }
 
+  /// Returns a plain-text, screen-reader friendly rendering of the whole
+  /// expression, used as the accessible value of the text field.
+  ///
+  /// The [semantics] provide the spoken words for tokens and functions.
+  String readableExpression(MathKeyboardSemantics semantics) =>
+      _readNode(root, semantics);
+
+  String _readNode(TeXNode node, MathKeyboardSemantics semantics) {
+    final parts = <String>[];
+    for (final tex in node.children) {
+      final part = switch (tex) {
+        TeXLeaf() => semantics.tokenLabel(tex.expression),
+        TeXFunction() => [
+          semantics.functionLabel(tex.expression),
+          for (final argument in tex.argNodes) _readNode(argument, semantics),
+        ].where((read) => read.isNotEmpty).join(' '),
+        // The cursor and anything else contribute nothing.
+        _ => '',
+      };
+      if (part.isNotEmpty) parts.add(part);
+    }
+    return parts.join(' ');
+  }
+
+  /// Returns a screen-reader friendly description of the cursor's location.
+  ///
+  /// Combines the structural context (for example "numerator" or "exponent")
+  /// with the token adjacent to the cursor (for example "before 2", or, at a
+  /// boundary, "start of expression" / "end of expression" / "empty"). The
+  /// [semantics] provide the words used.
+  String describeCursorContext(MathKeyboardSemantics semantics) {
+    final node = currentNode;
+    final structural = _cursorStructuralLabel(node, semantics);
+    final container = structural.isEmpty
+        ? semantics.expressionContainerLabel
+        : structural;
+    final right = _spokenTeXAt(node, node.courserPosition + 1, semantics);
+    final left = _spokenTeXAt(node, node.courserPosition - 1, semantics);
+    final atStart = left == null;
+    final atEnd = right == null;
+
+    // At the boundaries, report start/end (like a text field's "insertion point
+    // at start/end") rather than the adjacent token.
+    if (atStart && atEnd) {
+      return [
+        if (structural.isNotEmpty) structural,
+        semantics.emptyLabel,
+      ].join(', ');
+    }
+    if (atStart) return semantics.startOfContainer(container);
+    if (atEnd) return semantics.endOfContainer(container);
+
+    return [
+      if (structural.isNotEmpty) structural,
+      semantics.beforeToken(right),
+    ].join(', ');
+  }
+
+  /// Returns the structural role of [node] within its parent function, such as
+  /// "numerator" or "exponent", or an empty string at the expression root.
+  String _cursorStructuralLabel(TeXNode node, MathKeyboardSemantics semantics) {
+    final parent = node.parent;
+    if (parent == null) return '';
+    final index = parent.argNodes.indexOf(node);
+    final expression = parent.expression;
+    if (expression.startsWith(r'\frac')) {
+      return index == 0 ? semantics.numeratorLabel : semantics.denominatorLabel;
+    }
+    if (expression.startsWith('^')) {
+      return semantics.exponentLabel;
+    }
+    if (expression.startsWith(r'\sqrt')) {
+      if (parent.args.length == 2) {
+        return index == 0 ? semantics.rootIndexLabel : semantics.underRootLabel;
+      }
+      return semantics.underSquareRootLabel;
+    }
+    if (expression.startsWith(r'\log')) {
+      return index == 0 ? semantics.logBaseLabel : semantics.logArgumentLabel;
+    }
+    return semantics.insideParenthesesLabel;
+  }
+
+  /// Returns the spoken description of the child at [index] within [node], or
+  /// `null` when there is none (or it is the cursor).
+  String? _spokenTeXAt(
+    TeXNode node,
+    int index,
+    MathKeyboardSemantics semantics,
+  ) {
+    if (index < 0 || index >= node.children.length) {
+      return null;
+    }
+    final tex = node.children[index];
+    return switch (tex) {
+      Cursor() => null,
+      TeXFunction() => semantics.functionLabel(tex.expression),
+      TeXLeaf() => semantics.tokenLabel(tex.expression),
+      _ => null,
+    };
+  }
+
   /// Add leaf to the current node.
   void addLeaf(String tex) {
     currentNode.addTeX(TeXLeaf(tex));
@@ -868,8 +1225,10 @@ class MathFieldEditingController extends ChangeNotifier {
     // position. This way, we can always look at the last element in the list,
     // when taking the numerator, and don't need to keep track of the index.
     final tail = currentNode.children.sublist(currentNode.courserPosition);
-    currentNode.children
-        .removeRange(currentNode.courserPosition, currentNode.children.length);
+    currentNode.children.removeRange(
+      currentNode.courserPosition,
+      currentNode.children.length,
+    );
     // Expressions that indicate operators.
     final operators = ['+', '-', r'\cdot', r'\div'];
     // We need to determine whether we want to append an empty fraction or
