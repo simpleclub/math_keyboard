@@ -8,7 +8,7 @@ import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:math_keyboard/src/custom_key_icons/custom_key_icons.dart';
 import 'package:math_keyboard/src/foundation/keyboard_button.dart';
 import 'package:math_keyboard/src/foundation/math_keyboard_semantics.dart';
-import 'package:math_keyboard/src/widgets/decimal_separator.dart';
+import 'package:math_keyboard/src/foundation/decimal_separator.dart';
 import 'package:math_keyboard/src/widgets/keyboard_button.dart';
 import 'package:math_keyboard/src/widgets/math_field.dart';
 import 'package:math_keyboard/src/widgets/math_keyboard_theme.dart';
@@ -51,6 +51,7 @@ class MathKeyboard extends StatelessWidget {
     this.slideAnimation,
     this.style,
     this.semantics,
+    this.decimalSeparator,
     this.focusScopeNode,
     this.onExitToField,
     this.onExitToNext,
@@ -136,6 +137,12 @@ class MathKeyboard extends StatelessWidget {
   /// Defaults to `const EdgeInsets.only(bottom: 4, left: 4, right: 4),`.
   final EdgeInsets padding;
 
+  /// The decimal separator shown on the decimal key.
+  ///
+  /// If `null`, it is resolved from the nearest [MathKeyboardTheme], or from
+  /// the current locale if there is none.
+  final DecimalSeparator? decimalSeparator;
+
   @override
   Widget build(BuildContext context) {
     final style = this.style ?? MathKeyboardTheme.styleOf(context);
@@ -166,7 +173,7 @@ class MathKeyboard extends StatelessWidget {
       curve: Curves.ease,
     );
 
-    return SlideTransition(
+    final keyboard = SlideTransition(
       position: Tween<Offset>(
         begin: const Offset(0, 1),
         end: const Offset(0, 0),
@@ -276,6 +283,16 @@ class MathKeyboard extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    // Provided rather than threaded through every layout widget, because only
+    // the decimal key needs it.
+    return MathKeyboardTheme(
+      style: style,
+      semantics: semantics,
+      decimalSeparator:
+          decimalSeparator ?? MathKeyboardTheme.decimalSeparatorOf(context),
+      child: keyboard,
     );
   }
 
@@ -1077,8 +1094,9 @@ class _BasicButton extends StatelessWidget {
         options: MathOptions(fontSize: size, color: style.foregroundColor),
       );
     }
-    // The decimal separator is rendered per the current locale.
-    final symbol = label == '.' ? decimalSeparator(context) : label!;
+    final symbol = label == '.'
+        ? MathKeyboardTheme.decimalSeparatorOf(context).symbol
+        : label!;
     return Text(
       symbol,
       // The size is already resolved; don't let the ambient text scale grow it
@@ -1100,7 +1118,9 @@ class _BasicButton extends StatelessWidget {
     } else if (asTex) {
       resolvedSemanticsLabel = semantics.functionLabel(label!);
     } else if (label == '.') {
-      resolvedSemanticsLabel = decimalSeparator(context);
+      resolvedSemanticsLabel = MathKeyboardTheme.decimalSeparatorOf(
+        context,
+      ).symbol;
     } else {
       // Speak the inserted token (e.g. "times" for ×, "minus" for −) rather
       // than the raw glyph, so the announcement is reliable and localizable.

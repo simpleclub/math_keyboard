@@ -16,6 +16,19 @@
   * The math field opens the keyboard from an accessibility activation.
 * Add `large_content_viewer` dependency for long-press magnification of keys at
   large text sizes.
+* Make the decimal separator configurable via the new `DecimalSeparator` enum,
+  on `MathKeyboardTheme` or as an argument to `MathField`, `MathFormField`, and
+  `MathKeyboard`, instead of always deriving it from the locale. Defaults to
+  `null`, which keeps the previous locale-based behavior.
+* **Breaking:** `MathField.onChanged` and `onSubmitted` now report the separator
+  that is displayed (e.g. `1{,}5`), instead of always `.`, so rendering the
+  reported TeX matches the field. Fields in a dot locale are unaffected.
+  `TeXParser` reads every `DecimalSeparator`, grouped or plain.
+* **Breaking:** `decimalSeparator(BuildContext)` is now `DecimalSeparator.of`,
+  returning the enum. It no longer throws an `ArgumentError` for locales `intl`
+  does not know, and locales that use neither of the two markers SI and ISO
+  recognize (`ar_EG`, `fa`, `ps`, which use the Arabic decimal separator) now
+  fall back to `.` instead of displaying a separator that cannot be parsed back.
 * Requires Flutter 3.35.1 / Dart 3.9.
 
 ## 0.3.3

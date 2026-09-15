@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:math_keyboard/src/foundation/math_keyboard_semantics.dart';
+import 'package:math_keyboard/src/foundation/decimal_separator.dart';
 
 /// The color tiers a [MathKeyboard] key can adopt.
 ///
@@ -378,13 +379,13 @@ class MathKeyboardStyle {
   ]);
 }
 
-/// Provides a [MathKeyboardStyle] and [MathKeyboardSemantics] to the
-/// [MathKeyboard]s below it in the tree.
+/// Provides a [MathKeyboardStyle], [MathKeyboardSemantics], and decimal
+/// separator to the [MathKeyboard]s below it in the tree.
 ///
-/// A [MathField] resolves the style and semantics from the nearest
-/// [MathKeyboardTheme] at the time it opens its keyboard and forwards them into
-/// the overlay, because the overlay is built in a separate context that cannot
-/// read this ancestor.
+/// A [MathField] resolves the style, semantics, and decimal separator from the
+/// nearest [MathKeyboardTheme] at the time it opens its keyboard and forwards
+/// them into the overlay, because the overlay is built in a separate context
+/// that cannot read this ancestor.
 ///
 /// Because the values are captured when the keyboard opens, changing the theme
 /// while a keyboard is already open does not restyle that open keyboard — the
@@ -396,6 +397,7 @@ class MathKeyboardTheme extends InheritedWidget {
     Key? key,
     this.style = MathKeyboardStyle.fallback,
     this.semantics = MathKeyboardSemantics.fallback,
+    this.decimalSeparator,
     required Widget child,
   }) : super(key: key, child: child);
 
@@ -410,6 +412,16 @@ class MathKeyboardTheme extends InheritedWidget {
   /// Override this to localize the spoken announcements; defaults to the
   /// English [MathKeyboardSemantics.fallback].
   final MathKeyboardSemantics semantics;
+
+  /// The decimal separator displayed by descendant math fields and keyboards.
+  ///
+  /// Set this to pin the separator regardless of the locale, e.g. to back a
+  /// user-facing setting. It is applied to the TeX reported by
+  /// `MathField.onChanged` as well, so rendering that TeX shows the same number
+  /// the field shows.
+  ///
+  /// Defaults to `null`, which resolves the separator from the ambient locale.
+  final DecimalSeparator? decimalSeparator;
 
   /// Returns the [MathKeyboardStyle] from the nearest [MathKeyboardTheme], or
   /// [MathKeyboardStyle.fallback] if there is none.
@@ -427,8 +439,18 @@ class MathKeyboardTheme extends InheritedWidget {
     return theme?.semantics ?? MathKeyboardSemantics.fallback;
   }
 
+  /// Returns the decimal separator from the nearest [MathKeyboardTheme], or the
+  /// separator of the current locale if there is none.
+  static DecimalSeparator decimalSeparatorOf(BuildContext context) {
+    final theme = context
+        .dependOnInheritedWidgetOfExactType<MathKeyboardTheme>();
+    return theme?.decimalSeparator ?? DecimalSeparator.of(context);
+  }
+
   @override
   bool updateShouldNotify(MathKeyboardTheme oldWidget) {
-    return oldWidget.style != style || oldWidget.semantics != semantics;
+    return oldWidget.style != style ||
+        oldWidget.semantics != semantics ||
+        oldWidget.decimalSeparator != decimalSeparator;
   }
 }

@@ -8,7 +8,7 @@ import 'package:math_keyboard/src/foundation/keyboard_button.dart';
 import 'package:math_keyboard/src/foundation/math2tex.dart';
 import 'package:math_keyboard/src/foundation/math_keyboard_semantics.dart';
 import 'package:math_keyboard/src/foundation/node.dart';
-import 'package:math_keyboard/src/widgets/decimal_separator.dart';
+import 'package:math_keyboard/src/foundation/decimal_separator.dart';
 import 'package:math_keyboard/src/widgets/math_keyboard.dart';
 import 'package:math_keyboard/src/widgets/math_keyboard_theme.dart';
 import 'package:math_keyboard/src/widgets/view_insets.dart';
@@ -33,6 +33,7 @@ class MathField extends StatefulWidget {
     this.style,
     this.semantics,
     this.semanticsValue,
+    this.decimalSeparator,
   });
 
   /// The controller for the math field.
@@ -134,6 +135,18 @@ class MathField extends StatefulWidget {
   /// or [MathKeyboardSemantics.fallback] if there is none.
   final MathKeyboardSemantics? semantics;
 
+  /// The decimal separator to display in this field and on its keyboard.
+  ///
+  /// If `null`, it is resolved from the nearest [MathKeyboardTheme], or from
+  /// the current locale if there is none.
+  ///
+  /// It is applied to the TeX reported by [onChanged] and [onSubmitted] too, as
+  /// a TeX group (`1{,}5`) so that the spacing stays right, so rendering that
+  /// TeX shows the same number the field shows. The reported value is therefore
+  /// locale-dependent: normalize it before storing it if you compare or parse
+  /// expressions across locales.
+  final DecimalSeparator? decimalSeparator;
+
   /// The spoken value the screen reader announces for the field's content.
   ///
   /// When provided, this overrides the built-in linearization of the expression
@@ -164,6 +177,13 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   late var _cursorOpacity = 0.0;
 
   OverlayEntry? _overlayEntry;
+
+  /// The separator in effect, resolved from the widget argument, the nearest
+  /// [MathKeyboardTheme], or the locale.
+  ///
+  /// Cached because the value is needed outside of [build], when reporting the
+  /// field's value.
+  late DecimalSeparator _decimalSeparator;
   late var _focusNode =
       widget.focusNode ??
       FocusNode(
@@ -216,8 +236,22 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _decimalSeparator =
+        widget.decimalSeparator ??
+        MathKeyboardTheme.decimalSeparatorOf(context);
+  }
+
+  @override
   void didUpdateWidget(MathField oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.decimalSeparator != widget.decimalSeparator) {
+      _decimalSeparator =
+          widget.decimalSeparator ??
+          MathKeyboardTheme.decimalSeparatorOf(context);
+    }
 
     if (oldWidget.controller != widget.controller) {
       if (oldWidget.controller != null) {
@@ -317,6 +351,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
 
     final expression = _controller.currentEditingValue(
       placeholderWhenEmpty: false,
+      decimalSeparator: _decimalSeparator,
     );
     // We want to make sure to execute the callback after we have
     // executed all of our logic that we know has to be executed.
@@ -493,6 +528,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
             style: widget.style ?? MathKeyboardTheme.styleOf(this.context),
             semantics:
                 widget.semantics ?? MathKeyboardTheme.semanticsOf(this.context),
+            decimalSeparator: _decimalSeparator,
             focusScopeNode: _keyboardFocusScopeNode,
             onExitToField: _returnFocusToField,
             onExitToNext: _exitKeyboardForward,
@@ -520,7 +556,10 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     // suppressed, so submitting must close the keyboard itself.
     _closeKeyboard();
     widget.onSubmitted?.call(
-      _controller.currentEditingValue(placeholderWhenEmpty: false),
+      _controller.currentEditingValue(
+        placeholderWhenEmpty: false,
+        decimalSeparator: _decimalSeparator,
+      ),
     );
   }
 
@@ -709,6 +748,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
                       widget.semantics ??
                       MathKeyboardTheme.semanticsOf(context),
                   semanticsValue: widget.semanticsValue,
+                  decimalSeparator: _decimalSeparator,
                   decoration: widget.decoration.applyDefaults(
                     Theme.of(context).inputDecorationTheme,
                   ),
@@ -734,6 +774,7 @@ class _FieldPreview extends StatelessWidget {
     required this.scrollController,
     required this.semantics,
     required this.semanticsValue,
+    required this.decimalSeparator,
     required this.onTap,
   }) : super(key: key);
 
@@ -750,6 +791,9 @@ class _FieldPreview extends StatelessWidget {
   /// An externally supplied spoken value that overrides the built-in
   /// linearization, or `null` to fall back to [readableExpression].
   final String? semanticsValue;
+
+  /// The resolved decimal separator shown in the preview.
+  final DecimalSeparator decimalSeparator;
 
   /// The scroll controller handling the horizontal positioning inside of the
   /// preview viewport.
@@ -809,26 +853,16 @@ class _FieldPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tex = controller.root
-        .buildTeXString(
-          cursorColor: Color.lerp(
-            _getDisabledCursorColor(Theme.of(context)),
-            Theme.of(context).textSelectionTheme.cursorColor ??
-                Theme.of(context).colorScheme.secondary,
-            cursorOpacity,
-          ),
-        )
-        .replaceAll(
-          // We assume that every dot in the tex string is a decimal dot
-          // that can simply be replaced by an alternate decimal separator
-          // for the preview.
-          '.',
-          // We need to wrap the decimal separator in an extra group ("{}")
-          // because commas will otherwise be spaced as if they created a
-          // list, e.g. in vector notation (there is a padding to the right
-          // of the comma).
-          '{${decimalSeparator(context)}}',
-        );
+    final tex = decimalSeparator.applyTo(
+      controller.root.buildTeXString(
+        cursorColor: Color.lerp(
+          _getDisabledCursorColor(Theme.of(context)),
+          Theme.of(context).textSelectionTheme.cursorColor ??
+              Theme.of(context).colorScheme.secondary,
+          cursorOpacity,
+        ),
+      ),
+    );
 
     final Widget field = ConstrainedBox(
       constraints: const BoxConstraints(
@@ -889,7 +923,11 @@ class _FieldPreview extends StatelessWidget {
     // Prefer an externally supplied spoken value (e.g. from a dedicated
     // TeX-to-speech engine); fall back to the built-in linearization otherwise.
     final readableExpression =
-        semanticsValue ?? controller.readableExpression(semantics);
+        semanticsValue ??
+        controller.readableExpression(
+          semantics,
+          decimalSeparator: decimalSeparator,
+        );
     return Semantics(
       textField: true,
       // The field is not editable via the OS keyboard (input comes from the
@@ -942,7 +980,10 @@ class MathFieldEditingController extends ChangeNotifier {
   /// Returns the current editing value (expression), which requires temporarily
   /// removing the cursor. When [placeholderWhenEmpty] is true, a TeX \Box
   /// is returned as a placeholder.
-  String currentEditingValue({bool placeholderWhenEmpty = true}) {
+  String currentEditingValue({
+    bool placeholderWhenEmpty = true,
+    DecimalSeparator decimalSeparator = DecimalSeparator.dot,
+  }) {
     currentNode.removeCursor();
     // Store the expression as a TeX string.
     final expression = root.buildTeXString(
@@ -953,7 +994,7 @@ class MathFieldEditingController extends ChangeNotifier {
     );
     currentNode.setCursor();
 
-    return expression;
+    return decimalSeparator.applyTo(expression);
   }
 
   /// Clears the current value and sets it to the [expression] equivalent.
@@ -1065,17 +1106,29 @@ class MathFieldEditingController extends ChangeNotifier {
   /// expression, used as the accessible value of the text field.
   ///
   /// The [semantics] provide the spoken words for tokens and functions.
-  String readableExpression(MathKeyboardSemantics semantics) =>
-      _readNode(root, semantics);
+  ///
+  /// The [decimalSeparator] is spoken in place of the canonical `.`, so that a
+  /// screen reader announces the same separator the field displays and the
+  /// decimal key announces.
+  String readableExpression(
+    MathKeyboardSemantics semantics, {
+    DecimalSeparator decimalSeparator = DecimalSeparator.dot,
+  }) => _readNode(root, semantics, decimalSeparator);
 
-  String _readNode(TeXNode node, MathKeyboardSemantics semantics) {
+  String _readNode(
+    TeXNode node,
+    MathKeyboardSemantics semantics,
+    DecimalSeparator decimalSeparator,
+  ) {
     final parts = <String>[];
     for (final tex in node.children) {
       final part = switch (tex) {
+        TeXLeaf() when tex.expression == '.' => decimalSeparator.symbol,
         TeXLeaf() => semantics.tokenLabel(tex.expression),
         TeXFunction() => [
           semantics.functionLabel(tex.expression),
-          for (final argument in tex.argNodes) _readNode(argument, semantics),
+          for (final argument in tex.argNodes)
+            _readNode(argument, semantics, decimalSeparator),
         ].where((read) => read.isNotEmpty).join(' '),
         // The cursor and anything else contribute nothing.
         _ => '',

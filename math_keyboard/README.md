@@ -24,7 +24,7 @@ no plugins, no web views.
 * Full focus tree integration: works with regular text fields, manual `FocusNode`s, tabbing, etc.
 * Autofocus support
 * Form field support
-* Decimal separator based on locale
+* Decimal separator based on locale, or configured explicitly
 * Converting TeX from and to math expressions
 
 You can view all features **in action** in the [demo app][demo].
@@ -176,10 +176,16 @@ class FooState extends State<FooStatefulWidget> {
 ### Decimal separators
 
 Note that not all countries use a dot `.` as decimal separator (see [reference][decimal separators]).
-If the locale obtained via [`Localizations.localeOf`][localeOf] uses a comma `,` as decimal
-separator, both the separator in the math field as well as the symbol on the keyboard are adjusted.
-Otherwise, a dot `.` is used. You can override the locale using the
-[`Localizations.override`][Localizations override] widget (wrap your `MathField`s with it).
+By default, the separator follows the locale obtained via [`Localizations.localeOf`][localeOf]. To
+choose it explicitly instead — e.g. to back a user-facing setting — set a `DecimalSeparator` on a
+`MathKeyboardTheme` (for all descendant fields) or on an individual `MathField`, which takes
+precedence.
+
+The separator applies to the math field, the symbol on the keyboard, the screen-reader
+announcements, and the TeX reported by `onChanged`, so rendering that TeX shows the same number the
+field shows. It is emitted as a TeX group (`1{,}5`) to keep the spacing right; [`TeXParser`][TeXParser]
+reads that form and the plain `1.5` form alike. Since the reported value follows the separator,
+normalize it before storing it if you compare or parse expressions across locales.
 
 Note that physical keyboard input always accepts both `.` and `,`.
 
@@ -227,6 +233,5 @@ final texString = texNode.buildTexString();
 [FocusNode]: https://api.flutter.dev/flutter/widgets/FocusNode-class.html
 [decimal separators]: https://en.wikipedia.org/wiki/Decimal_separator#Countries_using_decimal_comma
 [localeOf]: https://api.flutter.dev/flutter/widgets/Localizations/localeOf.html
-[Localizations override]: https://api.flutter.dev/flutter/widgets/Localizations/Localizations.override.html
 [TeXParser]: https://pub.dev/documentation/math_keyboard/latest/math_keyboard/TeXParser-class.html
 [convertMathExpressionToTeXNode]: https://pub.dev/documentation/math_keyboard/latest/math_keyboard/convertMathExpressionToTeXNode.html

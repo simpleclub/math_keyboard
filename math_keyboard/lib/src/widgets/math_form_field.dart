@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:math_keyboard/src/foundation/decimal_separator.dart';
 import 'package:math_keyboard/src/foundation/math_keyboard_semantics.dart';
 import 'package:math_keyboard/src/widgets/math_field.dart';
 import 'package:math_keyboard/src/widgets/math_keyboard.dart';
@@ -37,6 +38,7 @@ class MathFormField extends FormField<String> {
     MathKeyboardStyle? style,
     MathKeyboardSemantics? semantics,
     String? semanticsValue,
+    this.decimalSeparator,
   }) : super(
          key: key,
          initialValue: controller != null
@@ -66,6 +68,7 @@ class MathFormField extends FormField<String> {
              style: style,
              semantics: semantics,
              semanticsValue: semanticsValue,
+             decimalSeparator: state.widget.decimalSeparator,
            );
          },
        );
@@ -75,12 +78,24 @@ class MathFormField extends FormField<String> {
   /// If null, this widget will create its own [MathFieldEditingController].
   final MathFieldEditingController? controller;
 
+  /// The decimal separator to display, and to report the value with.
+  ///
+  /// See [MathField.decimalSeparator].
+  final DecimalSeparator? decimalSeparator;
+
   @override
   _MathFormFieldState createState() => _MathFormFieldState();
 }
 
 class _MathFormFieldState extends FormFieldState<String> {
   late MathFieldEditingController _controller;
+
+  /// The separator the field reports its value with.
+  ///
+  /// [FormField.initialValue] is built before a [BuildContext] exists, so it is
+  /// always canonical. Resolving here and rewriting the value keeps the form
+  /// from mixing formats.
+  var _decimalSeparator = DecimalSeparator.dot;
 
   @override
   MathFormField get widget => super.widget as MathFormField;
@@ -98,6 +113,20 @@ class _MathFormFieldState extends FormFieldState<String> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final separator =
+        widget.decimalSeparator ??
+        MathKeyboardTheme.decimalSeparatorOf(context);
+    if (separator == _decimalSeparator) return;
+
+    _decimalSeparator = separator;
+    setValue(
+      _controller.currentEditingValue(decimalSeparator: _decimalSeparator),
+    );
+  }
+
+  @override
   void didUpdateWidget(MathFormField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
@@ -112,7 +141,9 @@ class _MathFormFieldState extends FormFieldState<String> {
         widget.controller!.addListener(_handleControllerChanged);
         _controller = widget.controller!;
       }
-      setValue(_controller.currentEditingValue());
+      setValue(
+        _controller.currentEditingValue(decimalSeparator: _decimalSeparator),
+      );
     }
   }
 

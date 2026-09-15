@@ -7,6 +7,7 @@
 import 'dart:math' as math;
 
 import 'package:math_expressions/math_expressions.dart';
+import 'package:math_keyboard/src/foundation/decimal_separator.dart';
 import 'package:petitparser/petitparser.dart';
 
 /// Parser for converting TeX input strings to math expressions.
@@ -23,6 +24,19 @@ class TeXParser {
   final _outputStack = <dynamic>[];
   final _operatorStack = <dynamic>[];
 
+  /// Rewrites any decimal separator in [value] to the `.` that [num.parse]
+  /// expects, dropping the TeX group around a separator that was typeset for
+  /// display.
+  static String _canonicalizeNumber(String value) {
+    var result = value;
+    for (final separator in DecimalSeparator.values) {
+      result = result
+          .replaceAll('{${separator.symbol}}', '.')
+          .replaceAll(separator.symbol, '.');
+    }
+    return result;
+  }
+
   /// Traverses the TeX String and creates classifies symbols.
   ///
   // ignore: code-metrics, long-method
@@ -35,12 +49,24 @@ class TeXParser {
     /// o+digit+(l) -> operator + precedence + (left-associativity)
     /// u -> other
     final integer = digit().plus().flatten();
+    // Any separator a math field can display, optionally wrapped in a TeX
+    // group (the field groups it to suppress the list spacing TeX applies to a
+    // comma). Deriving this from [DecimalSeparator] keeps the parser in sync
+    // with what a field can emit. These are unambiguous because this TeX
+    // dialect has no comma-separated constructs, and because none of them is a
+    // letter, which is what a variable group holds.
+    final decimalSeparator = ChoiceParser([
+      // Grouped forms first so that the whole group is consumed.
+      for (final separator in DecimalSeparator.values)
+        string('{${separator.symbol}}'),
+      for (final separator in DecimalSeparator.values) string(separator.symbol),
+    ]);
     final number =
-        ((integer | char('.').and()) &
-                (char('.') & integer).pick(1).optional() &
+        ((integer | decimalSeparator.and()) &
+                (decimalSeparator & integer).pick(1).optional() &
                 (char('E') & pattern('+-').optional() & integer).optional())
             .flatten()
-            .map(num.parse);
+            .map((value) => num.parse(_canonicalizeNumber(value)));
 
     final pi = (string('{') & string(r'\pi') & string('}')).map((a) => math.pi);
     final e = (string('{') & string('e') & string('}')).map((a) => math.e);
