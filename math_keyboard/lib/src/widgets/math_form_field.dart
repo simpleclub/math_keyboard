@@ -115,6 +115,11 @@ class _MathFormFieldState extends FormFieldState<String> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _syncDecimalSeparator();
+  }
+
+  /// Rewrites the value when the separator the field displays changes.
+  void _syncDecimalSeparator() {
     final separator =
         widget.decimalSeparator ??
         MathKeyboardTheme.decimalSeparatorOf(context);
@@ -129,6 +134,9 @@ class _MathFormFieldState extends FormFieldState<String> {
   @override
   void didUpdateWidget(MathFormField oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.decimalSeparator != oldWidget.decimalSeparator) {
+      _syncDecimalSeparator();
+    }
     if (widget.controller != oldWidget.controller) {
       if (oldWidget.controller == null) {
         widget.controller!.addListener(_handleControllerChanged);
@@ -176,8 +184,11 @@ class _MathFormFieldState extends FormFieldState<String> {
     // notifications for changes originating from within this class -- for
     // example, the reset() method. In such cases, the FormField value will
     // already have been set.
-    if (_controller.currentEditingValue() != value) {
-      didChange(_controller.currentEditingValue());
+    final editingValue = _controller.currentEditingValue(
+      decimalSeparator: _decimalSeparator,
+    );
+    if (editingValue != value) {
+      didChange(editingValue);
     }
   }
 }

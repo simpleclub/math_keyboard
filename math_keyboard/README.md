@@ -182,7 +182,8 @@ choose it explicitly instead — e.g. to back a user-facing setting — set a `D
 precedence.
 
 The separator applies to the math field, the symbol on the keyboard, the screen-reader
-announcements, and the TeX reported by `onChanged`, so rendering that TeX shows the same number the
+announcements, and the TeX reported by `onChanged` and `onSubmitted`, so rendering that TeX shows
+the same number the
 field shows. It is emitted as a TeX group (`1{,}5`) to keep the spacing right; [`TeXParser`][TeXParser]
 reads that form and the plain `1.5` form alike. Since the reported value follows the separator,
 normalize it before storing it if you compare or parse expressions across locales.

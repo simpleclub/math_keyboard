@@ -273,17 +273,22 @@ void main() {
       ..addLeaf('.')
       ..addLeaf('5');
 
-    String? validated;
+    final validated = <String?>[];
+    // Every value a Form observer can read, including intermediate ones.
+    final observed = <String?>[];
+    final fieldKey = GlobalKey<FormFieldState<String>>();
     await tester.pumpWidget(
       app(
         child: MathKeyboardTheme(
           decimalSeparator: DecimalSeparator.comma,
           child: Form(
+            onChanged: () => observed.add(fieldKey.currentState?.value),
             child: MathFormField(
+              key: fieldKey,
               controller: controller,
               autovalidateMode: AutovalidateMode.always,
               validator: (value) {
-                validated = value;
+                validated.add(value);
                 return null;
               },
             ),
@@ -295,6 +300,39 @@ void main() {
 
     // A validator must not see the canonical form initially and the localized
     // form after the first edit.
-    expect(validated, '1{,}5');
+    expect(validated.last, '1{,}5');
+
+    // A change driven through the external controller must not report the
+    // canonical form either, not even transiently: the field's own controller
+    // listener notifies Form.onChanged before the MathField reports, so an
+    // observer would otherwise read the wrong format.
+    controller.addLeaf('2');
+    await tester.pump();
+    expect(validated.last, '1{,}52');
+    expect(observed, isNot(contains('1.52')));
+
+    // ... and so does a change of the separator itself, which arrives as a
+    // widget update rather than a dependency change.
+    await tester.pumpWidget(
+      app(
+        child: MathKeyboardTheme(
+          decimalSeparator: DecimalSeparator.comma,
+          child: Form(
+            child: MathFormField(
+              controller: controller,
+              decimalSeparator: DecimalSeparator.dot,
+              autovalidateMode: AutovalidateMode.always,
+              validator: (value) {
+                validated.add(value);
+                return null;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(validated.last, '1.52');
   });
 }
