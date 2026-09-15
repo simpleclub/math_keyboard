@@ -11,6 +11,9 @@ on:
       - 'math_keyboard_demo/lib/**'
       - 'math_keyboard_demo/web/**'
       - 'math_keyboard_demo/pubspec.yaml'
+      # The demo depends on the package by path, so a change to the package
+      # itself changes the deployed demo and has to redeploy it.
+      - 'math_keyboard/lib/**'
       - 'math_keyboard/pubspec.yaml'
 
 jobs:
