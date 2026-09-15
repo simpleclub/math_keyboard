@@ -1121,9 +1121,26 @@ class MathFieldEditingController extends ChangeNotifier {
     DecimalSeparator decimalSeparator,
   ) {
     final parts = <String>[];
+    // The digits and the decimal separator of one number are spoken as a single
+    // token ("1,5", "23"), because screen readers spell space separated digits
+    // out one by one and drop a lone separator entirely, turning "1 , 5" into
+    // "one five". The cursor may sit inside a number, so it does not break the
+    // run.
+    final number = StringBuffer();
+    void flushNumber() {
+      if (number.isEmpty) return;
+      parts.add(number.toString());
+      number.clear();
+    }
+
     for (final tex in node.children) {
+      if (tex is TeXLeaf && _isNumberPart(tex.expression)) {
+        number.write(
+          tex.expression == '.' ? decimalSeparator.symbol : tex.expression,
+        );
+        continue;
+      }
       final part = switch (tex) {
-        TeXLeaf() when tex.expression == '.' => decimalSeparator.symbol,
         TeXLeaf() => semantics.tokenLabel(tex.expression),
         TeXFunction() => [
           semantics.functionLabel(tex.expression),
@@ -1133,10 +1150,18 @@ class MathFieldEditingController extends ChangeNotifier {
         // The cursor and anything else contribute nothing.
         _ => '',
       };
+      if (tex is! Cursor) flushNumber();
       if (part.isNotEmpty) parts.add(part);
     }
+    flushNumber();
     return parts.join(' ');
   }
+
+  /// Whether [tex] is a digit or the canonical decimal separator, i.e. a leaf
+  /// that is read as part of the number it belongs to.
+  static bool _isNumberPart(String tex) =>
+      tex.length == 1 &&
+      (tex == '.' || (tex.codeUnitAt(0) >= 0x30 && tex.codeUnitAt(0) <= 0x39));
 
   /// Returns a screen-reader friendly description of the cursor's location.
   ///

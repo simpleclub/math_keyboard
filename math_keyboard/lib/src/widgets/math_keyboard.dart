@@ -1118,6 +1118,10 @@ class _BasicButton extends StatelessWidget {
     } else if (asTex) {
       resolvedSemanticsLabel = semantics.functionLabel(label!);
     } else if (label == '.') {
+      // The separator glyph itself, not a word: a label that is punctuation on
+      // its own is announced by the screen reader in the user's own language
+      // ("Komma" for a German VoiceOver), which a hard-coded English default
+      // could not do.
       resolvedSemanticsLabel = MathKeyboardTheme.decimalSeparatorOf(
         context,
       ).symbol;

@@ -14,6 +14,13 @@
   * Section landmark regions (variables, formula, numbers, submit) so screen
     readers can jump between them.
   * The math field opens the keyboard from an accessibility activation.
+  * Numbers are announced as numbers: the digits and the decimal separator of
+    one number are exposed as a single token ("1,5", "23") instead of
+    space-separated leaves, which screen readers spelled out digit by digit
+    while dropping the separator ("1 5").
+  * The cursor announcements name the decimal separator as a word ("before
+    point", from the `tokenMappings` of `MathKeyboardSemantics`), because a
+    bare `.` embedded in a sentence is dropped as punctuation.
 * Add `large_content_viewer` dependency for long-press magnification of keys at
   large text sizes.
 * Make the decimal separator configurable via the new `DecimalSeparator` enum,

@@ -167,6 +167,8 @@ void main() {
         ),
       );
 
+      // The glyph itself, so that the screen reader names it in the user's own
+      // language rather than in whatever language a label would hard-code.
       expect(find.bySemanticsLabel(','), findsOneWidget);
       expect(find.bySemanticsLabel('.'), findsNothing);
       handle.dispose();
@@ -203,10 +205,11 @@ void main() {
               .map((widget) => widget.text.toPlainText()),
           ['1', ',', '5'],
         );
-        // ... and the screen reader announces it, rather than a literal dot.
+        // ... and the screen reader announces it as one number, rather than
+        // as a literal dot or as space separated digits.
         expect(
           tester.getSemantics(find.bySemanticsLabel('Math field')).value,
-          '1 , 5',
+          '1,5',
         );
         handle.dispose();
       },
@@ -334,5 +337,77 @@ void main() {
     await tester.pump();
 
     expect(validated.last, '1.52');
+  });
+
+  group('spoken numbers', () {
+    /// The spoken value of the whole expression in [controller].
+    String spoken(
+      MathFieldEditingController controller,
+      DecimalSeparator separator,
+    ) => controller.readableExpression(
+      MathKeyboardSemantics.fallback,
+      decimalSeparator: separator,
+    );
+
+    /// Types the [tokens] as leaves into a fresh controller.
+    MathFieldEditingController typed(List<String> tokens) {
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      for (final token in tokens) {
+        controller.addLeaf(token);
+      }
+      return controller;
+    }
+
+    test('reads a decimal as one number, not as separate digits', () {
+      // Space separated digits are spelled out one by one and a lone separator
+      // is dropped entirely, so "1 , 5" is announced as "one five".
+      final controller = typed(['1', '.', '5']);
+
+      expect(spoken(controller, DecimalSeparator.comma), '1,5');
+      expect(spoken(controller, DecimalSeparator.dot), '1.5');
+    });
+
+    test('joins the digits of a multi digit number', () {
+      expect(spoken(typed(['2', '3']), DecimalSeparator.dot), '23');
+    });
+
+    test('keeps operators and functions separated from the numbers', () {
+      final controller = typed(['1', '.', '5', '+', '2', '3', r'\cdot', '4']);
+
+      expect(spoken(controller, DecimalSeparator.comma), '1,5 plus 23 times 4');
+    });
+
+    test('is not broken up by the cursor sitting inside a number', () {
+      final controller = typed(['1', '.', '5'])..goBack();
+
+      expect(spoken(controller, DecimalSeparator.comma), '1,5');
+    });
+
+    test('speaks the separator as a word next to the cursor', () {
+      // The cursor announcement embeds a single token in a sentence, where a
+      // bare `.` is dropped as punctuation, so it comes from `tokenMappings`
+      // as a word instead.
+      final controller = typed(['1', '.', '5'])
+        ..goBack()
+        ..goBack();
+
+      expect(
+        controller.describeCursorContext(MathKeyboardSemantics.fallback),
+        'before point',
+      );
+      expect(
+        controller.describeCursorContext(
+          MathKeyboardSemantics.fallback.copyWith(
+            tokenMappings: {
+              ...MathKeyboardSemantics.fallback.tokenMappings,
+              '.': 'Komma',
+            },
+          ),
+        ),
+        'before Komma',
+        reason: 'the separator is localized through the existing seam',
+      );
+    });
   });
 }
