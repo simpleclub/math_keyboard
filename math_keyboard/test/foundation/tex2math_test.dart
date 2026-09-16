@@ -9,7 +9,6 @@ import 'package:math_keyboard/math_keyboard.dart';
 // todo| Note that the latter is because Expression does not override equality.
 // ignore: long-method
 void main() {
-  _decimalSeparatorTests();
   group('constants', () {
     test('pi', () {
       const tex = r'23+{\pi}+{x}';
@@ -212,47 +211,6 @@ void main() {
         TeXParser(tex).parse().toString(),
         ShuntingYardParser().parse(exp).toString(),
       );
-    });
-  });
-}
-
-void _decimalSeparatorTests() {
-  group('decimal separators', () {
-    /// Parses [tex] and evaluates it to a double.
-    double evaluate(String tex) =>
-        TeXParser(tex).parse().evaluate(EvaluationType.REAL, ContextModel())
-            as double;
-
-    test('parses the canonical dot form', () {
-      expect(evaluate('1.5'), 1.5);
-      expect(evaluate('.5'), 0.5);
-    });
-
-    test('parses a bare comma', () {
-      expect(evaluate('1,5'), 1.5);
-      expect(evaluate(',5'), 0.5);
-    });
-
-    test('parses the grouped separator the field displays', () {
-      expect(evaluate('1{,}5'), 1.5);
-      expect(evaluate('1{.}5'), 1.5);
-      expect(evaluate('{,}5'), 0.5);
-    });
-
-    test('parses a comma inside a larger expression', () {
-      expect(evaluate(r'1{,}5+2{,}5'), 4.0);
-      expect(evaluate(r'\frac{1{,}5}{0{,}5}'), 3.0);
-    });
-
-    test('keeps exponents working with either separator', () {
-      expect(evaluate('1.5E2'), 150.0);
-      expect(evaluate('1{,}5E2'), 150.0);
-    });
-
-    test('does not mistake a variable group for a number', () {
-      final expression = TeXParser('{x}+1{,}5').parse();
-      final context = ContextModel()..bindVariableName('x', Number(1));
-      expect(expression.evaluate(EvaluationType.REAL, context), 2.5);
     });
   });
 }

@@ -4,9 +4,9 @@ import 'package:intl/number_symbols_data.dart';
 
 /// A decimal separator a math field can display.
 ///
-/// These are the two decimal markers SI and ISO recognize. Displaying and
-/// parsing are kept in sync through this enum: a field only ever displays one
-/// of these, and [TeXParser] accepts exactly these.
+/// These are the two decimal markers SI and ISO recognize. The separator only
+/// affects what a field displays and announces; the TeX a field reports always
+/// uses the canonical `.`.
 enum DecimalSeparator {
   /// The dot used by e.g. `en`, and the canonical separator in TeX values.
   dot('.'),
@@ -21,12 +21,16 @@ enum DecimalSeparator {
 
   /// The separator of the current locale, or [dot] if it uses neither of these.
   ///
+  /// The [context] is used for a dependency on [Localizations]. See
+  /// [fromLocale] for the mapping.
+  static DecimalSeparator of(BuildContext context) =>
+      fromLocale(Localizations.localeOf(context));
+
+  /// The separator of [locale], or [dot] if it uses neither of these.
+  ///
   /// Note that a handful of locales (`ar_EG`, `fa`, `ps`) use the Arabic
   /// decimal separator, and fall back to [dot] here.
-  ///
-  /// The [context] is used for a dependency on [Localizations].
-  static DecimalSeparator of(BuildContext context) {
-    final locale = Localizations.localeOf(context);
+  static DecimalSeparator fromLocale(Locale locale) {
     final symbol =
         numberFormatSymbols[Intl.verifiedLocale(
               '${locale.languageCode}_${locale.countryCode}',
@@ -46,7 +50,6 @@ enum DecimalSeparator {
   ///
   /// The separator is wrapped in a TeX group (`{,}`) because a bare comma is
   /// spaced as if it separated a list, which would put a gap after it.
-  /// [TeXParser] reads both the grouped and the plain form.
   String applyTo(String tex) =>
       this == dot ? tex : tex.replaceAll('.', '{$symbol}');
 }

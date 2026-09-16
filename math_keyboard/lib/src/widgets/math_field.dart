@@ -140,11 +140,10 @@ class MathField extends StatefulWidget {
   /// If `null`, it is resolved from the nearest [MathKeyboardTheme], or from
   /// the current locale if there is none.
   ///
-  /// It is applied to the TeX reported by [onChanged] and [onSubmitted] too, as
-  /// a TeX group (`1{,}5`) so that the spacing stays right, so rendering that
-  /// TeX shows the same number the field shows. The reported value is therefore
-  /// locale-dependent: normalize it before storing it if you compare or parse
-  /// expressions across locales.
+  /// This only affects what the field displays and announces. The TeX reported
+  /// by [onChanged] and [onSubmitted] always uses the canonical `.`, so that
+  /// the value can be stored and parsed independently of the locale. Render it
+  /// with [DecimalSeparator.applyTo] to show the same number the field shows.
   final DecimalSeparator? decimalSeparator;
 
   /// The spoken value the screen reader announces for the field's content.
@@ -181,8 +180,8 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   /// The separator in effect, resolved from the widget argument, the nearest
   /// [MathKeyboardTheme], or the locale.
   ///
-  /// Cached because the value is needed outside of [build], when reporting the
-  /// field's value.
+  /// Cached because the value is needed outside of [build], when opening the
+  /// keyboard overlay.
   late DecimalSeparator _decimalSeparator;
   late var _focusNode =
       widget.focusNode ??
@@ -351,7 +350,6 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
 
     final expression = _controller.currentEditingValue(
       placeholderWhenEmpty: false,
-      decimalSeparator: _decimalSeparator,
     );
     // We want to make sure to execute the callback after we have
     // executed all of our logic that we know has to be executed.
@@ -556,10 +554,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
     // suppressed, so submitting must close the keyboard itself.
     _closeKeyboard();
     widget.onSubmitted?.call(
-      _controller.currentEditingValue(
-        placeholderWhenEmpty: false,
-        decimalSeparator: _decimalSeparator,
-      ),
+      _controller.currentEditingValue(placeholderWhenEmpty: false),
     );
   }
 
@@ -980,10 +975,7 @@ class MathFieldEditingController extends ChangeNotifier {
   /// Returns the current editing value (expression), which requires temporarily
   /// removing the cursor. When [placeholderWhenEmpty] is true, a TeX \Box
   /// is returned as a placeholder.
-  String currentEditingValue({
-    bool placeholderWhenEmpty = true,
-    DecimalSeparator decimalSeparator = DecimalSeparator.dot,
-  }) {
+  String currentEditingValue({bool placeholderWhenEmpty = true}) {
     currentNode.removeCursor();
     // Store the expression as a TeX string.
     final expression = root.buildTeXString(
@@ -994,7 +986,7 @@ class MathFieldEditingController extends ChangeNotifier {
     );
     currentNode.setCursor();
 
-    return decimalSeparator.applyTo(expression);
+    return expression;
   }
 
   /// Clears the current value and sets it to the [expression] equivalent.

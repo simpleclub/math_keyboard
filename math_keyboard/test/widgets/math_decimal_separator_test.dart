@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:math_expressions/math_expressions.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 
 /// Tests for the configurable decimal separator: how it is resolved (argument >
-/// [MathKeyboardTheme] > locale), that it reaches the key, the preview, the
-/// spoken value and the reported TeX, and that the reported TeX parses back.
+/// [MathKeyboardTheme] > locale), that it reaches the key, the preview and the
+/// spoken value, and that the reported TeX stays canonical.
 void main() {
   /// Pins a portrait window so the paged (non-landscape) layout is exercised.
   void pinPortrait(WidgetTester tester) {
@@ -113,6 +112,23 @@ void main() {
     });
   });
 
+  group('DecimalSeparator.fromLocale', () {
+    test('maps a locale without a context', () {
+      expect(
+        DecimalSeparator.fromLocale(const Locale('de', 'DE')),
+        DecimalSeparator.comma,
+      );
+      expect(
+        DecimalSeparator.fromLocale(const Locale('en', 'US')),
+        DecimalSeparator.dot,
+      );
+      expect(
+        DecimalSeparator.fromLocale(const Locale('zz', 'ZZ')),
+        DecimalSeparator.dot,
+      );
+    });
+  });
+
   group('MathKeyboard decimal separator', () {
     testWidgets('falls back to the locale', (tester) async {
       pinPortrait(tester);
@@ -176,51 +192,43 @@ void main() {
   });
 
   group('MathField decimal separator', () {
-    testWidgets(
-      'reaches the preview, the reported value and the spoken value',
-      (tester) async {
-        pinPortrait(tester);
-        final controller = MathFieldEditingController();
-        addTearDown(controller.dispose);
-        final handle = tester.ensureSemantics();
-        String? changed;
+    testWidgets('reaches the preview and the spoken value', (tester) async {
+      pinPortrait(tester);
+      final controller = MathFieldEditingController();
+      addTearDown(controller.dispose);
+      final handle = tester.ensureSemantics();
 
-        await tester.pumpWidget(
-          app(
-            child: MathField(
-              controller: controller,
-              decimalSeparator: DecimalSeparator.comma,
-              onChanged: (value) => changed = value,
-            ),
+      await tester.pumpWidget(
+        app(
+          child: MathField(
+            controller: controller,
+            decimalSeparator: DecimalSeparator.comma,
           ),
-        );
-        await typeOnePointFive(tester, controller);
+        ),
+      );
+      await typeOnePointFive(tester, controller);
 
-        // Grouped so that it typesets without the list spacing of a bare comma.
-        expect(changed, '1{,}5');
-        // The preview renders the same number the value describes ...
-        expect(
-          tester
-              .widgetList<RichText>(find.byType(RichText))
-              .map((widget) => widget.text.toPlainText()),
-          ['1', ',', '5'],
-        );
-        // ... and the screen reader announces it as one number, rather than
-        // as a literal dot or as space separated digits.
-        expect(
-          tester.getSemantics(find.bySemanticsLabel('Math field')).value,
-          '1,5',
-        );
-        handle.dispose();
-      },
-    );
+      // The preview renders the number with the configured separator ...
+      expect(
+        tester
+            .widgetList<RichText>(find.byType(RichText))
+            .map((widget) => widget.text.toPlainText()),
+        ['1', ',', '5'],
+      );
+      // ... and the screen reader announces it as one number, rather than
+      // as a literal dot or as space separated digits.
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('Math field')).value,
+        '1,5',
+      );
+      handle.dispose();
+    });
 
-    testWidgets('round-trips every separator through TeXParser', (
-      tester,
-    ) async {
+    testWidgets('does not reach the reported value', (tester) async {
       pinPortrait(tester);
       for (final separator in DecimalSeparator.values) {
         final controller = MathFieldEditingController();
+        addTearDown(controller.dispose);
         String? changed;
         await tester.pumpWidget(
           app(
@@ -234,40 +242,15 @@ void main() {
         );
         await typeOnePointFive(tester, controller);
 
-        expect(
-          TeXParser(
-            changed!,
-          ).parse().evaluate(EvaluationType.REAL, ContextModel()),
-          1.5,
-          reason: '$separator produced unparseable TeX: $changed',
-        );
-        controller.dispose();
+        // The reported TeX stays canonical so that it can be stored and parsed
+        // independently of the locale.
+        expect(changed, '1.5', reason: '$separator changed the reported TeX');
       }
-    });
-
-    testWidgets('reports the canonical form for a dot locale', (tester) async {
-      pinPortrait(tester);
-      final controller = MathFieldEditingController();
-      addTearDown(controller.dispose);
-      String? changed;
-
-      await tester.pumpWidget(
-        app(
-          child: MathField(
-            controller: controller,
-            onChanged: (value) => changed = value,
-          ),
-        ),
-      );
-      await typeOnePointFive(tester, controller);
-
-      // Unchanged from before the separator became configurable.
-      expect(changed, '1.5');
     });
   });
 
-  testWidgets('MathFormField reports its initial value in the displayed '
-      'separator', (tester) async {
+  testWidgets('MathFormField displays the configured separator and keeps its '
+      'value canonical', (tester) async {
     pinPortrait(tester);
     final controller = MathFieldEditingController();
     addTearDown(controller.dispose);
@@ -277,66 +260,30 @@ void main() {
       ..addLeaf('5');
 
     final validated = <String?>[];
-    // Every value a Form observer can read, including intermediate ones.
-    final observed = <String?>[];
-    final fieldKey = GlobalKey<FormFieldState<String>>();
     await tester.pumpWidget(
       app(
-        child: MathKeyboardTheme(
-          decimalSeparator: DecimalSeparator.comma,
-          child: Form(
-            onChanged: () => observed.add(fieldKey.currentState?.value),
-            child: MathFormField(
-              key: fieldKey,
-              controller: controller,
-              autovalidateMode: AutovalidateMode.always,
-              validator: (value) {
-                validated.add(value);
-                return null;
-              },
-            ),
+        child: Form(
+          child: MathFormField(
+            controller: controller,
+            decimalSeparator: DecimalSeparator.comma,
+            autovalidateMode: AutovalidateMode.always,
+            validator: (value) {
+              validated.add(value);
+              return null;
+            },
           ),
         ),
       ),
     );
     await tester.pump();
 
-    // A validator must not see the canonical form initially and the localized
-    // form after the first edit.
-    expect(validated.last, '1{,}5');
-
-    // A change driven through the external controller must not report the
-    // canonical form either, not even transiently: the field's own controller
-    // listener notifies Form.onChanged before the MathField reports, so an
-    // observer would otherwise read the wrong format.
-    controller.addLeaf('2');
-    await tester.pump();
-    expect(validated.last, '1{,}52');
-    expect(observed, isNot(contains('1.52')));
-
-    // ... and so does a change of the separator itself, which arrives as a
-    // widget update rather than a dependency change.
-    await tester.pumpWidget(
-      app(
-        child: MathKeyboardTheme(
-          decimalSeparator: DecimalSeparator.comma,
-          child: Form(
-            child: MathFormField(
-              controller: controller,
-              decimalSeparator: DecimalSeparator.dot,
-              autovalidateMode: AutovalidateMode.always,
-              validator: (value) {
-                validated.add(value);
-                return null;
-              },
-            ),
-          ),
-        ),
-      ),
+    expect(
+      tester
+          .widgetList<RichText>(find.byType(RichText))
+          .map((widget) => widget.text.toPlainText()),
+      ['1', ',', '5'],
     );
-    await tester.pump();
-
-    expect(validated.last, '1.52');
+    expect(validated.last, '1.5');
   });
 
   group('spoken numbers', () {

@@ -78,7 +78,7 @@ class MathFormField extends FormField<String> {
   /// If null, this widget will create its own [MathFieldEditingController].
   final MathFieldEditingController? controller;
 
-  /// The decimal separator to display, and to report the value with.
+  /// The decimal separator to display in the field and on its keyboard.
   ///
   /// See [MathField.decimalSeparator].
   final DecimalSeparator? decimalSeparator;
@@ -89,13 +89,6 @@ class MathFormField extends FormField<String> {
 
 class _MathFormFieldState extends FormFieldState<String> {
   late MathFieldEditingController _controller;
-
-  /// The separator the field reports its value with.
-  ///
-  /// [FormField.initialValue] is built before a [BuildContext] exists, so it is
-  /// always canonical. Resolving here and rewriting the value keeps the form
-  /// from mixing formats.
-  var _decimalSeparator = DecimalSeparator.dot;
 
   @override
   MathFormField get widget => super.widget as MathFormField;
@@ -113,30 +106,8 @@ class _MathFormFieldState extends FormFieldState<String> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncDecimalSeparator();
-  }
-
-  /// Rewrites the value when the separator the field displays changes.
-  void _syncDecimalSeparator() {
-    final separator =
-        widget.decimalSeparator ??
-        MathKeyboardTheme.decimalSeparatorOf(context);
-    if (separator == _decimalSeparator) return;
-
-    _decimalSeparator = separator;
-    setValue(
-      _controller.currentEditingValue(decimalSeparator: _decimalSeparator),
-    );
-  }
-
-  @override
   void didUpdateWidget(MathFormField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.decimalSeparator != oldWidget.decimalSeparator) {
-      _syncDecimalSeparator();
-    }
     if (widget.controller != oldWidget.controller) {
       if (oldWidget.controller == null) {
         widget.controller!.addListener(_handleControllerChanged);
@@ -149,9 +120,7 @@ class _MathFormFieldState extends FormFieldState<String> {
         widget.controller!.addListener(_handleControllerChanged);
         _controller = widget.controller!;
       }
-      setValue(
-        _controller.currentEditingValue(decimalSeparator: _decimalSeparator),
-      );
+      setValue(_controller.currentEditingValue());
     }
   }
 
@@ -184,11 +153,8 @@ class _MathFormFieldState extends FormFieldState<String> {
     // notifications for changes originating from within this class -- for
     // example, the reset() method. In such cases, the FormField value will
     // already have been set.
-    final editingValue = _controller.currentEditingValue(
-      decimalSeparator: _decimalSeparator,
-    );
-    if (editingValue != value) {
-      didChange(editingValue);
+    if (_controller.currentEditingValue() != value) {
+      didChange(_controller.currentEditingValue());
     }
   }
 }

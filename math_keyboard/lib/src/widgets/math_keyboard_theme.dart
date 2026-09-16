@@ -416,9 +416,8 @@ class MathKeyboardTheme extends InheritedWidget {
   /// The decimal separator displayed by descendant math fields and keyboards.
   ///
   /// Set this to pin the separator regardless of the locale, e.g. to back a
-  /// user-facing setting. It is applied to the TeX reported by
-  /// `MathField.onChanged` as well, so rendering that TeX shows the same number
-  /// the field shows.
+  /// user-facing setting. It only affects what is displayed and announced; the
+  /// TeX reported by `MathField.onChanged` keeps the canonical `.`.
   ///
   /// Defaults to `null`, which resolves the separator from the ambient locale.
   final DecimalSeparator? decimalSeparator;

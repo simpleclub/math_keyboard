@@ -181,12 +181,11 @@ choose it explicitly instead — e.g. to back a user-facing setting — set a `D
 `MathKeyboardTheme` (for all descendant fields) or on an individual `MathField`, which takes
 precedence.
 
-The separator applies to the math field, the symbol on the keyboard, the screen-reader
-announcements, and the TeX reported by `onChanged` and `onSubmitted`, so rendering that TeX shows
-the same number the
-field shows. It is emitted as a TeX group (`1{,}5`) to keep the spacing right; [`TeXParser`][TeXParser]
-reads that form and the plain `1.5` form alike. Since the reported value follows the separator,
-normalize it before storing it if you compare or parse expressions across locales.
+The separator applies to the math field, the symbol on the keyboard, and the screen-reader
+announcements. The TeX reported by `onChanged` and `onSubmitted` always uses a dot, so the value can
+be stored and parsed independently of the locale. To render it the way the field shows it, call
+`DecimalSeparator.applyTo` on it, which emits the separator as a TeX group (`1{,}5`) to keep the
+spacing right.
 
 Note that physical keyboard input always accepts both `.` and `,`.
 
