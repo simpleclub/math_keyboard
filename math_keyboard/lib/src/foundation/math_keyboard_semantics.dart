@@ -238,6 +238,12 @@ class MathKeyboardSemantics {
   ];
 
   static const Map<String, String> _defaultTokenMappings = {
+    // Spoken as a word, because a lone `.` embedded in an announcement (for
+    // example "before .") is dropped by screen readers as punctuation. Inside a
+    // number the separator is kept as a glyph instead, so that the speech
+    // engine reads "1.5" as one number. Localize this entry along with the rest
+    // to say e.g. "Komma" in a comma locale.
+    '.': 'point',
     r'\cdot': 'times',
     r'\div': 'divided by',
     // The division key inserts a fraction, so its inserted token is `\frac`.

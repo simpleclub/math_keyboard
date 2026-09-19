@@ -14,8 +14,27 @@
   * Section landmark regions (variables, formula, numbers, submit) so screen
     readers can jump between them.
   * The math field opens the keyboard from an accessibility activation.
+  * Numbers are announced as numbers: the digits and the decimal separator of
+    one number are exposed as a single token ("1,5", "23") instead of
+    space-separated leaves, which screen readers spelled out digit by digit
+    while dropping the separator ("1 5").
+  * The cursor announcements name the decimal separator as a word ("before
+    point", from the `tokenMappings` of `MathKeyboardSemantics`), because a
+    bare `.` embedded in a sentence is dropped as punctuation.
 * Add `large_content_viewer` dependency for long-press magnification of keys at
   large text sizes.
+* Make the decimal separator configurable via the new `DecimalSeparator` enum,
+  on `MathKeyboardTheme` or as an argument to `MathField`, `MathFormField`, and
+  `MathKeyboard`, instead of always deriving it from the locale. Defaults to
+  `null`, which keeps the previous locale-based behavior. The separator only
+  affects what is displayed and announced; the TeX reported by `onChanged` and
+  `onSubmitted` keeps using `.`. `DecimalSeparator.applyTo` localizes such a
+  value for rendering.
+* **Breaking:** `decimalSeparator(BuildContext)` is now `DecimalSeparator.of`,
+  returning the enum. It no longer throws an `ArgumentError` for locales `intl`
+  does not know, and locales that use neither of the two markers SI and ISO
+  recognize (`ar_EG`, `fa`, `ps`, which use the Arabic decimal separator) now
+  fall back to `.` instead of displaying a separator `TeXParser` cannot read.
 * Requires Flutter 3.35.1 / Dart 3.9.
 
 ## 0.3.3

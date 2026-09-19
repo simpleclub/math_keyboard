@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:math_keyboard/src/foundation/decimal_separator.dart';
 import 'package:math_keyboard/src/foundation/math_keyboard_semantics.dart';
 import 'package:math_keyboard/src/widgets/math_field.dart';
 import 'package:math_keyboard/src/widgets/math_keyboard.dart';
@@ -37,6 +38,7 @@ class MathFormField extends FormField<String> {
     MathKeyboardStyle? style,
     MathKeyboardSemantics? semantics,
     String? semanticsValue,
+    this.decimalSeparator,
   }) : super(
          key: key,
          initialValue: controller != null
@@ -66,6 +68,7 @@ class MathFormField extends FormField<String> {
              style: style,
              semantics: semantics,
              semanticsValue: semanticsValue,
+             decimalSeparator: state.widget.decimalSeparator,
            );
          },
        );
@@ -74,6 +77,11 @@ class MathFormField extends FormField<String> {
   ///
   /// If null, this widget will create its own [MathFieldEditingController].
   final MathFieldEditingController? controller;
+
+  /// The decimal separator to display in the field and on its keyboard.
+  ///
+  /// See [MathField.decimalSeparator].
+  final DecimalSeparator? decimalSeparator;
 
   @override
   _MathFormFieldState createState() => _MathFormFieldState();
