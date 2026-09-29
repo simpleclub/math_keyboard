@@ -39,6 +39,7 @@ class MathFormField extends FormField<String> {
     MathKeyboardSemantics? semantics,
     String? semanticsValue,
     this.decimalSeparator,
+    this.isShowMultiplyValueAsDot = true,
   }) : super(
          key: key,
          initialValue: controller != null
@@ -65,6 +66,7 @@ class MathFormField extends FormField<String> {
              autofocus: autofocus,
              onChanged: onChangedHandler,
              onSubmitted: onFieldSubmitted,
+             isShowMultiplyValueAsDot: isShowMultiplyValueAsDot,
              style: style,
              semantics: semantics,
              semanticsValue: semanticsValue,
@@ -82,6 +84,9 @@ class MathFormField extends FormField<String> {
   ///
   /// See [MathField.decimalSeparator].
   final DecimalSeparator? decimalSeparator;
+
+  /// If true, the multiply value will be shown as dot else it will be shown as x.
+  final bool isShowMultiplyValueAsDot;
 
   @override
   _MathFormFieldState createState() => _MathFormFieldState();

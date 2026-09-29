@@ -30,6 +30,7 @@ class MathField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.opensKeyboard = true,
+    this.isShowMultiplyValueAsDot = true,
     this.style,
     this.semantics,
     this.semanticsValue,
@@ -123,6 +124,9 @@ class MathField extends StatefulWidget {
   /// Defaults to `true`.
   final bool opensKeyboard;
 
+  /// If true, the multiply value will be shown as dot else it will be shown as x.
+  final bool isShowMultiplyValueAsDot;
+
   /// The visual styling of the on-screen math keyboard.
   ///
   /// If `null`, the style is resolved from the nearest [MathKeyboardTheme], or
@@ -154,7 +158,6 @@ class MathField extends StatefulWidget {
   /// [MathFieldEditingController.readableExpression], so the package needs no
   /// extra dependency to remain accessible on its own.
   final String? semanticsValue;
-
   @override
   _MathFieldState createState() => _MathFieldState();
 }
@@ -514,6 +517,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
           context: this.context,
           locale: Localizations.localeOf(this.context),
           child: MathKeyboard(
+            isShowMultiplyValueAsDot: widget.isShowMultiplyValueAsDot,
             controller: _controller,
             type: widget.keyboardType,
             variables: _variables,
@@ -591,7 +595,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
         <List<KeyboardButtonConfig>>[
           if (widget.keyboardType ==
               MathKeyboardType.expression) ...<List<KeyboardButtonConfig>>[
-            ...standardKeyboard,
+            ...standardKeyboard(
+              isShowMultiplyValueAsDot: widget.isShowMultiplyValueAsDot,
+            ),
             ...functionKeyboard,
           ] else if (widget.keyboardType == MathKeyboardType.numberOnly) ...[
             ...numberKeyboard,

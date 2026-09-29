@@ -6,12 +6,13 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:math_keyboard/src/custom_key_icons/custom_key_icons.dart';
+import 'package:math_keyboard/src/foundation/decimal_separator.dart';
 import 'package:math_keyboard/src/foundation/keyboard_button.dart';
 import 'package:math_keyboard/src/foundation/math_keyboard_semantics.dart';
-import 'package:math_keyboard/src/foundation/decimal_separator.dart';
 import 'package:math_keyboard/src/widgets/keyboard_button.dart';
 import 'package:math_keyboard/src/widgets/math_field.dart';
 import 'package:math_keyboard/src/widgets/math_keyboard_theme.dart';
+import 'package:math_keyboard/src/widgets/more_variable_button.dart';
 import 'package:math_keyboard/src/widgets/view_insets.dart';
 
 /// Enumeration for the types of keyboard that a math keyboard can adopt.
@@ -57,6 +58,7 @@ class MathKeyboard extends StatelessWidget {
     this.onExitToNext,
     this.onClose,
     this.padding = const EdgeInsets.only(bottom: 4, left: 4, right: 4),
+    this.isShowMultiplyValueAsDot = true,
   }) : assert(
          focusScopeNode != null ||
              (onExitToField == null && onExitToNext == null),
@@ -137,6 +139,9 @@ class MathKeyboard extends StatelessWidget {
   /// Defaults to `const EdgeInsets.only(bottom: 4, left: 4, right: 4),`.
   final EdgeInsets padding;
 
+  /// If true, the multiply value will be shown as dot else it will be shown as x.
+  final bool isShowMultiplyValueAsDot;
+
   /// The decimal separator shown on the decimal key.
   ///
   /// If `null`, it is resolved from the nearest [MathKeyboardTheme], or from
@@ -169,7 +174,7 @@ class MathKeyboard extends StatelessWidget {
         MediaQuery.orientationOf(context) == Orientation.landscape;
 
     final curvedSlideAnimation = CurvedAnimation(
-      parent: slideAnimation ?? AlwaysStoppedAnimation(1),
+      parent: slideAnimation ?? const AlwaysStoppedAnimation(1),
       curve: Curves.ease,
     );
 
@@ -380,7 +385,9 @@ class MathKeyboard extends StatelessWidget {
                 controller: controller,
                 page1: type == MathKeyboardType.numberOnly
                     ? numberKeyboard
-                    : standardKeyboard,
+                    : standardKeyboard(
+                        isShowMultiplyValueAsDot: isShowMultiplyValueAsDot,
+                      ),
                 page2: type == MathKeyboardType.numberOnly
                     ? null
                     : functionKeyboard,
@@ -422,6 +429,7 @@ class MathKeyboard extends StatelessWidget {
             semantics: semantics,
             fontSize: fontSize,
             keyHeight: keyHeight,
+            isShowMultiplyValueAsDot: isShowMultiplyValueAsDot,
           ),
         ),
       ),
@@ -550,6 +558,9 @@ class _Variables extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (variables.isEmpty) {
+      return const SizedBox.shrink();
+    }
     final leftPadding = leadingPadding ?? style.horizontalPadding;
     return SizedBox(
       height: keyHeight,
@@ -569,60 +580,74 @@ class _Variables extends StatelessWidget {
           return AnimatedBuilder(
             animation: controller,
             builder: (context, child) {
-              return ListView.separated(
-                itemCount: variables.length,
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.only(left: leftPadding),
-                separatorBuilder: (context, index) =>
-                    SizedBox(width: style.rowSpacing),
-                itemBuilder: (context, index) {
-                  return SizedBox(
-                    width: keyWidth,
-                    child: Builder(
-                      builder: (itemContext) => KeyboardButton(
-                        keyStyle: style.neutralKey,
-                        borderRadius: style.keyBorderRadius,
-                        padding: style.keyPadding,
-                        focusColor: style.focusBorderColor,
-                        focusWidth: style.focusBorderWidth,
-                        semanticsLabel: semantics.variableLabel(
-                          variables[index],
-                        ),
-                        onFocusChange: (focused) {
-                          if (!focused) return;
-                          // Keep the focused variable visible under keyboard and
-                          // switch-access navigation.
-                          Scrollable.ensureVisible(
-                            itemContext,
-                            alignment: 0.5,
-                            duration: const Duration(milliseconds: 100),
-                          );
-                        },
-                        onTap: () =>
-                            controller.addLeaf('{${variables[index]}}'),
-                        largeContentThreshold:
-                            style.largeContentViewerThreshold,
-                        largeContent: style.largeContentViewerEnabled
-                            ? Math.tex(
+              return Row(
+                children: [
+                  MoreVariableButton(
+                    controller: controller,
+                    style: style,
+                    fontSize: fontSize,
+                    keyHeight: keyHeight,
+                  ),
+                  SizedBox(width: style.rowSpacing),
+                  Expanded(
+                    child: ListView.separated(
+                      itemCount: variables.length,
+                      scrollDirection: Axis.horizontal,
+                      physics: const ClampingScrollPhysics(),
+                      padding: EdgeInsets.only(left: leftPadding),
+                      separatorBuilder: (context, index) =>
+                          SizedBox(width: style.rowSpacing),
+                      itemBuilder: (context, index) {
+                        return SizedBox(
+                          width: keyWidth,
+                          child: Builder(
+                            builder: (itemContext) => KeyboardButton(
+                              keyStyle: style.neutralKey,
+                              borderRadius: style.keyBorderRadius,
+                              padding: style.keyPadding,
+                              focusColor: style.focusBorderColor,
+                              focusWidth: style.focusBorderWidth,
+                              semanticsLabel: semantics.variableLabel(
+                                variables[index],
+                              ),
+                              onFocusChange: (focused) {
+                                if (!focused) return;
+                                // Keep the focused variable visible under keyboard and
+                                // switch-access navigation.
+                                Scrollable.ensureVisible(
+                                  itemContext,
+                                  alignment: 0.5,
+                                  duration: const Duration(milliseconds: 100),
+                                );
+                              },
+                              onTap: () =>
+                                  controller.addLeaf('{${variables[index]}}'),
+                              largeContentThreshold:
+                                  style.largeContentViewerThreshold,
+                              largeContent: style.largeContentViewerEnabled
+                                  ? Math.tex(
+                                      variables[index],
+                                      options: MathOptions(
+                                        fontSize:
+                                            fontSize * style.largeContentLabelScale,
+                                        color: style.foregroundColor,
+                                      ),
+                                    )
+                                  : null,
+                              child: Math.tex(
                                 variables[index],
                                 options: MathOptions(
-                                  fontSize:
-                                      fontSize * style.largeContentLabelScale,
+                                  fontSize: fontSize,
                                   color: style.foregroundColor,
                                 ),
-                              )
-                            : null,
-                        child: Math.tex(
-                          variables[index],
-                          options: MathOptions(
-                            fontSize: fontSize,
-                            color: style.foregroundColor,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
+                  ),
+                ],
               );
             },
           );
@@ -852,6 +877,7 @@ class _LandscapeButtons extends StatelessWidget {
     required this.semantics,
     required this.fontSize,
     required this.keyHeight,
+    this.isShowMultiplyValueAsDot = true,
   }) : super(key: key);
 
   final MathFieldEditingController controller;
@@ -861,6 +887,7 @@ class _LandscapeButtons extends StatelessWidget {
   final MathKeyboardSemantics semantics;
   final double fontSize;
   final double keyHeight;
+  final bool isShowMultiplyValueAsDot;
 
   @override
   Widget build(BuildContext context) {
@@ -964,7 +991,9 @@ class _LandscapeButtons extends StatelessWidget {
         final numbersGroup = semanticGroup(
           semantics.numbersGroupLabel,
           column([
-            for (final numberRow in landscapeNumberKeyboard)
+            for (final numberRow in landscapeNumberKeyboard(
+              isShowMultiplyValueAsDot: isShowMultiplyValueAsDot,
+            ))
               row(numberRow, nextOrder: () => numberKeyOrder++),
           ]),
         );
@@ -1031,13 +1060,13 @@ class _BasicButton extends StatelessWidget {
     required this.style,
     required this.semantics,
     required this.fontSize,
+    this.enableLargeContentViewer = true,
     this.label,
     this.value,
     this.icon,
     this.onTap,
     this.asTex = false,
     this.semanticsLabel,
-    this.enableLargeContentViewer = true,
   }) : assert(label != null || icon != null),
        super(key: key);
 
@@ -1215,3 +1244,4 @@ class _NavigationButton extends StatelessWidget {
     );
   }
 }
+

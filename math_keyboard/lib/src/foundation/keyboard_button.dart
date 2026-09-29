@@ -210,14 +210,16 @@ final functionKeyboard = [
 ];
 
 /// Standard keyboard for math expression input.
-final standardKeyboard = [
+List<List<KeyboardButtonConfig>> standardKeyboard ({bool isShowMultiplyValueAsDot=true}){
+  final multiplyButtonValue = isShowMultiplyValueAsDot ? r'\cdot' : r'\times';
+  return [
   [
     _digitButtons[7],
     _digitButtons[8],
     _digitButtons[9],
-    const BasicKeyboardButtonConfig(
+     BasicKeyboardButtonConfig(
       label: '×',
-      value: r'\cdot',
+      value: multiplyButtonValue,
       keyboardCharacters: ['*'],
     ),
     const BasicKeyboardButtonConfig(
@@ -252,7 +254,7 @@ final standardKeyboard = [
     NextButtonConfig(),
     SubmitButtonConfig(),
   ],
-];
+];}
 
 /// The typeset function rows shown on the left ("Symbols") section of the
 /// landscape keyboard.
@@ -271,19 +273,26 @@ final landscapeFunctionKeyboard = [
 /// The first three rows mirror [standardKeyboard]; the last row replaces the
 /// page toggle and submit key (the landscape layout shows a dedicated
 /// full-height submit key) with the parentheses and cursor navigation keys.
-final landscapeNumberKeyboard = [
-  standardKeyboard[0],
-  standardKeyboard[1],
-  standardKeyboard[2],
-  [
-    _digitButtons[0],
-    // The opening and closing parentheses from the function page.
-    functionKeyboard[3][1],
-    functionKeyboard[3][2],
-    PreviousButtonConfig(),
-    NextButtonConfig(),
-  ],
-];
+List<List<KeyboardButtonConfig>> landscapeNumberKeyboard({
+  bool isShowMultiplyValueAsDot = true,
+}) {
+  final stdKeyboard = standardKeyboard(
+    isShowMultiplyValueAsDot: isShowMultiplyValueAsDot,
+  );
+  return [
+    stdKeyboard[0],
+    stdKeyboard[1],
+    stdKeyboard[2],
+    [
+      _digitButtons[0],
+      // The opening and closing parentheses from the function page.
+      functionKeyboard[3][1],
+      functionKeyboard[3][2],
+      PreviousButtonConfig(),
+      NextButtonConfig(),
+    ],
+  ];
+}
 
 /// Keyboard getting shown for number input only.
 final numberKeyboard = [

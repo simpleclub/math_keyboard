@@ -6,4 +6,5 @@ export 'package:math_keyboard/src/widgets/math_field.dart';
 export 'package:math_keyboard/src/widgets/math_form_field.dart';
 export 'package:math_keyboard/src/widgets/math_keyboard.dart';
 export 'package:math_keyboard/src/widgets/math_keyboard_theme.dart';
+export 'package:math_keyboard/src/widgets/more_variable_button.dart';
 export 'package:math_keyboard/src/widgets/view_insets.dart';
