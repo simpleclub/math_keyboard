@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
@@ -1122,9 +1122,8 @@ class _BasicButton extends StatelessWidget {
       // its own is announced by the screen reader in the user's own language
       // ("Komma" for a German VoiceOver), which a hard-coded English default
       // could not do.
-      resolvedSemanticsLabel = MathKeyboardTheme.decimalSeparatorOf(
-        context,
-      ).symbol;
+      resolvedSemanticsLabel = MathKeyboardTheme.decimalSeparatorOf(context)
+          .symbol;
     } else {
       // Speak the inserted token (e.g. "times" for ×, "minus" for −) rather
       // than the raw glyph, so the announcement is reliable and localizable.

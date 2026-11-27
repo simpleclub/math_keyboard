@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 
 void main() {
@@ -25,9 +24,7 @@ class ExampleApp extends StatelessWidget {
         // not provide supported locales that use commas as decimal separators.
         Locale('de', 'DE'),
       ],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-      ],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

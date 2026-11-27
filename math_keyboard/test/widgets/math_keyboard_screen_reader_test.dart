@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:math_keyboard/math_keyboard.dart';
@@ -25,9 +25,8 @@ void main() {
         home: Scaffold(
           body: Builder(
             builder: (context) => MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).copyWith(accessibleNavigation: accessibleNavigation),
+              data: MediaQuery.of(context)
+                  .copyWith(accessibleNavigation: accessibleNavigation),
               child: MathField(autofocus: true, controller: controller),
             ),
           ),

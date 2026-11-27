@@ -1,3 +1,14 @@
+## 0.5.0
+
+* **Breaking:** Migrate from the deprecated in-framework Material library
+  (`package:flutter/material.dart`) to the standalone
+  [`material_ui`](https://pub.dev/packages/material_ui) package. The public API
+  now uses the `material_ui` types, so apps must migrate to `material_ui` as
+  well. See the
+  [migration guide](https://docs.flutter.dev/release/breaking-changes/material-ui-and-cupertino-ui).
+* Remove the unused `flutter_localizations` dependency.
+* Requires Flutter 3.47.0 / Dart 3.13.
+
 ## 0.4.0
 
 * Redesign the on-screen keyboard with a configurable theme
