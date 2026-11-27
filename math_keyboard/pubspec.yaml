@@ -2,23 +2,22 @@ name: math_keyboard
 description: >-2
   Math expression editing using an on-screen software keyboard or physical keyboard input in a
   typeset input field in Flutter.
-version: 0.4.0
+version: 0.5.0
 homepage: https://github.com/simpleclub/math_keyboard/tree/main/math_keyboard
 
 environment:
-  sdk: '>=3.9.0 <4.0.0'
-  flutter: '>=3.35.1'
+  sdk: '>=3.13.0 <4.0.0'
+  flutter: '>=3.47.0'
 
 dependencies:
   flutter:
-    sdk: flutter
-  flutter_localizations:
     sdk: flutter
 
   flutter_math_fork: ^0.7.3
   holding_gesture: ^1.2.0
   intl: ^0.20.2
   large_content_viewer: ^0.1.4
+  material_ui: ^1.11.1
   math_expressions: ^2.5.0
   petitparser: ^6.0.0
 

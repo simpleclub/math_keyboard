@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:math_keyboard_demo/data/strings.dart';
 import 'package:math_keyboard_demo/widgets/scaffold.dart';
 

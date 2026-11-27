@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 /// Stylized button widget for linking to outside resources.
@@ -28,10 +28,7 @@ class LinkButton extends StatelessWidget {
     void onPressed() => launchUrlString(url);
     final style = OutlinedButton.styleFrom(
       padding: const EdgeInsets.all(16),
-      textStyle: TextStyle(
-        fontSize: 20,
-        decoration: TextDecoration.underline,
-      ),
+      textStyle: TextStyle(fontSize: 20, decoration: TextDecoration.underline),
     );
 
     if (child == null) {
@@ -47,9 +44,7 @@ class LinkButton extends StatelessWidget {
       style: style,
       label: Text(label),
       icon: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxHeight: 32,
-        ),
+        constraints: const BoxConstraints(maxHeight: 32),
         child: child,
       ),
     );

@@ -220,7 +220,7 @@ final texString = texNode.buildTexString();
 [pub]: https://pub.dev/packages/math_keyboard
 [installing guide]: https://pub.dev/packages/math_keyboard/install
 [large_content_viewer]: https://pub.dev/packages/large_content_viewer
-[InputDecoration]: https://api.flutter.dev/flutter/material/InputDecoration-class.html
+[InputDecoration]: https://pub.dev/documentation/material_ui/latest/material_ui/InputDecoration-class.html
 [MathField]: https://pub.dev/documentation/math_keyboard/latest/math_keyboard/MathField-class.html
 [MathFieldEditingController]: https://pub.dev/documentation/math_keyboard/latest/math_keyboard/MathFieldEditingController-class.html
 [MathKeyboardViewInsets]: https://pub.dev/documentation/math_keyboard/latest/math_keyboard/MathKeyboardViewInsets-class.html
@@ -228,7 +228,7 @@ final texString = texNode.buildTexString();
 [keyboardShowingIn]: https://pub.dev/documentation/math_keyboard/latest/math_keyboard/MathKeyboardViewInsetsQuery/keyboardShowingIn.html
 [view insets]: https://api.flutter.dev/flutter/widgets/MediaQueryData/viewInsets.html
 [Form]: https://api.flutter.dev/flutter/widgets/Form-class.html
-[TextFormField]: https://api.flutter.dev/flutter/material/TextFormField-class.html
+[TextFormField]: https://pub.dev/documentation/material_ui/latest/material_ui/TextFormField-class.html
 [MathFormField]: https://pub.dev/documentation/math_keyboard/latest/math_keyboard/MathFormField-class.html
 [FocusNode]: https://api.flutter.dev/flutter/widgets/FocusNode-class.html
 [decimal separators]: https://en.wikipedia.org/wiki/Decimal_separator#Countries_using_decimal_comma

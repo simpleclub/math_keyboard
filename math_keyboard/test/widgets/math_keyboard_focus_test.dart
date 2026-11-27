@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 import 'package:math_keyboard/src/widgets/keyboard_button.dart';
 
