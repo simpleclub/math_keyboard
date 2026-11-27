@@ -3,10 +3,10 @@
 // Keep using `containsSemantics` (a subset matcher, unlike `matchesSemantics`)
 // across the supported range and silence the deprecation notice.
 // ignore_for_file: deprecated_member_use
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:large_content_viewer/large_content_viewer.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 import 'package:math_keyboard/src/custom_key_icons/custom_key_icons.dart';
 import 'package:math_keyboard/src/widgets/keyboard_button.dart';

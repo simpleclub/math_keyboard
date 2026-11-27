@@ -1,5 +1,5 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:math_expressions/math_expressions.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 
@@ -56,11 +56,7 @@ class _DemoPageViewState extends State<DemoPageView> {
       const _Page(child: _PrimaryPage()),
       const _Page(child: _InputDecorationPage()),
       const _Page(child: _ControllerPage()),
-      _Page(
-        child: _AutofocusPage(
-          autofocus: _page == 3,
-        ),
-      ),
+      _Page(child: _AutofocusPage(autofocus: _page == 3)),
       const _Page(child: _FocusTreePage()),
       const _Page(child: _DecimalSeparatorPage()),
       const _Page(child: _MathExpressionsPage()),
@@ -148,20 +144,14 @@ class _DemoPageViewState extends State<DemoPageView> {
 }
 
 class _Page extends StatelessWidget {
-  const _Page({
-    Key? key,
-    required this.child,
-  }) : super(key: key);
+  const _Page({Key? key, required this.child}) : super(key: key);
 
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: 16,
-        horizontal: 56,
-      ),
+      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 56),
       child: child,
     );
   }
@@ -172,11 +162,8 @@ class _Page extends StatelessWidget {
 /// If selected, the dot will be bigger.
 class _PageIndicator extends StatelessWidget {
   /// Constructs a [_PageIndicator] widget.
-  const _PageIndicator({
-    Key? key,
-    required this.selected,
-    required this.onTap,
-  }) : super(key: key);
+  const _PageIndicator({Key? key, required this.selected, required this.onTap})
+    : super(key: key);
 
   final bool selected;
 
@@ -201,9 +188,7 @@ class _PageIndicator extends StatelessWidget {
                 width: size.width,
                 height: size.height,
                 decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
+                  color: Theme.of(context).colorScheme.onSurface
                       .withValues(alpha: selected ? 1 : 1 / 2),
                   shape: BoxShape.circle,
                 ),
@@ -226,7 +211,8 @@ class _PrimaryPage extends StatefulWidget {
 class _PrimaryPageState extends State<_PrimaryPage> {
   late final _expressionController = MathFieldEditingController()
     ..updateValue(
-        ShuntingYardParser().parse('4.2 - (cos(x)/(x^3 - sin(x))) + e^(4^2)'));
+      ShuntingYardParser().parse('4.2 - (cos(x)/(x^3 - sin(x))) + e^(4^2)'),
+    );
   late final _numberController = MathFieldEditingController()
     ..updateValue(ShuntingYardParser().parse('42'));
 
@@ -242,14 +228,11 @@ class _PrimaryPageState extends State<_PrimaryPage> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(
-            bottom: 16,
-          ),
+          padding: const EdgeInsets.only(bottom: 16),
           child: Text(
             'Try it now!',
-            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontStyle: FontStyle.italic,
-                ),
+            style: Theme.of(context).textTheme.headlineSmall!
+                .copyWith(fontStyle: FontStyle.italic),
             textAlign: TextAlign.center,
           ),
         ),
@@ -277,9 +260,7 @@ class _PrimaryPageState extends State<_PrimaryPage> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(
-            top: 32,
-          ),
+          padding: const EdgeInsets.only(top: 32),
           child: SizedBox(
             width: 420,
             child: MathField(
@@ -306,14 +287,11 @@ class _InputDecorationPage extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(
-            bottom: 16,
-          ),
+          padding: const EdgeInsets.only(bottom: 16),
           child: Text(
             'Completely customizable with InputDecoration!',
-            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontStyle: FontStyle.italic,
-                ),
+            style: Theme.of(context).textTheme.headlineSmall!
+                .copyWith(fontStyle: FontStyle.italic),
             textAlign: TextAlign.center,
           ),
         ),
@@ -340,9 +318,7 @@ class _InputDecorationPage extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(
-            top: 16,
-          ),
+          padding: const EdgeInsets.only(top: 16),
           child: SizedBox(
             width: 420,
             child: MathField(
@@ -368,9 +344,7 @@ class _InputDecorationPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(
-                  width: 12,
-                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: MathField(
                     keyboardType: MathKeyboardType.numberOnly,
@@ -380,7 +354,7 @@ class _InputDecorationPage extends StatelessWidget {
                       suffixIcon: const Icon(Icons.format_shapes_sharp),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -417,14 +391,11 @@ class _ControllerPageState extends State<_ControllerPage> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(
-            bottom: 16,
-          ),
+          padding: const EdgeInsets.only(bottom: 16),
           child: Text(
             'Fully controllable using custom controllers!',
-            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontStyle: FontStyle.italic,
-                ),
+            style: Theme.of(context).textTheme.headlineSmall!
+                .copyWith(fontStyle: FontStyle.italic),
             textAlign: TextAlign.center,
           ),
         ),
@@ -454,23 +425,26 @@ class _ControllerPageState extends State<_ControllerPage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(
-                left: 16,
-              ),
+              padding: const EdgeInsets.only(left: 16),
               child: Tooltip(
-                message: 'If the on-screen keyboard is opened, the snack bar '
+                message:
+                    'If the on-screen keyboard is opened, the snack bar '
                     'will appear above the keyboard (view insets feature).',
                 child: OutlinedButton.icon(
                   onPressed: () async {
-                    await Clipboard.setData(ClipboardData(
-                      text: _clipboardController.currentEditingValue(),
-                    ));
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [Text('Copied TeX string to clipboard :)')],
+                    await Clipboard.setData(
+                      ClipboardData(
+                        text: _clipboardController.currentEditingValue(),
                       ),
-                    ));
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [Text('Copied TeX string to clipboard :)')],
+                        ),
+                      ),
+                    );
                   },
                   icon: const Icon(Icons.copy_outlined),
                   label: Text('Copy to clipboard'),
@@ -480,9 +454,7 @@ class _ControllerPageState extends State<_ControllerPage> {
           ],
         ),
         Padding(
-          padding: const EdgeInsets.only(
-            top: 32,
-          ),
+          padding: const EdgeInsets.only(top: 32),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -507,9 +479,7 @@ class _ControllerPageState extends State<_ControllerPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(
-                  left: 16,
-                ),
+                padding: const EdgeInsets.only(left: 16),
                 child: Tooltip(
                   message:
                       'Works from anywhere - thanks to the controller pattern.',
@@ -523,9 +493,7 @@ class _ControllerPageState extends State<_ControllerPage> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(
-            top: 32,
-          ),
+          padding: const EdgeInsets.only(top: 32),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -543,9 +511,7 @@ class _ControllerPageState extends State<_ControllerPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(
-                  left: 16,
-                ),
+                padding: const EdgeInsets.only(left: 16),
                 child: OutlinedButton(
                   onPressed: () {
                     _magicController.addLeaf('+');
@@ -564,10 +530,7 @@ class _ControllerPageState extends State<_ControllerPage> {
 }
 
 class _AutofocusPage extends StatelessWidget {
-  const _AutofocusPage({
-    Key? key,
-    required this.autofocus,
-  }) : super(key: key);
+  const _AutofocusPage({Key? key, required this.autofocus}) : super(key: key);
 
   final bool autofocus;
 
@@ -576,14 +539,11 @@ class _AutofocusPage extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(
-            bottom: 16,
-          ),
+          padding: const EdgeInsets.only(bottom: 16),
           child: Text(
             'With autofocus support!',
-            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontStyle: FontStyle.italic,
-                ),
+            style: Theme.of(context).textTheme.headlineSmall!
+                .copyWith(fontStyle: FontStyle.italic),
             textAlign: TextAlign.center,
           ),
         ),
@@ -641,14 +601,11 @@ class _FocusTreePageState extends State<_FocusTreePage> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(
-            bottom: 16,
-          ),
+          padding: const EdgeInsets.only(bottom: 16),
           child: Text(
             'And focus tree integration!',
-            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontStyle: FontStyle.italic,
-                ),
+            style: Theme.of(context).textTheme.headlineSmall!
+                .copyWith(fontStyle: FontStyle.italic),
             textAlign: TextAlign.center,
           ),
         ),
@@ -682,9 +639,7 @@ class _FocusTreePageState extends State<_FocusTreePage> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                        top: 8,
-                      ),
+                      padding: const EdgeInsets.only(top: 8),
                       child: MathField(
                         focusNode: _focusNodeTwo,
                         variables: ['t', 'w', 'o'],
@@ -696,9 +651,7 @@ class _FocusTreePageState extends State<_FocusTreePage> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                        top: 8,
-                      ),
+                      padding: const EdgeInsets.only(top: 8),
                       child: MathField(
                         focusNode: _focusNodeThree,
                         variables: ['t', 'h', 'r', 'e'],
@@ -710,9 +663,7 @@ class _FocusTreePageState extends State<_FocusTreePage> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                        top: 8,
-                      ),
+                      padding: const EdgeInsets.only(top: 8),
                       child: MathField(
                         focusNode: _focusNodeFour,
                         variables: ['f', 'o', 'u', 'r'],
@@ -783,14 +734,11 @@ class _DecimalSeparatorPageState extends State<_DecimalSeparatorPage> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(
-            bottom: 16,
-          ),
+          padding: const EdgeInsets.only(bottom: 16),
           child: Text(
             'Adaptive decimal separators!',
-            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontStyle: FontStyle.italic,
-                ),
+            style: Theme.of(context).textTheme.headlineSmall!
+                .copyWith(fontStyle: FontStyle.italic),
             textAlign: TextAlign.center,
           ),
         ),
@@ -824,9 +772,7 @@ class _DecimalSeparatorPageState extends State<_DecimalSeparatorPage> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(
-            top: 32,
-          ),
+          padding: const EdgeInsets.only(top: 32),
           child: SizedBox(
             width: 420,
             child: Localizations.override(
@@ -884,8 +830,10 @@ class _MathExpressionsPageState extends State<_MathExpressionsPage> {
   void _calculateResult() {
     try {
       setState(() {
-        _result = _expression.evaluate(EvaluationType.REAL,
-            ContextModel()..bindVariableName('x', Number(_value)));
+        _result = _expression.evaluate(
+          EvaluationType.REAL,
+          ContextModel()..bindVariableName('x', Number(_value)),
+        );
       });
     } catch (_) {}
   }
@@ -895,14 +843,11 @@ class _MathExpressionsPageState extends State<_MathExpressionsPage> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(
-            bottom: 16,
-          ),
+          padding: const EdgeInsets.only(bottom: 16),
           child: Text(
             'Math expression support!',
-            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  fontStyle: FontStyle.italic,
-                ),
+            style: Theme.of(context).textTheme.headlineSmall!
+                .copyWith(fontStyle: FontStyle.italic),
             textAlign: TextAlign.center,
           ),
         ),
@@ -944,33 +889,21 @@ class _MathExpressionsPageState extends State<_MathExpressionsPage> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(
-            top: 32,
-            left: 32,
-            right: 32,
-          ),
+          padding: const EdgeInsets.only(top: 32, left: 32, right: 32),
           child: Text(
             'TeX: ${_tex ?? 'waiting for input'}',
             textAlign: TextAlign.center,
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(
-            top: 16,
-            left: 32,
-            right: 32,
-          ),
+          padding: const EdgeInsets.only(top: 16, left: 32, right: 32),
           child: Text(
             'Math expression: $_expression',
             textAlign: TextAlign.center,
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(
-            top: 32,
-            left: 32,
-            right: 32,
-          ),
+          padding: const EdgeInsets.only(top: 32, left: 32, right: 32),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -999,7 +932,8 @@ class _MathExpressionsPageState extends State<_MathExpressionsPage> {
                 child: const Icon(Icons.arrow_right_alt_outlined),
               ),
               Text(
-                  'Result: ${_result?.toString() ?? 'waiting for valid input'}'),
+                'Result: ${_result?.toString() ?? 'waiting for valid input'}',
+              ),
             ],
           ),
         ),
@@ -1019,14 +953,11 @@ class _FormFieldPage extends StatelessWidget {
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(
-                  bottom: 16,
-                ),
+                padding: const EdgeInsets.only(bottom: 16),
                 child: Text(
                   'Last but not least: form fields!',
-                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                        fontStyle: FontStyle.italic,
-                      ),
+                  style: Theme.of(context).textTheme.headlineSmall!
+                      .copyWith(fontStyle: FontStyle.italic),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -1071,17 +1002,19 @@ class _FormFieldPage extends StatelessWidget {
                     final result = Form.of(context).validate();
 
                     if (result == true) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [Text('Form is valid :)')],
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [Text('Form is valid :)')],
+                          ),
                         ),
-                      ));
+                      );
                     }
                   },
                   child: Text('Submit form'),
                 ),
-              )
+              ),
             ],
           );
         },

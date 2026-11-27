@@ -25,9 +25,7 @@ class ExampleApp extends StatelessWidget {
         Locale('de', 'DE'),
       ],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: const DemoPage(),
     );
   }
@@ -67,14 +65,10 @@ class _DemoPageState extends State<DemoPage> {
 
     return MathKeyboardViewInsets(
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Math keyboard demo'),
-        ),
+        appBar: AppBar(title: const Text('Math keyboard demo')),
         body: Column(
           children: [
-            Expanded(
-              child: child,
-            ),
+            Expanded(child: child),
             // We insert the bottom navigation bar here instead of the
             // bottomNavigationBar parameter in order to make it stick on
             // top of the keyboard.
@@ -118,10 +112,7 @@ class _MathFieldTextFieldExample extends StatelessWidget {
     return SafeArea(
       child: ListView(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: TextField(),
-          ),
+          const Padding(padding: EdgeInsets.all(16), child: TextField()),
           Padding(
             padding: const EdgeInsets.all(16),
             child: MathField(
@@ -134,16 +125,16 @@ class _MathFieldTextFieldExample extends StatelessWidget {
                   expression = 'invalid input';
                 }
 
-                print('input expression: $value\n'
-                    'converted expression: $expression');
+                print(
+                  'input expression: $value\n'
+                  'converted expression: $expression',
+                );
               },
             ),
           ),
           const Padding(
             padding: EdgeInsets.all(16),
-            child: MathField(
-              keyboardType: MathKeyboardType.numberOnly,
-            ),
+            child: MathField(keyboardType: MathKeyboardType.numberOnly),
           ),
         ],
       ),

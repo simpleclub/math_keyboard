@@ -1,6 +1,6 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 
 /// Verifies the keyboard exposes its sections as labelled screen-reader groups.

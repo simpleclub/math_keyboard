@@ -1,6 +1,6 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:math_keyboard/math_keyboard.dart';
 import 'package:math_keyboard_demo/data/strings.dart';
 import 'package:math_keyboard_demo/widgets/link_button.dart';
@@ -10,10 +10,8 @@ import 'package:url_launcher/url_launcher_string.dart';
 /// Scaffold for the demo page.
 class DemoScaffold extends StatelessWidget {
   /// Creates a [DemoScaffold] widget.
-  const DemoScaffold({
-    Key? key,
-    required this.onToggleBrightness,
-  }) : super(key: key);
+  const DemoScaffold({Key? key, required this.onToggleBrightness})
+    : super(key: key);
 
   /// Called when the brightness toggle is tapped.
   final void Function() onToggleBrightness;
@@ -40,14 +38,12 @@ class DemoScaffold extends StatelessWidget {
           ],
         ),
       ),
-      const LinkButton(
-        label: docsLabel,
-        url: docsUrl,
-      ),
+      const LinkButton(label: docsLabel, url: docsUrl),
     ];
 
     SystemChrome.setSystemUIOverlayStyle(
-        darkMode ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
+      darkMode ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+    );
 
     return MathKeyboardViewInsets(
       child: Scaffold(
@@ -63,15 +59,14 @@ class DemoScaffold extends StatelessWidget {
                       tooltip: brightnessSwitchTooltip,
                       onPressed: onToggleBrightness,
                       splashRadius: 20,
-                      icon: Icon(darkMode
-                          ? Icons.brightness_6_outlined
-                          : Icons.brightness_2_outlined),
+                      icon: Icon(
+                        darkMode
+                            ? Icons.brightness_6_outlined
+                            : Icons.brightness_2_outlined,
+                      ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                        left: 3,
-                        bottom: 3,
-                      ),
+                      padding: const EdgeInsets.only(left: 3, bottom: 3),
                       child: MouseRegion(
                         cursor: SystemMouseCursors.click,
                         child: GestureDetector(
@@ -80,12 +75,8 @@ class DemoScaffold extends StatelessWidget {
                           },
                           child: Text(
                             header,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.w500),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -94,10 +85,7 @@ class DemoScaffold extends StatelessWidget {
                   ],
                 ),
               ),
-              const Divider(
-                thickness: 1,
-                height: 0,
-              ),
+              const Divider(thickness: 1, height: 0),
             ],
           ),
         ),
@@ -107,9 +95,7 @@ class DemoScaffold extends StatelessWidget {
               child: Material(
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 32,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 32),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
                         return Column(
@@ -131,16 +117,12 @@ class DemoScaffold extends StatelessWidget {
                                         fontStyle: FontStyle.italic,
                                       ),
                                     ),
-                                    TextSpan(
-                                      text: ' $description',
-                                    ),
+                                    TextSpan(text: ' $description'),
                                   ],
                                   style: Theme.of(context)
                                       .textTheme
                                       .headlineSmall
-                                      ?.copyWith(
-                                        fontSize: 28,
-                                      ),
+                                      ?.copyWith(fontSize: 28),
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -166,9 +148,7 @@ class DemoScaffold extends StatelessWidget {
                                 ],
                               ),
                             const Padding(
-                              padding: EdgeInsets.only(
-                                top: 32,
-                              ),
+                              padding: EdgeInsets.only(top: 32),
                               child: DemoPageView(),
                             ),
                           ],
@@ -186,10 +166,7 @@ class DemoScaffold extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Divider(
-                thickness: 1,
-                height: 0,
-              ),
+              const Divider(thickness: 1, height: 0),
               MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: GestureDetector(

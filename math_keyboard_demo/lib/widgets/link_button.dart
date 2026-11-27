@@ -28,10 +28,7 @@ class LinkButton extends StatelessWidget {
     void onPressed() => launchUrlString(url);
     final style = OutlinedButton.styleFrom(
       padding: const EdgeInsets.all(16),
-      textStyle: TextStyle(
-        fontSize: 20,
-        decoration: TextDecoration.underline,
-      ),
+      textStyle: TextStyle(fontSize: 20, decoration: TextDecoration.underline),
     );
 
     if (child == null) {
@@ -47,9 +44,7 @@ class LinkButton extends StatelessWidget {
       style: style,
       label: Text(label),
       icon: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxHeight: 32,
-        ),
+        constraints: const BoxConstraints(maxHeight: 32),
         child: child,
       ),
     );
